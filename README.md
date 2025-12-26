@@ -256,6 +256,62 @@ async def my_endpoint(user_id: str = Depends(get_current_user)):
 
 See [api/AUTH_README.md](api/AUTH_README.md#security-considerations) for more details.
 
+## Deployment to AWS
+
+Deploy nbhd.city to production using OpenTofu (Terraform). This will:
+
+- Deploy frontend to **S3 + CloudFront CDN**
+- Deploy API to **AWS Lambda + API Gateway**
+- Automatically configure CORS and environment variables
+- Set up logging and monitoring
+
+### Quick Deployment
+
+```bash
+# 1. Setup AWS credentials
+aws configure
+
+# 2. Follow the DevOps setup guide
+cat DEVOPS_SETUP.md
+
+# 3. Deploy
+cd devops
+tofu init
+tofu apply
+```
+
+For complete instructions, see:
+- **[DEVOPS_SETUP.md](DEVOPS_SETUP.md)** - Complete deployment guide
+- **[devops/README.md](devops/README.md)** - DevOps documentation
+- **.github/workflows/deploy.yml** - GitHub Actions CI/CD
+
+### Architecture
+
+```
+┌──────────────────────────────┐
+│    CloudFront (CDN)          │
+│ ┌────────────────────────┐   │
+│ │ Frontend (React)       │   │
+│ │ API Gateway endpoint   │   │
+│ └────────────────────────┘   │
+└──────────────┬───────────────┘
+               │
+        ┌──────┴──────┐
+        │             │
+    ┌───▼────┐   ┌───▼──────┐
+    │   S3   │   │ Lambda   │
+    │ (dist) │   │  (API)   │
+    └────────┘   └──────────┘
+```
+
+### Estimated Costs
+
+- **S3**: ~$0.50-$1/month
+- **CloudFront**: ~$0.50-$5/month (depends on traffic)
+- **Lambda**: Free tier covers most usage
+- **API Gateway**: Free tier covers most usage
+- **Total**: ~$5-10/month for low traffic
+
 ## Next Steps
 
 - [ ] Database integration (PostgreSQL/MongoDB)

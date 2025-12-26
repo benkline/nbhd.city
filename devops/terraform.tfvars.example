@@ -1,0 +1,29 @@
+# Copy this file to terraform.tfvars and fill in your values
+# DO NOT commit terraform.tfvars with real secrets - only commit terraform.tfvars.example
+
+project_name                   = "nbhd-city"
+environment                    = "dev"
+aws_region                     = "us-east-1"
+lambda_memory_size             = 512
+lambda_timeout                 = 30
+cloudfront_enabled             = true
+enable_logging                 = true
+
+# BlueSky OAuth - get these from https://atproto.com/docs/oauth
+bluesky_oauth_client_id        = "your-bluesky-client-id"
+bluesky_oauth_client_secret    = "your-bluesky-client-secret"
+
+# JWT Secret - generate a secure random key
+jwt_secret_key                 = "your-secure-random-jwt-secret-key"
+
+# Frontend and API paths
+frontend_artifact_path         = "../frontend/dist"
+api_artifact_path              = "../api"
+
+# Tags
+tags = {
+  Project     = "nbhd.city"
+  Environment = "dev"
+  ManagedBy   = "OpenTofu"
+  Owner       = "your-name"
+}
