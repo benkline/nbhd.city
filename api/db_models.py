@@ -5,9 +5,9 @@ from sqlalchemy.orm import relationship
 from database import Base
 
 
-class Neighborhood(Base):
+class Nbhd(Base):
     """
-    Neighborhood model for storing neighborhood information.
+    Nbhd model for storing nbhd information.
     """
 
     __tablename__ = "neighborhoods"
@@ -20,15 +20,15 @@ class Neighborhood(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # Relationship to memberships
-    memberships = relationship("Membership", back_populates="neighborhood", cascade="all, delete-orphan")
+    memberships = relationship("Membership", back_populates="nbhd", cascade="all, delete-orphan")
 
     def __repr__(self):
-        return f"<Neighborhood(id={self.id}, name='{self.name}', created_by='{self.created_by}')>"
+        return f"<Nbhd(id={self.id}, name='{self.name}', created_by='{self.created_by}')>"
 
 
 class Membership(Base):
     """
-    Membership model for tracking which users are members of which neighborhoods.
+    Membership model for tracking which users are members of which nbhds.
     """
 
     __tablename__ = "memberships"
@@ -38,14 +38,14 @@ class Membership(Base):
     neighborhood_id = Column(Integer, ForeignKey("neighborhoods.id"), nullable=False, index=True)
     joined_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    # Relationship to neighborhood
-    neighborhood = relationship("Neighborhood", back_populates="memberships")
+    # Relationship to nbhd
+    nbhd = relationship("Nbhd", back_populates="memberships")
 
-    # Ensure user can only join a neighborhood once
+    # Ensure user can only join a nbhd once
     __table_args__ = (
         UniqueConstraint("user_id", "neighborhood_id", name="unique_user_neighborhood_membership"),
         Index("idx_user_neighborhood", "user_id", "neighborhood_id"),
     )
 
     def __repr__(self):
-        return f"<Membership(id={self.id}, user_id='{self.user_id}', neighborhood_id={self.neighborhood_id})>"
+        return f"<Membership(id={self.id}, user_id='{self.user_id}', nbhd_id={self.neighborhood_id})>"

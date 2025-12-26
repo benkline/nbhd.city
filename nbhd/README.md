@@ -1,26 +1,26 @@
-# nbhd.city Neighborhood
+# nbhd.city Nbhd
 
-Collaborative neighborhood site for nbhd.city - where groups of users collaborate on neighborhood-level projects and discussions.
+Collaborative Nbhd site for nbhd.city - where groups of users collaborate on Nbhd-level projects and discussions.
 
 ## Overview
 
-The neighborhood app is a shared space where users in a specific geographic or community area can:
-- Collaborate on neighborhood projects
+The Nbhd app is a shared space where users in a specific geographic or community area can:
+- Collaborate on Nbhd projects
 - Share discussions and announcements
 - Organize local events
 - Share resources and recommendations
 - Build community relationships
-- Coordinate neighborhood initiatives
+- Coordinate Nbhd initiatives
 
 ## Features
 
-- **Neighborhood Directory**: Browse and join neighborhoods
+- **Nbhd Directory**: Browse and join Nbhds
 - **Discussion Boards**: Community discussions and announcements
-- **Events**: Create and manage neighborhood events
+- **Events**: Create and manage Nbhd events
 - **Resources**: Share resources and recommendations
-- **Member Directory**: View other neighborhood members
-- **Projects**: Collaborate on neighborhood projects
-- **Notifications**: Stay updated on neighborhood activity
+- **Member Directory**: View other Nbhd members
+- **Projects**: Collaborate on Nbhd projects
+- **Notifications**: Stay updated on Nbhd activity
 
 ## Tech Stack
 
@@ -46,7 +46,7 @@ npm run dev
 ## Running Locally
 
 ```bash
-# In the neighborhood directory (different port than homepage)
+# In the Nbhd directory (different port than homepage)
 VITE_PORT=5174 npm run dev
 
 # Runs on http://localhost:5174
@@ -60,17 +60,17 @@ npm run dev -- --port 5174
 ## Pages
 
 - **Login** (`/login`) - BlueSky OAuth login
-- **Neighborhoods** (`/neighborhoods`) - Browse and join neighborhoods
-- **Neighborhood Detail** (`/neighborhood/:id`) - View specific neighborhood
-- **Discussions** (`/neighborhood/:id/discussions`) - Neighborhood discussions
-- **Events** (`/neighborhood/:id/events`) - Neighborhood events
-- **Members** (`/neighborhood/:id/members`) - Neighborhood members
-- **Settings** (`/neighborhood/:id/settings`) - Neighborhood settings
+- **Nbhds** (`/Nbhds`) - Browse and join Nbhds
+- **Nbhd Detail** (`/Nbhd/:id`) - View specific Nbhd
+- **Discussions** (`/Nbhd/:id/discussions`) - Nbhd discussions
+- **Events** (`/Nbhd/:id/events`) - Nbhd events
+- **Members** (`/Nbhd/:id/members`) - Nbhd members
+- **Settings** (`/Nbhd/:id/settings`) - Nbhd settings
 
 ## API Integration
 
 Communicates with the nbhd.city API at `http://localhost:8000` for:
-- Neighborhood data and management
+- Nbhd data and management
 - User authentication
 - Discussion forums
 - Event management
@@ -85,13 +85,13 @@ npm run build
 
 ## Development Notes
 
-- Both `homepage` and `neighborhood` apps run independently
+- Both `homepage` and `Nbhd` apps run independently
 - They share the same authentication system
 - Each communicates with the same backend API
 - Can be deployed separately to different subdomains
 - Examples:
   - homepage: `username.nbhd.city`
-  - neighborhood: `neighborhood-name.nbhd.city`
+  - Nbhd: `Nbhd-name.nbhd.city`
 
 ## Related
 

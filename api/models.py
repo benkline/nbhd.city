@@ -33,10 +33,10 @@ class BlueSkyAuthResponse(BaseModel):
     handle: str
 
 
-# Neighborhood Models
+# Nbhd Models
 
-class NeighborhoodCreate(BaseModel):
-    """Schema for creating a new neighborhood."""
+class NbhdCreate(BaseModel):
+    """Schema for creating a new nbhd."""
 
     name: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=1000)
@@ -53,8 +53,8 @@ class MembershipResponse(BaseModel):
         from_attributes = True
 
 
-class NeighborhoodResponse(BaseModel):
-    """Schema for neighborhood list responses."""
+class NbhdResponse(BaseModel):
+    """Schema for nbhd list responses."""
 
     id: int
     name: str
@@ -67,13 +67,13 @@ class NeighborhoodResponse(BaseModel):
         from_attributes = True
 
 
-class NeighborhoodDetailResponse(NeighborhoodResponse):
-    """Schema for detailed neighborhood responses with members."""
+class NbhdDetailResponse(NbhdResponse):
+    """Schema for detailed nbhd responses with members."""
 
     members: List[MembershipResponse] = []
 
 
 class UserMembershipsResponse(BaseModel):
-    """Schema for user's neighborhood memberships."""
+    """Schema for user's nbhd memberships."""
 
-    neighborhoods: List[NeighborhoodResponse]
+    neighborhoods: List[NbhdResponse]

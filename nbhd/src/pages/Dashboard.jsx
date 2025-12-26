@@ -56,24 +56,24 @@ export default function Dashboard() {
           </div>
 
           <div className={styles.navigation}>
-            <h3>Neighborhoods</h3>
+            <h3>Nbhds</h3>
             <div className={styles.navGrid}>
               <button
-                onClick={() => navigate('/neighborhoods')}
+                onClick={() => navigate('/nbhds')}
                 className={styles.navCard}
               >
                 <span className={styles.navIcon}>🏘️</span>
-                <h4>Browse Neighborhoods</h4>
-                <p>Discover and join neighborhoods in your area</p>
+                <h4>Browse Nbhds</h4>
+                <p>Discover and join nbhds in your area</p>
               </button>
 
               <button
-                onClick={() => navigate('/my-neighborhoods')}
+                onClick={() => navigate('/my-nbhds')}
                 className={styles.navCard}
               >
                 <span className={styles.navIcon}>👥</span>
-                <h4>My Neighborhoods</h4>
-                <p>View neighborhoods you've joined</p>
+                <h4>My Nbhds</h4>
+                <p>View nbhds you've joined</p>
               </button>
             </div>
           </div>
@@ -83,8 +83,8 @@ export default function Dashboard() {
             <ul>
               <li>Connect with neighbors</li>
               <li>Create community events</li>
-              <li>Share neighborhood updates</li>
-              <li>Neighborhood discussions</li>
+              <li>Share nbhd updates</li>
+              <li>Nbhd discussions</li>
             </ul>
           </div>
         </div>

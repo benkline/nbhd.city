@@ -1,6 +1,6 @@
 # nbhd.city
 
-A full-stack web application for building neighborhood communities. This repository contains the API and frontend for connecting neighbors.
+A full-stack web application for building Nbhd communities. This repository contains the API and frontend for connecting neighbors.
 
 ## Project Structure
 
@@ -31,12 +31,12 @@ nbhd.city/
 │   ├── vite.config.js          # Vite configuration
 │   └── README.md               # Homepage documentation
 │
-├── neighborhood/                 # React + Vite collaborative neighborhood site
+├── nbhd/                 # React + Vite collaborative Nbhd site
 │   ├── src/
-│   │   ├── pages/              # Page components (Neighborhoods, Detail, MyNeighborhoods)
-│   │   ├── components/         # Reusable components (NeighborhoodCard, Modal)
-│   │   ├── services/           # API service layer (neighborhoodService)
-│   │   ├── hooks/              # Custom React hooks (useNeighborhoods, useMyNeighborhoods)
+│   │   ├── pages/              # Page components (Nbhds, Detail, MyNbhds)
+│   │   ├── components/         # Reusable components (NbhdCard, Modal)
+│   │   ├── services/           # API service layer (nbhdService)
+│   │   ├── hooks/              # Custom React hooks (useNbhds, useMyNbhds)
 │   │   ├── contexts/           # React contexts (Auth context)
 │   │   ├── lib/                # Utilities (API client)
 │   │   ├── styles/             # CSS modules
@@ -46,7 +46,7 @@ nbhd.city/
 │   ├── .env                     # Local env (git ignored)
 │   ├── package.json            # Node dependencies
 │   ├── vite.config.js          # Vite configuration
-│   └── README.md               # Neighborhood documentation
+│   └── README.md               # Nbhd documentation
 │
 ├── devops/                       # Infrastructure as Code (OpenTofu)
 │   ├── provider.tf
@@ -92,7 +92,7 @@ Personal user site deployed as a **static site** (S3 + CloudFront or similar).
 Features:
 - Manage their profile
 - View their activity
-- Join and manage neighborhoods
+- Join and manage nbhds
 - Access personal settings
 - See personalized recommendations
 
@@ -103,13 +103,13 @@ Features:
 - ✅ Simple OAuth callback handler included
 - See [homepage/STATIC_DEPLOYMENT.md](./homepage/STATIC_DEPLOYMENT.md) for deployment instructions
 
-#### 2. **Neighborhood** (`neighborhood/`)
+#### 2. **Nbhd** (`nbhd/`)
 Collaborative site for groups of users in a geographic area:
-- Browse and join neighborhoods
+- Browse and join nbhds
 - View community discussions
 - Create and manage events
 - Share resources and recommendations
-- Collaborate on neighborhood projects
+- Collaborate on nbhd projects
 - Connect with local members
 
 **Both apps share:**
@@ -122,7 +122,7 @@ Collaborative site for groups of users in a geographic area:
 
 **Deployment:**
 - Both can be deployed independently
-- Can run on different subdomains (e.g., `user.nbhd.city` and `neighborhood.nbhd.city`)
+- Can run on different subdomains (e.g., `user.nbhd.city` and `nbhd.nbhd.city`)
 - Share the same backend API
 
 ## Quick Start
@@ -167,7 +167,7 @@ The API will be available at `http://localhost:8000`
 
 ### Frontend Setup
 
-You can run either the Homepage or Neighborhood app (or both in different terminals on different ports).
+You can run either the Homepage or Nbhd app (or both in different terminals on different ports).
 
 #### Option A: Run Homepage (Personal User Site)
 
@@ -195,11 +195,11 @@ You can run either the Homepage or Neighborhood app (or both in different termin
 
 The homepage will be available at `http://localhost:5173`
 
-#### Option B: Run Neighborhood (Collaborative Site)
+#### Option B: Run Nbhd (Collaborative Site)
 
-1. **In a new terminal, navigate to neighborhood:**
+1. **In a new terminal, navigate to nbhd:**
    ```bash
-   cd neighborhood
+   cd nbhd
    ```
 
 2. **Install dependencies:**
@@ -219,13 +219,13 @@ The homepage will be available at `http://localhost:5173`
    npm run dev -- --port 5174
    ```
 
-The neighborhood app will be available at `http://localhost:5174`
+The nbhd app will be available at `http://localhost:5174`
 
 #### Run Both Simultaneously
 
 Open two terminal windows and run:
 - Terminal 1: `cd homepage && npm run dev` (port 5173)
-- Terminal 2: `cd neighborhood && npm run dev -- --port 5174` (port 5174)
+- Terminal 2: `cd nbhd && npm run dev -- --port 5174` (port 5174)
 
 ### Full Stack Running
 
@@ -238,8 +238,8 @@ You should now have:
   - Personal user site
   - Redirects unauthenticated users to `/login`
 
-- **Neighborhood App** (if running): http://localhost:5174
-  - Collaborative neighborhood site
+- **Nbhd App** (if running): http://localhost:5174
+  - Collaborative nbhd site
   - Redirects unauthenticated users to `/login`
 
 Visit either frontend app in your browser to start! (The first one you set up will be at 5173)
@@ -314,7 +314,7 @@ FRONTEND_URL=http://localhost:5173
 
 ### Frontend Environment Variables
 
-See `homepage/.env.example` or `neighborhood/.env.example`:
+See `homepage/.env.example` or `Nbhd/.env.example`:
 
 ```
 # API URL
@@ -424,8 +424,8 @@ For complete instructions, see:
 ## Next Steps
 
 - [ ] Database integration (PostgreSQL/MongoDB)
-- [ ] User profiles and neighborhoods
-- [ ] Real-time neighborhood events
+- [ ] User profiles and nbhds
+- [ ] Real-time nbhd events
 - [ ] Frontend application (React/Next.js)
 - [ ] Deployment pipeline (Docker/Kubernetes)
 

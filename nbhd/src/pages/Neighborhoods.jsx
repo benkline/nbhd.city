@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNeighborhoods } from '../hooks/useNeighborhoods';
-import NeighborhoodCard from '../components/NeighborhoodCard';
-import CreateNeighborhoodModal from '../components/CreateNeighborhoodModal';
-import styles from '../styles/Neighborhoods.module.css';
+import { useNbhds } from '../hooks/useNeighborhoods';
+import NbhdCard from '../components/NeighborhoodCard';
+import CreateNbhdModal from '../components/CreateNeighborhoodModal';
+import styles from '../styles/Nbhds.module.css';
 
-export default function Neighborhoods() {
+export default function Nbhds() {
   const { isAuthenticated } = useAuth();
-  const { neighborhoods, loading, error, refresh } = useNeighborhoods();
+  const { nbhds, loading, error, refresh } = useNbhds();
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleCreateSuccess = () => {
@@ -17,7 +17,7 @@ export default function Neighborhoods() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Loading neighborhoods...</div>
+        <div className={styles.loading}>Loading nbhds...</div>
       </div>
     );
   }
@@ -40,9 +40,9 @@ export default function Neighborhoods() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h1>Neighborhoods</h1>
+          <h1>Nbhds</h1>
           <p className={styles.subtitle}>
-            {neighborhoods.length} neighborhood{neighborhoods.length !== 1 ? 's' : ''}
+            {nbhds.length} nbhd{nbhds.length !== 1 ? 's' : ''}
           </p>
         </div>
 
@@ -51,37 +51,37 @@ export default function Neighborhoods() {
             onClick={() => setModalOpen(true)}
             className={styles.createButton}
           >
-            <span className={styles.icon}>+</span> Create Neighborhood
+            <span className={styles.icon}>+</span> Create Nbhd
           </button>
         )}
       </div>
 
-      {neighborhoods.length > 0 ? (
+      {nbhds.length > 0 ? (
         <div className={styles.grid}>
-          {neighborhoods.map((neighborhood) => (
-            <NeighborhoodCard
-              key={neighborhood.id}
-              neighborhood={neighborhood}
+          {nbhds.map((nbhd) => (
+            <NbhdCard
+              key={nbhd.id}
+              nbhd={nbhd}
             />
           ))}
         </div>
       ) : (
         <div className={styles.empty}>
           <div className={styles.emptyIcon}>🏘️</div>
-          <h2>No neighborhoods yet</h2>
+          <h2>No nbhds yet</h2>
           <p>Be the first to create a community!</p>
           {isAuthenticated && (
             <button
               onClick={() => setModalOpen(true)}
               className={styles.createButton}
             >
-              Create First Neighborhood
+              Create First Nbhd
             </button>
           )}
         </div>
       )}
 
-      <CreateNeighborhoodModal
+      <CreateNbhdModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onSuccess={handleCreateSuccess}

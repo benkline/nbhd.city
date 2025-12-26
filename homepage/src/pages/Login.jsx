@@ -22,7 +22,7 @@ export default function Login() {
     <div className={styles.container}>
       <div className={styles.card}>
         <h1>Welcome to nbhd.city</h1>
-        <p>Connect with your neighborhood community</p>
+        <p>Connect with your nbhd community</p>
 
         <button onClick={handleLogin} className={styles.loginButton}>
           Login with BlueSky

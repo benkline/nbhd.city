@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { neighborhoodService } from '../services/neighborhoodService';
+import { nbhdService } from '../services/neighborhoodService';
 import styles from '../styles/Modal.module.css';
 
-export default function CreateNeighborhoodModal({ isOpen, onClose, onSuccess }) {
+export default function CreateNbhdModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({ name: '', description: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -16,7 +16,7 @@ export default function CreateNeighborhoodModal({ isOpen, onClose, onSuccess }) 
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError('Neighborhood name is required');
+      setError('Nbhd name is required');
       return;
     }
 
@@ -24,14 +24,14 @@ export default function CreateNeighborhoodModal({ isOpen, onClose, onSuccess }) 
     setError(null);
 
     try {
-      await neighborhoodService.createNeighborhood(formData);
+      await nbhdService.createNbhd(formData);
       onSuccess();
       onClose();
       setFormData({ name: '', description: '' });
     } catch (err) {
-      const errorMessage = err.response?.data?.detail || 'Failed to create neighborhood';
+      const errorMessage = err.response?.data?.detail || 'Failed to create nbhd';
       setError(errorMessage);
-      console.error('Error creating neighborhood:', err);
+      console.error('Error creating nbhd:', err);
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ export default function CreateNeighborhoodModal({ isOpen, onClose, onSuccess }) 
     <div className={styles.overlay} onClick={handleOverlayClick}>
       <div className={styles.modal}>
         <div className={styles.header}>
-          <h2>Create New Neighborhood</h2>
+          <h2>Create New Nbhd</h2>
           <button
             className={styles.closeButton}
             onClick={onClose}
@@ -61,7 +61,7 @@ export default function CreateNeighborhoodModal({ isOpen, onClose, onSuccess }) 
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
-            <label htmlFor="name">Neighborhood Name *</label>
+            <label htmlFor="name">Nbhd Name *</label>
             <input
               id="name"
               type="text"
@@ -111,7 +111,7 @@ export default function CreateNeighborhoodModal({ isOpen, onClose, onSuccess }) 
               className={styles.submitButton}
               disabled={loading}
             >
-              {loading ? 'Creating...' : 'Create Neighborhood'}
+              {loading ? 'Creating...' : 'Create Nbhd'}
             </button>
           </div>
         </form>

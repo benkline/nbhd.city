@@ -58,10 +58,10 @@ export default function Dashboard() {
           <div className={styles.nextSteps}>
             <h3>Coming Soon</h3>
             <ul>
-              <li>View your neighborhood</li>
+              <li>View your nbhd</li>
               <li>Connect with neighbors</li>
               <li>Create community events</li>
-              <li>Share neighborhood updates</li>
+              <li>Share nbhd updates</li>
             </ul>
           </div>
         </div>

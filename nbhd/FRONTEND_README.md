@@ -1,6 +1,6 @@
 # nbhd.city Frontend
 
-A React + Vite application for the nbhd.city neighborhood community platform. Authenticates via BlueSky OAuth and communicates with the FastAPI backend.
+A React + Vite application for the nbhd.city Nbhd community platform. Authenticates via BlueSky OAuth and communicates with the FastAPI backend.
 
 ## Tech Stack
 
@@ -276,7 +276,7 @@ Run `npm install` to ensure all dependencies are installed.
 
 - [ ] Add form validation and error handling
 - [ ] Implement user profile page
-- [ ] Add neighborhood listing and map view
+- [ ] Add Nbhd listing and map view
 - [ ] Create event creation and management
 - [ ] Add real-time notifications
 - [ ] Implement comprehensive error boundaries

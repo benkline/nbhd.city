@@ -5,7 +5,7 @@
 The nbhd.city frontend has been split into two independent React applications:
 
 1. **Homepage** - Personal user site
-2. **Neighborhood** - Collaborative community site
+2. **Nbhd** - Collaborative community site
 
 Both applications share the same authentication system and backend API but provide distinct user experiences.
 
@@ -15,7 +15,7 @@ Both applications share the same authentication system and backend API but provi
 
 **Separation of Concerns:**
 - Homepage focuses on individual user management
-- Neighborhood focuses on group/community features
+- Nbhd focuses on group/community features
 - Each can evolve independently
 
 **Deployment Flexibility:**
@@ -32,12 +32,12 @@ Both applications share the same authentication system and backend API but provi
 ## Homepage App (`homepage/`)
 
 ### Purpose
-Personal space where users manage their profile, connections, and neighborhood participation.
+Personal space where users manage their profile, connections, and Nbhd participation.
 
 ### Key Features
 - **Profile Management**: View and edit user profile
 - **Activity Feed**: See personal activities and contributions
-- **Neighborhood List**: View and manage joined neighborhoods
+- **Nbhd List**: View and manage joined Nbhds
 - **Connections**: Manage connections with other users
 - **Settings**: Manage personal preferences and privacy
 
@@ -64,30 +64,30 @@ npm run build  # Output: dist/
 - Subdomain: `username.nbhd.city` or `home.nbhd.city`
 - Can handle thousands of concurrent users
 
-## Neighborhood App (`neighborhood/`)
+## Nbhd App (`Nbhd/`)
 
 ### Purpose
 Shared community space where users collaborate on local initiatives, discussions, and events.
 
 ### Key Features
-- **Neighborhood Directory**: Browse and join neighborhoods
+- **Nbhd Directory**: Browse and join Nbhds
 - **Discussions**: Community discussion boards
 - **Events**: Create and manage local events
 - **Resources**: Share recommendations and resources
-- **Members**: View neighborhood members
-- **Projects**: Collaborate on neighborhood projects
+- **Members**: View Nbhd members
+- **Projects**: Collaborate on Nbhd projects
 
 ### Pages
 - `/login` - Authentication via BlueSky
-- `/neighborhoods` - Browse neighborhoods
-- `/neighborhood/:id` - View specific neighborhood
-- `/neighborhood/:id/discussions` - Discussion board
-- `/neighborhood/:id/events` - Events listing
-- `/neighborhood/:id/members` - Members directory
+- `/Nbhds` - Browse Nbhds
+- `/Nbhd/:id` - View specific Nbhd
+- `/Nbhd/:id/discussions` - Discussion board
+- `/Nbhd/:id/events` - Events listing
+- `/Nbhd/:id/members` - Members directory
 
 ### Development
 ```bash
-cd neighborhood
+cd Nbhd
 npm install
 npm run dev -- --port 5174  # Runs on http://localhost:5174
 ```
@@ -99,8 +99,8 @@ npm run build  # Output: dist/
 
 ### Deployment Option
 - Deploy to S3 + CloudFront
-- Subdomain: `neighborhood-name.nbhd.city` or `neighborhoods.nbhd.city`
-- Can handle neighborhood-level traffic
+- Subdomain: `Nbhd-name.nbhd.city` or `Nbhds.nbhd.city`
+- Can handle Nbhd-level traffic
 
 ## Running Both Simultaneously
 
@@ -109,14 +109,14 @@ npm run build  # Output: dist/
 cd homepage
 npm run dev
 
-# Terminal 2: Neighborhood (in a new terminal)
-cd neighborhood
+# Terminal 2: Nbhd (in a new terminal)
+cd Nbhd
 npm run dev -- --port 5174
 ```
 
 Then you can test:
 - Homepage: http://localhost:5173
-- Neighborhood: http://localhost:5174
+- Nbhd: http://localhost:5174
 - API: http://localhost:8000
 
 ## Shared Components
@@ -165,15 +165,15 @@ Backend needs to support:
 - `GET /api/profile/:user_id` - Get user profile
 - `PUT /api/profile/:user_id` - Update profile
 - `GET /api/user/activity` - Get user activity
-- `GET /api/user/neighborhoods` - Get joined neighborhoods
+- `GET /api/user/Nbhds` - Get joined Nbhds
 
-**Neighborhood specific:**
-- `GET /api/neighborhoods` - List all neighborhoods
-- `GET /api/neighborhoods/:id` - Get neighborhood details
-- `POST /api/neighborhoods` - Create neighborhood
-- `GET /api/neighborhoods/:id/discussions` - Get discussions
-- `GET /api/neighborhoods/:id/events` - Get events
-- `GET /api/neighborhoods/:id/members` - Get members
+**Nbhd specific:**
+- `GET /api/Nbhds` - List all Nbhds
+- `GET /api/Nbhds/:id` - Get Nbhd details
+- `POST /api/Nbhds` - Create Nbhd
+- `GET /api/Nbhds/:id/discussions` - Get discussions
+- `GET /api/Nbhds/:id/events` - Get events
+- `GET /api/Nbhds/:id/members` - Get members
 
 ## Development Workflow
 
@@ -181,11 +181,11 @@ Backend needs to support:
 
 1. **Identify which app it belongs to:**
    - Personal feature → Homepage
-   - Community feature → Neighborhood
+   - Community feature → Nbhd
 
 2. **Update the app:**
    ```bash
-   cd homepage  # or neighborhood
+   cd homepage  # or Nbhd
    # Add your components/pages
    # Add your API calls
    ```
@@ -227,15 +227,15 @@ homepage/
 └── README.md
 ```
 
-### Neighborhood
+### Nbhd
 ```
-neighborhood/
+Nbhd/
 ├── src/
 │   ├── pages/
 │   │   ├── Login.jsx
 │   │   ├── AuthSuccess.jsx
-│   │   ├── Neighborhoods.jsx
-│   │   ├── NeighborhoodDetail.jsx
+│   │   ├── Nbhds.jsx
+│   │   ├── NbhdDetail.jsx
 │   │   └── Events.jsx
 │   ├── contexts/
 │   │   └── AuthContext.jsx
@@ -267,11 +267,11 @@ VITE_APP_NAME=nbhd.city
 - Both apps behind CloudFront
 - Route based on URL path
 - `/` → Homepage
-- `/neighborhoods/*` → Neighborhood app
+- `/Nbhds/*` → Nbhd app
 
 **Option 2: Separate Deployments (Recommended)**
 - Homepage on `home.nbhd.city`
-- Neighborhood on `neighborhoods.nbhd.city`
+- Nbhd on `Nbhds.nbhd.city`
 - More flexible scaling
 - Independent deployments
 - Cross-domain auth handled by shared API
@@ -285,7 +285,7 @@ VITE_APP_NAME=nbhd.city
 ## Migration Path
 
 ### From Original Frontend
-1. Both `homepage` and `neighborhood` already exist
+1. Both `homepage` and `Nbhd` already exist
 2. `frontend/` is the original (can be deprecated)
 3. Gradually replace frontend with new structure
 4. Users still log in via BlueSky OAuth
@@ -305,10 +305,10 @@ packages/
 ### Cross-App Navigation
 Add deep linking:
 ```javascript
-// From Homepage to Neighborhood
-window.location.href = 'http://localhost:5174/neighborhoods/123'
+// From Homepage to Nbhd
+window.location.href = 'http://localhost:5174/Nbhds/123'
 
-// From Neighborhood back to Homepage
+// From Nbhd back to Homepage
 window.location.href = 'http://localhost:5173/dashboard'
 ```
 
@@ -327,12 +327,12 @@ npm test  # When tests added
 ### Integration Testing
 Test authentication flow across both apps:
 1. Log in via Homepage
-2. Visit Neighborhood (should stay logged in)
+2. Visit Nbhd (should stay logged in)
 3. Verify same auth token used
 
 ### End-to-End Testing
 - Test user journey across both apps
-- Test neighborhoods created in Neighborhood appear in Homepage
+- Test Nbhds created in Nbhd appear in Homepage
 - Test profile changes in Homepage sync across apps
 
 ## Troubleshooting

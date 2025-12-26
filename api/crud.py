@@ -1,152 +1,152 @@
 """
-CRUD operations for neighborhoods and memberships.
+CRUD operations for nbhds and memberships.
 """
 
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from db_models import Neighborhood, Membership
+from db_models import Nbhd, Membership
 
 
-async def get_neighborhoods(db: AsyncSession, skip: int = 0, limit: int = 100):
+async def get_nbhds(db: AsyncSession, skip: int = 0, limit: int = 100):
     """
-    Get all neighborhoods with member count and pagination.
+    Get all nbhds with member count and pagination.
     """
     # Subquery to count members
     member_count_subquery = (
         select(func.count(Membership.id))
-        .where(Membership.neighborhood_id == Neighborhood.id)
-        .correlate(Neighborhood)
+        .where(Membership.neighborhood_id == Nbhd.id)
+        .correlate(Nbhd)
         .scalar_subquery()
     )
 
     result = await db.execute(
         select(
-            Neighborhood,
+            Nbhd,
             member_count_subquery.label("member_count"),
         )
         .offset(skip)
         .limit(limit)
-        .order_by(Neighborhood.created_at.desc())
+        .order_by(Nbhd.created_at.desc())
     )
 
-    # Return neighborhoods with member counts
-    neighborhoods = []
+    # Return nbhds with member counts
+    nbhds = []
     for row in result:
-        neighborhood = row[0]
-        neighborhood.member_count = row[1] or 0
-        neighborhoods.append(neighborhood)
+        nbhd = row[0]
+        nbhd.member_count = row[1] or 0
+        nbhds.append(nbhd)
 
-    return neighborhoods
+    return nbhds
 
 
-async def get_neighborhood(db: AsyncSession, neighborhood_id: int) -> Neighborhood | None:
+async def get_nbhd(db: AsyncSession, nbhd_id: int) -> Nbhd | None:
     """
-    Get a single neighborhood by ID.
+    Get a single nbhd by ID.
     """
-    result = await db.execute(select(Neighborhood).where(Neighborhood.id == neighborhood_id))
+    result = await db.execute(select(Nbhd).where(Nbhd.id == nbhd_id))
     return result.scalar_one_or_none()
 
 
-async def get_neighborhood_with_members(
-    db: AsyncSession, neighborhood_id: int
-) -> Neighborhood | None:
+async def get_nbhd_with_members(
+    db: AsyncSession, nbhd_id: int
+) -> Nbhd | None:
     """
-    Get a neighborhood with all its members.
+    Get a nbhd with all its members.
     """
     result = await db.execute(
-        select(Neighborhood)
-        .where(Neighborhood.id == neighborhood_id)
-        .options(selectinload(Neighborhood.memberships))
+        select(Nbhd)
+        .where(Nbhd.id == nbhd_id)
+        .options(selectinload(Nbhd.memberships))
     )
     return result.scalar_one_or_none()
 
 
-async def create_neighborhood(
+async def create_nbhd(
     db: AsyncSession, name: str, description: str | None, created_by: str
-) -> Neighborhood:
+) -> Nbhd:
     """
-    Create a new neighborhood.
+    Create a new nbhd.
     """
-    neighborhood = Neighborhood(
+    nbhd = Nbhd(
         name=name,
         description=description,
         created_by=created_by,
     )
-    db.add(neighborhood)
+    db.add(nbhd)
     await db.flush()  # Flush to get the ID
-    return neighborhood
+    return nbhd
 
 
 async def get_user_memberships(db: AsyncSession, user_id: str):
     """
-    Get all neighborhoods that a user is a member of.
+    Get all nbhds that a user is a member of.
     """
     # Subquery to count members
     member_count_subquery = (
         select(func.count(Membership.id))
-        .where(Membership.neighborhood_id == Neighborhood.id)
-        .correlate(Neighborhood)
+        .where(Membership.neighborhood_id == Nbhd.id)
+        .correlate(Nbhd)
         .scalar_subquery()
     )
 
     result = await db.execute(
         select(
-            Neighborhood,
+            Nbhd,
             member_count_subquery.label("member_count"),
         )
-        .join(Membership, Neighborhood.id == Membership.neighborhood_id)
+        .join(Membership, Nbhd.id == Membership.neighborhood_id)
         .where(Membership.user_id == user_id)
-        .order_by(Neighborhood.created_at.desc())
+        .order_by(Nbhd.created_at.desc())
     )
 
-    # Return neighborhoods with member counts
-    neighborhoods = []
+    # Return nbhds with member counts
+    nbhds = []
     for row in result:
-        neighborhood = row[0]
-        neighborhood.member_count = row[1] or 0
-        neighborhoods.append(neighborhood)
+        nbhd = row[0]
+        nbhd.member_count = row[1] or 0
+        nbhds.append(nbhd)
 
-    return neighborhoods
+    return nbhds
 
 
 async def get_membership(
-    db: AsyncSession, user_id: str, neighborhood_id: int
+    db: AsyncSession, user_id: str, nbhd_id: int
 ) -> Membership | None:
     """
-    Check if a user is a member of a neighborhood.
+    Check if a user is a member of a nbhd.
     """
     result = await db.execute(
         select(Membership).where(
-            (Membership.user_id == user_id) & (Membership.neighborhood_id == neighborhood_id)
+            (Membership.user_id == user_id) & (Membership.neighborhood_id == nbhd_id)
         )
     )
     return result.scalar_one_or_none()
 
 
 async def create_membership(
-    db: AsyncSession, user_id: str, neighborhood_id: int
+    db: AsyncSession, user_id: str, nbhd_id: int
 ) -> Membership:
     """
-    Create a membership (user joins neighborhood).
+    Create a membership (user joins nbhd).
     """
-    membership = Membership(user_id=user_id, neighborhood_id=neighborhood_id)
+    membership = Membership(user_id=user_id, neighborhood_id=nbhd_id)
     db.add(membership)
     await db.flush()  # Flush to get the ID
     return membership
 
 
 async def delete_membership(
-    db: AsyncSession, user_id: str, neighborhood_id: int
+    db: AsyncSession, user_id: str, nbhd_id: int
 ) -> bool:
     """
-    Delete a membership (user leaves neighborhood).
+    Delete a membership (user leaves nbhd).
     Returns True if deleted, False if not found.
     """
     result = await db.execute(
         select(Membership).where(
-            (Membership.user_id == user_id) & (Membership.neighborhood_id == neighborhood_id)
+            (Membership.user_id == user_id) & (Membership.neighborhood_id == nbhd_id)
         )
     )
     membership = result.scalar_one_or_none()

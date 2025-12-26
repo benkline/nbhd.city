@@ -1,6 +1,6 @@
 # nbhd.city Homepage
 
-Personal user homepage for nbhd.city - where individual users manage their profile and personal neighborhood data.
+Personal user homepage for nbhd.city - where individual users manage their profile and personal Nbhd data.
 
 **Static Site**: Deployed as pure client-side application to S3 + CloudFront (or other static hosts).
 
@@ -8,10 +8,10 @@ Personal user homepage for nbhd.city - where individual users manage their profi
 
 The homepage is a personalized space for each user where they can:
 - View and edit their profile
-- Manage their neighborhood connections
+- Manage their Nbhd connections
 - See their activity and contributions
 - Access their personal settings
-- View neighborhood recommendations
+- View Nbhd recommendations
 
 ## Static Deployment
 
@@ -32,7 +32,7 @@ See **[STATIC_DEPLOYMENT.md](./STATIC_DEPLOYMENT.md)** for complete deployment i
 
 - **User Profile**: Display and edit personal information
 - **Activity Feed**: See their own activities and contributions
-- **Neighborhood List**: View neighborhoods they're part of
+- **Nbhd List**: View Nbhds they're part of
 - **Settings**: Manage preferences and privacy
 - **Connections**: Manage connections with other users
 
@@ -69,7 +69,7 @@ npm run dev
 ## Pages
 
 - **Login** (`/login`) - BlueSky OAuth login
-- **Dashboard** (`/dashboard`) - Main page with profile summary and neighborhoods
+- **Dashboard** (`/dashboard`) - Main page with profile summary and Nbhds
 - **Profile** (`/profile`) - User profile page
 - **Settings** (`/settings`) - User settings
 
@@ -77,7 +77,7 @@ npm run dev
 
 Communicates with the nbhd.city API at `http://localhost:8000` for:
 - User authentication and profiles
-- Neighborhood data
+- Nbhd data
 - Activity tracking
 - User connections
 
@@ -90,5 +90,5 @@ npm run build
 ## Related
 
 - **Backend**: See `api/` folder
-- **Neighborhood App**: See `neighborhood/` folder for collaborative features
+- **Nbhd App**: See `Nbhd/` folder for collaborative features
 - **Testing**: See `LOCAL_TEST_GUIDE.md` in project root

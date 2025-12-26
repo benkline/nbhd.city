@@ -12,7 +12,7 @@ from models import Token, User
 from auth import create_access_token, get_current_user
 from bluesky_oauth import get_oauth_authorize_url, exchange_code_for_token
 from database import init_db, close_db
-from neighborhoods import router as neighborhoods_router
+from neighborhoods import router as nbhds_router
 
 app = FastAPI(title="nbhd.city API")
 
@@ -26,7 +26,7 @@ app.add_middleware(
 )
 
 # Register routers
-app.include_router(neighborhoods_router, tags=["neighborhoods"])
+app.include_router(nbhds_router, tags=["nbhds"])
 
 # Store OAuth states (in production, use a database or Redis)
 oauth_states = {}
