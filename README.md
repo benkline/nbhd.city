@@ -87,12 +87,21 @@ The nbhd.city API is built with **FastAPI** and provides:
 The frontend is split into two independent applications, both built with **React + Vite**:
 
 #### 1. **Homepage** (`homepage/`)
-Personal user site where individual users can:
+Personal user site deployed as a **static site** (S3 + CloudFront or similar).
+
+Features:
 - Manage their profile
 - View their activity
 - Join and manage neighborhoods
 - Access personal settings
 - See personalized recommendations
+
+**Static Site Benefits:**
+- ✅ Hash-based routing (no server needed)
+- ✅ Deployable to S3, GitHub Pages, Vercel, Netlify
+- ✅ Fast and cost-effective
+- ✅ Simple OAuth callback handler included
+- See [homepage/STATIC_DEPLOYMENT.md](./homepage/STATIC_DEPLOYMENT.md) for deployment instructions
 
 #### 2. **Neighborhood** (`neighborhood/`)
 Collaborative site for groups of users in a geographic area:

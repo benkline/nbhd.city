@@ -2,6 +2,8 @@
 
 Personal user homepage for nbhd.city - where individual users manage their profile and personal neighborhood data.
 
+**Static Site**: Deployed as pure client-side application to S3 + CloudFront (or other static hosts).
+
 ## Overview
 
 The homepage is a personalized space for each user where they can:
@@ -10,6 +12,21 @@ The homepage is a personalized space for each user where they can:
 - See their activity and contributions
 - Access their personal settings
 - View neighborhood recommendations
+
+## Static Deployment
+
+This homepage is configured as a **static site**:
+- ✅ Client-side hash-based routing (works without server)
+- ✅ Deployable to S3, CloudFront, GitHub Pages, Vercel, Netlify, etc.
+- ✅ OAuth callback handler included (`public/callback.html`)
+- ✅ No server required, minimal infrastructure
+
+See **[STATIC_DEPLOYMENT.md](./STATIC_DEPLOYMENT.md)** for complete deployment instructions to:
+- AWS S3 + CloudFront
+- GitHub Pages
+- Vercel
+- Netlify
+- Cloudflare Pages
 
 ## Features
 
