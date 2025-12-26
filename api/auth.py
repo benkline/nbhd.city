@@ -1,16 +1,15 @@
 import jwt
+import os
 from datetime import datetime, timedelta
 from typing import Optional
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
-import os
+from starlette.requests import Request
 
 # Token configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "10080"))  # 7 days
-
-security = HTTPBearer()
 
 
 def create_access_token(user_id: str, expires_delta: Optional[timedelta] = None) -> str:
@@ -38,12 +37,12 @@ def create_access_token(user_id: str, expires_delta: Optional[timedelta] = None)
     return encoded_jwt
 
 
-def verify_token(credentials: HTTPAuthCredentials = Depends(security)) -> str:
+def verify_token(request: Request) -> str:
     """
     Verify a JWT token and return the user ID.
 
     Args:
-        credentials: HTTP Bearer credentials from the request
+        request: HTTP request object
 
     Returns:
         The user ID (DID) from the token
@@ -51,8 +50,19 @@ def verify_token(credentials: HTTPAuthCredentials = Depends(security)) -> str:
     Raises:
         HTTPException: If the token is invalid or expired
     """
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing or invalid Authorization header",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    token = auth_header.split(" ")[1]
+
     try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
 
         if user_id is None:
