@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -31,3 +31,49 @@ class BlueSkyAuthResponse(BaseModel):
     refresh_token: Optional[str] = None
     did: str
     handle: str
+
+
+# Neighborhood Models
+
+class NeighborhoodCreate(BaseModel):
+    """Schema for creating a new neighborhood."""
+
+    name: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = Field(None, max_length=1000)
+
+
+class MembershipResponse(BaseModel):
+    """Schema for membership information in responses."""
+
+    id: int
+    user_id: str
+    joined_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class NeighborhoodResponse(BaseModel):
+    """Schema for neighborhood list responses."""
+
+    id: int
+    name: str
+    description: Optional[str]
+    created_by: str
+    created_at: datetime
+    member_count: int = 0
+
+    class Config:
+        from_attributes = True
+
+
+class NeighborhoodDetailResponse(NeighborhoodResponse):
+    """Schema for detailed neighborhood responses with members."""
+
+    members: List[MembershipResponse] = []
+
+
+class UserMembershipsResponse(BaseModel):
+    """Schema for user's neighborhood memberships."""
+
+    neighborhoods: List[NeighborhoodResponse]
