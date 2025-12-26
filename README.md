@@ -33,7 +33,10 @@ nbhd.city/
 │
 ├── neighborhood/                 # React + Vite collaborative neighborhood site
 │   ├── src/
-│   │   ├── pages/              # Page components (Neighborhoods, Events, etc.)
+│   │   ├── pages/              # Page components (Neighborhoods, Detail, MyNeighborhoods)
+│   │   ├── components/         # Reusable components (NeighborhoodCard, Modal)
+│   │   ├── services/           # API service layer (neighborhoodService)
+│   │   ├── hooks/              # Custom React hooks (useNeighborhoods, useMyNeighborhoods)
 │   │   ├── contexts/           # React contexts (Auth context)
 │   │   ├── lib/                # Utilities (API client)
 │   │   ├── styles/             # CSS modules
@@ -44,9 +47,6 @@ nbhd.city/
 │   ├── package.json            # Node dependencies
 │   ├── vite.config.js          # Vite configuration
 │   └── README.md               # Neighborhood documentation
-│
-├── frontend/                     # Original frontend (legacy, being phased out)
-│   └── [Same structure as homepage]
 │
 ├── devops/                       # Infrastructure as Code (OpenTofu)
 │   ├── provider.tf
@@ -314,7 +314,7 @@ FRONTEND_URL=http://localhost:5173
 
 ### Frontend Environment Variables
 
-See `frontend/.env.example`:
+See `homepage/.env.example` or `neighborhood/.env.example`:
 
 ```
 # API URL
@@ -323,6 +323,8 @@ VITE_API_URL=http://localhost:8000
 # App name
 VITE_APP_NAME=nbhd.city
 ```
+
+Both applications use the same environment configuration and communicate with the same backend API.
 
 ## Development
 
