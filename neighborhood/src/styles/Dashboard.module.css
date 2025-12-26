@@ -128,3 +128,59 @@
   font-weight: bold;
   margin-right: 0.5rem;
 }
+
+.navigation {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #eee;
+}
+
+.navigation h3 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.navGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.navCard {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-family: inherit;
+}
+
+.navCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.navIcon {
+  font-size: 32px;
+}
+
+.navCard h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.navCard p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.9;
+  line-height: 1.4;
+}

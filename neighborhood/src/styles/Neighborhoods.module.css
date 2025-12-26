@@ -1,0 +1,142 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.header h1 {
+  margin: 0 0 8px 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #222;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.createButton:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.icon {
+  font-size: 18px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .createButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: #f9f9f9;
+  border-radius: 12px;
+}
+
+.emptyIcon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.empty h2 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #222;
+}
+
+.empty p {
+  margin: 0 0 24px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 16px;
+  color: #666;
+}
+
+.error {
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+}
+
+.error h2 {
+  margin: 0 0 8px 0;
+  color: #c33;
+}
+
+.error p {
+  margin: 0 0 16px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.retryButton {
+  padding: 10px 20px;
+  background: #c33;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retryButton:hover {
+  background: #a00;
+}

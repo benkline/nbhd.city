@@ -55,13 +55,36 @@ export default function Dashboard() {
             </div>
           </div>
 
+          <div className={styles.navigation}>
+            <h3>Neighborhoods</h3>
+            <div className={styles.navGrid}>
+              <button
+                onClick={() => navigate('/neighborhoods')}
+                className={styles.navCard}
+              >
+                <span className={styles.navIcon}>🏘️</span>
+                <h4>Browse Neighborhoods</h4>
+                <p>Discover and join neighborhoods in your area</p>
+              </button>
+
+              <button
+                onClick={() => navigate('/my-neighborhoods')}
+                className={styles.navCard}
+              >
+                <span className={styles.navIcon}>👥</span>
+                <h4>My Neighborhoods</h4>
+                <p>View neighborhoods you've joined</p>
+              </button>
+            </div>
+          </div>
+
           <div className={styles.nextSteps}>
-            <h3>Coming Soon</h3>
+            <h3>Future Features</h3>
             <ul>
-              <li>View your neighborhood</li>
               <li>Connect with neighbors</li>
               <li>Create community events</li>
               <li>Share neighborhood updates</li>
+              <li>Neighborhood discussions</li>
             </ul>
           </div>
         </div>
