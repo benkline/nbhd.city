@@ -6,19 +6,33 @@ A full-stack web application for building neighborhood communities. This reposit
 
 ```
 nbhd.city/
-├── api/                  # FastAPI backend
-│   ├── main.py          # Main application entry point
-│   ├── auth.py          # JWT authentication utilities
-│   ├── models.py        # Pydantic data models
-│   ├── bluesky_oauth.py # BlueSky OAuth integration
-│   ├── requirements.txt # Python dependencies
-│   ├── .env.example     # Environment variables template
-│   ├── .gitignore       # Git ignore rules
-│   └── AUTH_README.md   # Authentication documentation
-└── README.md            # This file
+├── api/                      # FastAPI backend
+│   ├── main.py              # Main application entry point
+│   ├── auth.py              # JWT authentication utilities
+│   ├── models.py            # Pydantic data models
+│   ├── bluesky_oauth.py     # BlueSky OAuth integration
+│   ├── requirements.txt     # Python dependencies
+│   ├── .env.example         # Environment variables template
+│   ├── .gitignore           # Git ignore rules
+│   └── AUTH_README.md       # Authentication documentation
+├── frontend/                 # React + Vite frontend
+│   ├── src/
+│   │   ├── pages/           # Page components (Login, Dashboard, etc.)
+│   │   ├── contexts/        # React contexts (Auth context)
+│   │   ├── lib/             # Utilities (API client)
+│   │   ├── styles/          # CSS modules
+│   │   ├── App.jsx          # Main app component
+│   │   └── main.jsx         # Entry point
+│   ├── .env.example         # Environment variables template
+│   ├── package.json         # Node dependencies
+│   ├── vite.config.js       # Vite configuration
+│   └── FRONTEND_README.md   # Frontend documentation
+└── README.md                # This file
 ```
 
-## API Overview
+## Architecture
+
+### Backend
 
 The nbhd.city API is built with **FastAPI** and provides:
 
@@ -26,22 +40,37 @@ The nbhd.city API is built with **FastAPI** and provides:
 - **Real-time Communication**: Async/await support for high concurrency
 - **Interactive Documentation**: Auto-generated API docs at `/docs` and `/redoc`
 
-### Key Features
-
+**Key Features:**
 - ✅ BlueSky OAuth 2.0 authentication
 - ✅ JWT-based session management
 - ✅ CORS middleware configured
 - ✅ Async request handling
 - ✅ Comprehensive authentication documentation
 
+### Frontend
+
+The frontend is built with **React + Vite** and provides:
+
+- **Authentication Context**: Global state management for authentication
+- **Protected Routes**: Automatic redirection for unauthenticated users
+- **OAuth Integration**: Seamless BlueSky login flow
+- **Responsive Design**: Mobile-friendly interface with CSS modules
+
+**Key Features:**
+- ✅ React Router for client-side navigation
+- ✅ Axios HTTP client with automatic token injection
+- ✅ Clean component-based architecture
+- ✅ CSS Modules for scoped styling
+- ✅ Fast hot module reloading with Vite
+
 ## Quick Start
 
 ### Prerequisites
 
-- Python 3.11+
-- pip/venv
+- Python 3.11+ and pip/venv (for API)
+- Node.js 16+ and npm (for frontend)
 
-### Installation
+### Backend Setup
 
 1. **Clone the repository:**
    ```bash
@@ -73,6 +102,40 @@ The nbhd.city API is built with **FastAPI** and provides:
    ```
 
 The API will be available at `http://localhost:8000`
+
+### Frontend Setup
+
+1. **In a new terminal, navigate to the frontend:**
+   ```bash
+   cd frontend
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables:**
+   ```bash
+   cp .env.example .env
+   # .env should have:
+   # VITE_API_URL=http://localhost:8000
+   ```
+
+4. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+The frontend will be available at `http://localhost:5173`
+
+### Full Stack Running
+
+You should now have:
+- API backend at `http://localhost:8000` (/docs for API docs)
+- Frontend at `http://localhost:5173` (redirects unauthenticated users to /login)
+
+Visit `http://localhost:5173` in your browser to start!
 
 ## API Endpoints
 
@@ -120,7 +183,9 @@ For detailed authentication documentation, see [api/AUTH_README.md](api/AUTH_REA
 
 ## Configuration
 
-Environment variables (see `.env.example`):
+### Backend Environment Variables
+
+See `api/.env.example`:
 
 ```
 # API Configuration
@@ -137,7 +202,19 @@ BLUESKY_OAUTH_CLIENT_SECRET=your-client-secret
 BLUESKY_OAUTH_REDIRECT_URI=http://localhost:8000/auth/callback
 
 # Frontend
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:5173
+```
+
+### Frontend Environment Variables
+
+See `frontend/.env.example`:
+
+```
+# API URL
+VITE_API_URL=http://localhost:8000
+
+# App name
+VITE_APP_NAME=nbhd.city
 ```
 
 ## Development
