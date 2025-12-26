@@ -96,9 +96,10 @@ async def oauth_callback(code: str = Query(...), state: str = Query(...)):
 
     # In production, you'd save the user info and BlueSky tokens to your database
     # For now, we'll just return the token
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5175")
+    # Redirect to callback.html which handles the static SPA redirect with hash routing
     return RedirectResponse(
-        url=f"{frontend_url}/auth/success?token={access_token}",
+        url=f"{frontend_url}/callback.html?token={access_token}",
         status_code=status.HTTP_302_FOUND
     )
 
