@@ -6,28 +6,63 @@ A full-stack web application for building neighborhood communities. This reposit
 
 ```
 nbhd.city/
-├── api/                      # FastAPI backend
-│   ├── main.py              # Main application entry point
-│   ├── auth.py              # JWT authentication utilities
-│   ├── models.py            # Pydantic data models
-│   ├── bluesky_oauth.py     # BlueSky OAuth integration
-│   ├── requirements.txt     # Python dependencies
-│   ├── .env.example         # Environment variables template
-│   ├── .gitignore           # Git ignore rules
-│   └── AUTH_README.md       # Authentication documentation
-├── frontend/                 # React + Vite frontend
+├── api/                          # FastAPI backend
+│   ├── main.py                  # Main application entry point
+│   ├── auth.py                  # JWT authentication utilities
+│   ├── models.py                # Pydantic data models
+│   ├── bluesky_oauth.py         # BlueSky OAuth integration
+│   ├── requirements.txt         # Python dependencies
+│   ├── .env.example             # Environment variables template
+│   ├── .env                      # Local env (git ignored)
+│   ├── .gitignore               # Git ignore rules
+│   └── AUTH_README.md           # Authentication documentation
+│
+├── homepage/                     # React + Vite personal user site
 │   ├── src/
-│   │   ├── pages/           # Page components (Login, Dashboard, etc.)
-│   │   ├── contexts/        # React contexts (Auth context)
-│   │   ├── lib/             # Utilities (API client)
-│   │   ├── styles/          # CSS modules
-│   │   ├── App.jsx          # Main app component
-│   │   └── main.jsx         # Entry point
-│   ├── .env.example         # Environment variables template
-│   ├── package.json         # Node dependencies
-│   ├── vite.config.js       # Vite configuration
-│   └── FRONTEND_README.md   # Frontend documentation
-└── README.md                # This file
+│   │   ├── pages/              # Page components (Login, Profile, Dashboard, etc.)
+│   │   ├── contexts/           # React contexts (Auth context)
+│   │   ├── lib/                # Utilities (API client)
+│   │   ├── styles/             # CSS modules
+│   │   ├── App.jsx             # Main app component
+│   │   └── main.jsx            # Entry point
+│   ├── .env.example            # Environment variables template
+│   ├── .env                     # Local env (git ignored)
+│   ├── package.json            # Node dependencies
+│   ├── vite.config.js          # Vite configuration
+│   └── README.md               # Homepage documentation
+│
+├── neighborhood/                 # React + Vite collaborative neighborhood site
+│   ├── src/
+│   │   ├── pages/              # Page components (Neighborhoods, Events, etc.)
+│   │   ├── contexts/           # React contexts (Auth context)
+│   │   ├── lib/                # Utilities (API client)
+│   │   ├── styles/             # CSS modules
+│   │   ├── App.jsx             # Main app component
+│   │   └── main.jsx            # Entry point
+│   ├── .env.example            # Environment variables template
+│   ├── .env                     # Local env (git ignored)
+│   ├── package.json            # Node dependencies
+│   ├── vite.config.js          # Vite configuration
+│   └── README.md               # Neighborhood documentation
+│
+├── frontend/                     # Original frontend (legacy, being phased out)
+│   └── [Same structure as homepage]
+│
+├── devops/                       # Infrastructure as Code (OpenTofu)
+│   ├── provider.tf
+│   ├── variables.tf
+│   ├── frontend.tf              # S3 + CloudFront for deployments
+│   ├── backend.tf               # Lambda + API Gateway
+│   ├── outputs.tf
+│   └── README.md
+│
+├── .github/
+│   └── workflows/
+│       └── deploy.yml           # GitHub Actions CI/CD
+│
+├── LOCAL_TEST_GUIDE.md          # Local testing and development guide
+├── DEVOPS_SETUP.md              # AWS deployment guide
+└── README.md                     # This file
 ```
 
 ## Architecture
@@ -49,19 +84,37 @@ The nbhd.city API is built with **FastAPI** and provides:
 
 ### Frontend
 
-The frontend is built with **React + Vite** and provides:
+The frontend is split into two independent applications, both built with **React + Vite**:
 
-- **Authentication Context**: Global state management for authentication
-- **Protected Routes**: Automatic redirection for unauthenticated users
-- **OAuth Integration**: Seamless BlueSky login flow
-- **Responsive Design**: Mobile-friendly interface with CSS modules
+#### 1. **Homepage** (`homepage/`)
+Personal user site where individual users can:
+- Manage their profile
+- View their activity
+- Join and manage neighborhoods
+- Access personal settings
+- See personalized recommendations
 
-**Key Features:**
+#### 2. **Neighborhood** (`neighborhood/`)
+Collaborative site for groups of users in a geographic area:
+- Browse and join neighborhoods
+- View community discussions
+- Create and manage events
+- Share resources and recommendations
+- Collaborate on neighborhood projects
+- Connect with local members
+
+**Both apps share:**
 - ✅ React Router for client-side navigation
 - ✅ Axios HTTP client with automatic token injection
-- ✅ Clean component-based architecture
+- ✅ Authentication Context for state management
+- ✅ BlueSky OAuth integration
 - ✅ CSS Modules for scoped styling
 - ✅ Fast hot module reloading with Vite
+
+**Deployment:**
+- Both can be deployed independently
+- Can run on different subdomains (e.g., `user.nbhd.city` and `neighborhood.nbhd.city`)
+- Share the same backend API
 
 ## Quick Start
 
@@ -105,9 +158,13 @@ The API will be available at `http://localhost:8000`
 
 ### Frontend Setup
 
-1. **In a new terminal, navigate to the frontend:**
+You can run either the Homepage or Neighborhood app (or both in different terminals on different ports).
+
+#### Option A: Run Homepage (Personal User Site)
+
+1. **In a new terminal, navigate to homepage:**
    ```bash
-   cd frontend
+   cd homepage
    ```
 
 2. **Install dependencies:**
@@ -127,15 +184,56 @@ The API will be available at `http://localhost:8000`
    npm run dev
    ```
 
-The frontend will be available at `http://localhost:5173`
+The homepage will be available at `http://localhost:5173`
+
+#### Option B: Run Neighborhood (Collaborative Site)
+
+1. **In a new terminal, navigate to neighborhood:**
+   ```bash
+   cd neighborhood
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables:**
+   ```bash
+   cp .env.example .env
+   # .env should have:
+   # VITE_API_URL=http://localhost:8000
+   ```
+
+4. **Start the development server on a different port:**
+   ```bash
+   npm run dev -- --port 5174
+   ```
+
+The neighborhood app will be available at `http://localhost:5174`
+
+#### Run Both Simultaneously
+
+Open two terminal windows and run:
+- Terminal 1: `cd homepage && npm run dev` (port 5173)
+- Terminal 2: `cd neighborhood && npm run dev -- --port 5174` (port 5174)
 
 ### Full Stack Running
 
 You should now have:
-- API backend at `http://localhost:8000` (/docs for API docs)
-- Frontend at `http://localhost:5173` (redirects unauthenticated users to /login)
+- **API Backend**: http://localhost:8000
+  - Interactive docs at `/docs`
+  - ReDoc at `/redoc`
 
-Visit `http://localhost:5173` in your browser to start!
+- **Homepage App** (if running): http://localhost:5173
+  - Personal user site
+  - Redirects unauthenticated users to `/login`
+
+- **Neighborhood App** (if running): http://localhost:5174
+  - Collaborative neighborhood site
+  - Redirects unauthenticated users to `/login`
+
+Visit either frontend app in your browser to start! (The first one you set up will be at 5173)
 
 ## API Endpoints
 
