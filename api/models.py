@@ -8,7 +8,7 @@ class User(BaseModel):
     handle: str
     display_name: Optional[str] = None
     avatar: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -17,7 +17,7 @@ class User(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    user: User
+    user: Optional[User] = None
 
 
 class TokenPayload(BaseModel):

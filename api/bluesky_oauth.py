@@ -35,10 +35,10 @@ def get_oauth_authorize_url(state: str) -> str:
     Returns:
         The authorization URL to redirect the user to
     """
-    if not BLUESKY_OAUTH_CLIENT_ID:
+    if not BLUESKY_OAUTH_CLIENT_ID or not BLUESKY_OAUTH_REDIRECT_URI:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="OAuth is not configured"
+            detail="OAuth is not properly configured. Set BLUESKY_OAUTH_CLIENT_ID and BLUESKY_OAUTH_REDIRECT_URI in your .env file."
         )
 
     params = {
