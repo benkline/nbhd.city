@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import datetime
 
 
@@ -12,6 +12,20 @@ class User(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserProfile(BaseModel):
+    """Extended user profile with BlueSky information."""
+    did: str
+    handle: str
+    displayName: Optional[str] = None
+    description: Optional[str] = None
+    avatar: Optional[str] = None
+    banner: Optional[str] = None
+    followersCount: int = 0
+    followsCount: int = 0
+    postsCount: int = 0
+    viewer: Optional[Dict] = None
 
 
 class Token(BaseModel):
@@ -45,9 +59,9 @@ class NbhdCreate(BaseModel):
 class MembershipResponse(BaseModel):
     """Schema for membership information in responses."""
 
-    id: int
+    id: str  # Changed to UUID string
     user_id: str
-    joined_at: datetime
+    joined_at: str  # ISO format timestamp string
 
     class Config:
         from_attributes = True
@@ -56,11 +70,11 @@ class MembershipResponse(BaseModel):
 class NbhdResponse(BaseModel):
     """Schema for nbhd list responses."""
 
-    id: int
+    id: str  # Changed to UUID string
     name: str
     description: Optional[str]
     created_by: str
-    created_at: datetime
+    created_at: str  # ISO format timestamp string
     member_count: int = 0
 
     class Config:

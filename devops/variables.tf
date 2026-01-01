@@ -1,80 +1,161 @@
+variable "aws_region" {
+  description = "AWS region to deploy resources"
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "environment" {
+  description = "Environment name"
+  type        = string
+  default     = "production"
+}
+
 variable "project_name" {
   description = "Project name"
   type        = string
   default     = "nbhd-city"
 }
 
-variable "environment" {
-  description = "Environment name"
+variable "dynamodb_billing_mode" {
+  description = "DynamoDB billing mode"
   type        = string
-  default     = "dev"
+  default     = "PAY_PER_REQUEST"
 }
 
-variable "aws_region" {
-  description = "AWS region"
-  type        = string
-  default     = "us-east-1"
+variable "enable_point_in_time_recovery" {
+  description = "Enable PITR for DynamoDB"
+  type        = bool
+  default     = true
 }
 
-variable "lambda_memory_size" {
-  description = "Lambda function memory size in MB"
-  type        = number
-  default     = 512
+variable "enable_streams" {
+  description = "Enable DynamoDB Streams"
+  type        = bool
+  default     = false
+}
+
+variable "lambda_runtime" {
+  description = "Lambda runtime"
+  type        = string
+  default     = "python3.11"
 }
 
 variable "lambda_timeout" {
-  description = "Lambda function timeout in seconds"
+  description = "Lambda timeout in seconds"
   type        = number
   default     = 30
 }
 
-variable "frontend_artifact_path" {
-  description = "Path to frontend build artifacts"
-  type        = string
-  default     = "../frontend/dist"
+variable "lambda_memory_size" {
+  description = "Lambda memory in MB"
+  type        = number
+  default     = 512
 }
 
-variable "api_artifact_path" {
-  description = "Path to API code"
+variable "lambda_log_retention_days" {
+  description = "Log retention days"
+  type        = number
+  default     = 14
+}
+
+variable "use_lambda_layer" {
+  description = "Use Lambda layer"
+  type        = bool
+  default     = false
+}
+
+variable "lambda_layer_zip_path" {
+  description = "Path to layer zip"
   type        = string
-  default     = "../api"
+  default     = ""
+}
+
+variable "api_gateway_log_retention_days" {
+  description = "API Gateway log retention"
+  type        = number
+  default     = 14
+}
+
+variable "api_gateway_logging_level" {
+  description = "API Gateway logging level"
+  type        = string
+  default     = "INFO"
+}
+
+variable "api_gateway_throttle_burst_limit" {
+  description = "Throttle burst limit"
+  type        = number
+  default     = 5000
+}
+
+variable "api_gateway_throttle_rate_limit" {
+  description = "Throttle rate limit"
+  type        = number
+  default     = 10000
+}
+
+variable "enable_xray_tracing" {
+  description = "Enable X-Ray tracing"
+  type        = bool
+  default     = false
+}
+
+variable "jwt_secret_key" {
+  description = "JWT secret key"
+  type        = string
+  sensitive   = true
+}
+
+variable "access_token_expire_minutes" {
+  description = "Token expiration minutes"
+  type        = number
+  default     = 10080
+}
+
+variable "frontend_url" {
+  description = "Frontend URL"
+  type        = string
+  default     = "http://localhost:3000"
 }
 
 variable "bluesky_oauth_client_id" {
-  description = "BlueSky OAuth Client ID"
+  description = "BlueSky OAuth client ID"
   type        = string
   sensitive   = true
 }
 
 variable "bluesky_oauth_client_secret" {
-  description = "BlueSky OAuth Client Secret"
+  description = "BlueSky OAuth client secret"
   type        = string
   sensitive   = true
 }
 
-variable "jwt_secret_key" {
-  description = "JWT Secret Key"
+variable "bluesky_oauth_authorization_endpoint" {
+  description = "BlueSky OAuth authorization endpoint"
   type        = string
-  sensitive   = true
+  default     = "https://bsky.social/oauth/authorize"
 }
 
-variable "cloudfront_enabled" {
-  description = "Enable CloudFront distribution"
-  type        = bool
-  default     = true
+variable "bluesky_oauth_token_endpoint" {
+  description = "BlueSky OAuth token endpoint"
+  type        = string
+  default     = "https://bsky.social/oauth/token"
 }
 
-variable "enable_logging" {
-  description = "Enable CloudWatch logging"
-  type        = bool
-  default     = true
+variable "bluesky_oauth_redirect_uri" {
+  description = "BlueSky OAuth redirect URI"
+  type        = string
+  default     = ""
 }
 
-variable "tags" {
-  description = "Common tags for all resources"
-  type        = map(string)
-  default = {
-    Project     = "nbhd.city"
-    ManagedBy   = "OpenTofu"
-  }
+variable "custom_domain_name" {
+  description = "Custom domain name"
+  type        = string
+  default     = ""
+}
+
+variable "acm_certificate_arn" {
+  description = "ACM certificate ARN"
+  type        = string
+  default     = ""
 }

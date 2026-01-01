@@ -32,9 +32,17 @@ export default function Dashboard() {
     <div className={styles.container}>
       <nav className={styles.navbar}>
         <h1>nbhd.city</h1>
-        <button onClick={handleLogout} className={styles.logoutButton}>
-          Logout
-        </button>
+        <div className={styles.navButtons}>
+          <button
+            onClick={() => navigate('/profile')}
+            className={styles.profileButton}
+          >
+            Profile
+          </button>
+          <button onClick={handleLogout} className={styles.logoutButton}>
+            Logout
+          </button>
+        </div>
       </nav>
 
       <main className={styles.main}>

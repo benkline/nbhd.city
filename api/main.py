@@ -1,19 +1,21 @@
-from fastapi import FastAPI, HTTPException, status, Query, Depends
+from fastapi import FastAPI, HTTPException, status, Query, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
+from typing import Optional
 import secrets
 import os
+import httpx
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from .env.local file
+load_dotenv('.env.local')
 
-from models import Token, User
-from auth import create_access_token, get_current_user
+from models import Token, User, UserProfile
+from auth import create_access_token, get_current_user, get_bluesky_token
 from bluesky_oauth import get_oauth_authorize_url, exchange_code_for_token
-from database import init_db, close_db
-from neighborhoods import router as nbhds_router
+from bluesky_api import get_bluesky_profile
+from nbhd import router as nbhds_router
 
 
 class TestLoginRequest(BaseModel):
@@ -38,17 +40,8 @@ app.include_router(nbhds_router, tags=["nbhds"])
 oauth_states = {}
 
 
-# Database startup/shutdown events
-@app.on_event("startup")
-async def startup():
-    """Initialize database on startup."""
-    await init_db()
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    """Close database connections on shutdown."""
-    await close_db()
+# DynamoDB doesn't need startup/shutdown events
+# Connection is managed per-request
 
 
 @app.get("/")
@@ -105,8 +98,11 @@ async def oauth_callback(code: str = Query(...), state: str = Query(...)):
             detail="Failed to authenticate with BlueSky"
         )
 
-    # Create our JWT token
-    access_token = create_access_token(token_data["did"])
+    # Create our JWT token with BlueSky access token included
+    access_token = create_access_token(
+        user_id=token_data["did"],
+        bluesky_token=token_data.get("access_token")
+    )
 
     # In production, you'd save the user info and BlueSky tokens to your database
     # For now, we'll just return the token
@@ -130,6 +126,25 @@ async def get_current_user_info(user_id: str = Depends(get_current_user)):
     }
 
 
+@app.get("/api/users/profile", response_model=UserProfile)
+async def get_user_profile(
+    user_id: str = Depends(get_current_user),
+    request: Request = None,
+    bsky_token: Optional[str] = Depends(get_bluesky_token)
+):
+    """
+    Get the current authenticated user's full profile from BlueSky.
+    Requires valid JWT token in Authorization header.
+
+    Returns profile information including:
+    - Display name, avatar, banner
+    - Bio/description
+    - Followers/follows/posts counts
+    """
+    profile = await get_bluesky_profile(user_id, auth_token=bsky_token)
+    return UserProfile(**profile)
+
+
 @app.post("/auth/logout")
 async def logout(user_id: str = Depends(get_current_user)):
     """
@@ -143,6 +158,7 @@ async def test_login(request: TestLoginRequest):
     """
     Test login endpoint for development/testing.
     Authenticates against credentials in BSKY_USERNAME and BSKY_PASSWORD environment variables.
+    For testing purposes, also attempts to get a real BlueSky token.
     """
     test_username = os.getenv("BSKY_USERNAME")
     test_password = os.getenv("BSKY_PASSWORD")
@@ -159,9 +175,34 @@ async def test_login(request: TestLoginRequest):
             detail="Invalid credentials"
         )
 
-    # Create JWT token with test user ID
-    test_user_id = "did:plc:test-user"
-    access_token = create_access_token(test_user_id)
+    # Try to get a real BlueSky token using the test credentials
+    bluesky_token = None
+    test_user_id = None
+
+    try:
+        async with httpx.AsyncClient() as client:
+            # Use the Bluesky XRPC server.createSession endpoint
+            response = await client.post(
+                "https://bsky.social/xrpc/com.atproto.server.createSession",
+                json={
+                    "identifier": test_username,
+                    "password": test_password,
+                }
+            )
+
+            if response.status_code == 200:
+                auth_data = response.json()
+                bluesky_token = auth_data.get("accessJwt")
+                test_user_id = auth_data.get("did")
+    except Exception as e:
+        print(f"Warning: Failed to get BlueSky token: {e}")
+
+    # Fallback to test user if BlueSky auth fails
+    if not test_user_id:
+        test_user_id = "did:plc:test-user"
+
+    # Create JWT token with optional BlueSky token
+    access_token = create_access_token(test_user_id, bluesky_token=bluesky_token)
 
     return {
         "access_token": access_token,
