@@ -1,0 +1,96 @@
+.memberCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+}
+
+.memberCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.avatarContainer {
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarPlaceholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.memberInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.memberName {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.displayName {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+}
+
+.handle {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.location {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.locationIcon {
+  font-size: 0.75rem;
+}
+
+.joinedDate {
+  font-size: 0.8125rem;
+  color: #999;
+}
+
+@media (max-width: 640px) {
+  .memberCard {
+    padding: 0.75rem;
+  }
+
+  .avatar,
+  .avatarPlaceholder {
+    width: 40px;
+    height: 40px;
+  }
+
+  .avatarPlaceholder {
+    font-size: 1.25rem;
+  }
+}

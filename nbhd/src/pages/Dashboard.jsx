@@ -4,14 +4,19 @@ import { useAuth } from '../contexts/AuthContext';
 import styles from '../styles/Dashboard.module.css';
 
 export default function Dashboard() {
-  const { isAuthenticated, user, logout, isLoading } = useAuth();
+  const { isAuthenticated, user, needsOnboarding, logout, isLoading } = useAuth();
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate('/login');
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        navigate('/login');
+      } else if (needsOnboarding) {
+        // Redirect to profile if user needs to complete onboarding
+        navigate('/profile');
+      }
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, needsOnboarding, isLoading, navigate]);
 
   if (isLoading) {
     return (

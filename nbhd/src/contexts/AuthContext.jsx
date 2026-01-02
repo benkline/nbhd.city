@@ -5,6 +5,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize auth state from localStorage
@@ -21,24 +22,42 @@ export function AuthProvider({ children }) {
 
   const verifyToken = async (authToken) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
+      // First check basic auth
+      const authResponse = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
       });
 
-      if (response.ok) {
-        const userData = await response.json();
+      if (authResponse.ok) {
+        const userData = await authResponse.json();
         setUser(userData);
+
+        // Now check if user has a profile
+        const profileResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/users/me`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        if (profileResponse.status === 404) {
+          // User is authenticated but has no profile - needs onboarding
+          setNeedsOnboarding(true);
+        } else if (profileResponse.ok) {
+          // User has profile, no onboarding needed
+          setNeedsOnboarding(false);
+        }
       } else {
         // Token is invalid, clear it
         localStorage.removeItem('auth_token');
         setToken(null);
+        setNeedsOnboarding(false);
       }
     } catch (error) {
       console.error('Failed to verify token:', error);
       localStorage.removeItem('auth_token');
       setToken(null);
+      setNeedsOnboarding(false);
     } finally {
       setIsLoading(false);
     }
@@ -54,11 +73,13 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('auth_token');
     setToken(null);
     setUser(null);
+    setNeedsOnboarding(false);
   };
 
   const value = {
     token,
     user,
+    needsOnboarding,
     isLoading,
     isAuthenticated: !!token,
     login,

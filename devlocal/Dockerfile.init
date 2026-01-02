@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install AWS SDK
+RUN pip install --no-cache-dir boto3 aioboto3
+
+# Copy initialization scripts
+COPY init/ /app/init/
+
+# Default command (can be overridden)
+CMD ["python", "/app/init/create_tables.py"]
