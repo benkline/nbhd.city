@@ -1,0 +1,19 @@
+# Environment files
+.env
+
+# DynamoDB Local data
+dynamodb_data/*
+!dynamodb_data/.gitkeep
+
+# Export files (keep structure, ignore data)
+data/exports/*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db

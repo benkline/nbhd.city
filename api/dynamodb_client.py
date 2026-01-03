@@ -29,6 +29,10 @@ async def get_dynamodb_resource():
     kwargs = {"region_name": AWS_REGION}
     if DYNAMODB_ENDPOINT_URL:
         kwargs["endpoint_url"] = DYNAMODB_ENDPOINT_URL
+        # For local DynamoDB, use dummy credentials if not already set
+        if not os.getenv("AWS_ACCESS_KEY_ID"):
+            kwargs["aws_access_key_id"] = "dummy"
+            kwargs["aws_secret_access_key"] = "dummy"
 
     async with session.resource("dynamodb", **kwargs) as dynamodb:
         yield dynamodb
@@ -49,6 +53,10 @@ async def get_table():
     kwargs = {"region_name": AWS_REGION}
     if DYNAMODB_ENDPOINT_URL:
         kwargs["endpoint_url"] = DYNAMODB_ENDPOINT_URL
+        # For local DynamoDB, use dummy credentials if not already set
+        if not os.getenv("AWS_ACCESS_KEY_ID"):
+            kwargs["aws_access_key_id"] = "dummy"
+            kwargs["aws_secret_access_key"] = "dummy"
 
     async with session.resource("dynamodb", **kwargs) as dynamodb:
         table = await dynamodb.Table(TABLE_NAME)

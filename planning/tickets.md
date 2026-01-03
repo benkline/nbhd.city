@@ -14,7 +14,7 @@ This document contains epics, user stories, and tasks for nbhd.city - an online 
 
 **Tasks:**
 - [ ] Research AT Protocol PDS requirements and specifications
-- [ ] Evaluate SQLite vs other database options for PDS implementation
+- [ ] Evaluate DynamoDB vs other database options for PDS implementation
 - [ ] Design PDS data schema compatible with AT Protocol
 - [ ] Implement core PDS storage layer
 - [ ] Create PDS read/write API endpoints
@@ -34,6 +34,7 @@ This document contains epics, user stories, and tasks for nbhd.city - an online 
 **Tasks:**
 - [ ] Design user account data model
 - [ ] Create POST /api/accounts endpoint for account creation
+
 - [ ] Implement account validation (username, email, etc.)
 - [ ] Add subdomain generation for user accounts
 - [ ] Integrate with Bluesky authentication option
@@ -72,19 +73,25 @@ This document contains epics, user stories, and tasks for nbhd.city - an online 
 - [ ] Add fallback mechanism if AI generation fails
 - [ ] Test with various input types and validate outputs
 
-### User Story 2.4: Database Migration to SQLite
+### User Story 2.4: Database Migration to DynamoDB
 **As a** system administrator
-**I want** to migrate from external Postgres to embedded SQLite
+**I want** to migrate from external Postgres to embedded DynamoDB
 **So that** the system is simpler to deploy and maintain
 
 **Tasks:**
 - [ ] Audit current Postgres schema and usage patterns
-- [ ] Design SQLite database schema
-- [ ] Create migration scripts from Postgres to SQLite
-- [ ] Update database connection layer to support SQLite
-- [ ] Configure SQLite for PDS requirements
+- [ ] Design DynamoDB database schema
+- [ ] Create migration scripts from Postgres to DynamoDB
+- [ ] Update database connection layer to support DynamoDB
+
+### User Story 2.5: Database needs for at://
+**As a** system administrator
+**I want** to... 
+**So that** ...
+**Tasks:**
+- [ ] Configure DynamoDB for PDS requirements
 - [ ] Implement data backup and recovery procedures
-- [ ] Performance test SQLite under expected load
+- [ ] Performance test DynamoDB under expected load
 - [ ] Update deployment documentation
 
 ---
@@ -114,6 +121,7 @@ This document contains epics, user stories, and tasks for nbhd.city - an online 
 - [ ] Design account creation UI with option selection
 - [ ] Implement native account creation flow
 - [ ] Integrate Bluesky OAuth authentication
+
 - [ ] Create subdomain assignment logic based on username
 - [ ] Add subdomain availability checking
 - [ ] Implement email verification for native accounts

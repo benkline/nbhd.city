@@ -8,14 +8,17 @@ import os
 import httpx
 from dotenv import load_dotenv
 
-# Load environment variables from .env.local file
-load_dotenv('.env.local')
+# Load environment variables from .env.local file in project root
+import pathlib
+project_root = pathlib.Path(__file__).parent.parent
+load_dotenv(project_root / '.env.local')
 
 from models import Token, User, UserProfile
 from auth import create_access_token, get_current_user, get_bluesky_token
 from bluesky_oauth import get_oauth_authorize_url, exchange_code_for_token
 from bluesky_api import get_bluesky_profile
 from nbhd import router as nbhds_router
+from users import router as users_router
 
 
 class TestLoginRequest(BaseModel):
@@ -35,6 +38,7 @@ app.add_middleware(
 
 # Register routers
 app.include_router(nbhds_router, tags=["nbhds"])
+app.include_router(users_router, prefix="/api/users", tags=["users"])
 
 # Store OAuth states (in production, use a database or Redis)
 oauth_states = {}

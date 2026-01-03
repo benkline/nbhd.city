@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List, Dict
 from datetime import datetime
 
@@ -8,7 +8,11 @@ class User(BaseModel):
     handle: str
     display_name: Optional[str] = None
     avatar: Optional[str] = None
-    created_at: Optional[datetime] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    email: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -26,6 +30,29 @@ class UserProfile(BaseModel):
     followsCount: int = 0
     postsCount: int = 0
     viewer: Optional[Dict] = None
+
+
+class UserProfileCreate(BaseModel):
+    """Schema for creating a user profile."""
+    display_name: Optional[str] = None
+    avatar: Optional[str] = None
+    bio: Optional[str] = Field(None, max_length=500)
+    location: Optional[str] = Field(None, max_length=100)
+    email: Optional[EmailStr] = None
+
+
+class UserProfileUpdate(BaseModel):
+    """Schema for updating a user profile."""
+    display_name: Optional[str] = None
+    avatar: Optional[str] = None
+    bio: Optional[str] = Field(None, max_length=500)
+    location: Optional[str] = Field(None, max_length=100)
+    email: Optional[EmailStr] = None
+
+
+class UserBatchRequest(BaseModel):
+    """Schema for batch getting user profiles."""
+    user_ids: List[str] = Field(..., max_length=100)
 
 
 class Token(BaseModel):

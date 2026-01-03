@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies with proper version bounds to avoid resolution issues
+RUN pip install --no-cache-dir \
+    "boto3>=1.34.0,<2.0.0" \
+    "aioboto3>=12.3.0,<13.0.0" \
+    "botocore>=1.34.0,<2.0.0"
+
+# Copy initialization scripts
+COPY init/ /app/init/
+
+# Default command (can be overridden)
+CMD ["python", "/app/init/create_tables.py"]

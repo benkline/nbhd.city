@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { nbhdService } from '../services/neighborhoodService';
+import { userService } from '../services/userService';
+import MemberCard from '../components/MemberCard';
 import styles from '../styles/NbhdDetail.module.css';
 
 export default function NbhdDetail() {
@@ -10,6 +12,7 @@ export default function NbhdDetail() {
   const { isAuthenticated, user } = useAuth();
 
   const [nbhd, setNbhd] = useState(null);
+  const [memberProfiles, setMemberProfiles] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -24,6 +27,18 @@ export default function NbhdDetail() {
       setError(null);
       const data = await nbhdService.getNbhd(id);
       setNbhd(data);
+
+      // Fetch member profiles if there are members
+      if (data.members && data.members.length > 0) {
+        const userIds = data.members.map(m => m.user_id);
+        try {
+          const profilesResponse = await userService.batchGetUsers(userIds);
+          setMemberProfiles(profilesResponse.data);
+        } catch (err) {
+          console.error('Error fetching member profiles:', err);
+          // Continue without profiles - will show fallback
+        }
+      }
     } catch (err) {
       setError(err.response?.data?.detail || err.message || 'Failed to load nbhd');
       console.error('Error fetching nbhd:', err);
@@ -160,17 +175,11 @@ export default function NbhdDetail() {
         {nbhd.members && nbhd.members.length > 0 ? (
           <div className={styles.membersList}>
             {nbhd.members.map((member) => (
-              <div key={member.id} className={styles.memberItem}>
-                <div className={styles.memberInfo}>
-                  <span className={styles.memberIcon}>👤</span>
-                  <div className={styles.memberDetails}>
-                    <span className={styles.memberId}>{member.user_id}</span>
-                    <span className={styles.memberJoinedDate}>
-                      Joined {formatDate(member.joined_at)}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <MemberCard
+                key={member.id}
+                member={member}
+                profile={memberProfiles[member.user_id]}
+              />
             ))}
           </div>
         ) : (

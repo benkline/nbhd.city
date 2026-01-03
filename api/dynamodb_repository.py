@@ -1,12 +1,12 @@
 """
-DynamoDB data access layer for neighborhoods and memberships.
+DynamoDB data access layer for neighborhoods, memberships, and users.
 
 This module provides async functions for all database operations,
 replacing the previous SQLAlchemy-based crud.py.
 """
 
 from datetime import datetime, timezone
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 from boto3.dynamodb.conditions import Key
 import uuid
 
@@ -345,3 +345,219 @@ async def get_neighborhood_members(table, nbhd_id: str) -> List[dict]:
     )
 
     return response.get("Items", [])
+
+
+# User Profile Operations
+
+async def create_user_profile(
+    table,
+    user_id: str,
+    handle: str,
+    display_name: Optional[str] = None,
+    avatar: Optional[str] = None,
+    bio: Optional[str] = None,
+    location: Optional[str] = None,
+    email: Optional[str] = None
+) -> dict:
+    """
+    Create a user profile.
+
+    Args:
+        table: DynamoDB table resource
+        user_id: BlueSky DID
+        handle: BlueSky handle
+        display_name: User's display name
+        avatar: Avatar URL
+        bio: User bio/about text
+        location: User's city/location
+        email: User's email address
+
+    Returns:
+        dict: Created user profile item
+
+    Raises:
+        ValueError: If user profile already exists
+    """
+    # Check if profile already exists
+    existing = await get_user_profile(table, user_id)
+    if existing:
+        raise ValueError(f"User profile for {user_id} already exists")
+
+    timestamp = now_iso()
+
+    item = {
+        "PK": f"USER#{user_id}",
+        "SK": "PROFILE",
+        "user_id": user_id,
+        "handle": handle,
+        "display_name": display_name or handle,
+        "avatar": avatar,
+        "bio": bio or "",
+        "location": location or "",
+        "email": email or "",
+        "created_at": timestamp,
+        "updated_at": timestamp,
+        "entity_type": "user"
+    }
+
+    await table.put_item(Item=item)
+    return item
+
+
+async def get_user_profile(table, user_id: str) -> Optional[dict]:
+    """
+    Get user profile by ID.
+
+    Args:
+        table: DynamoDB table resource
+        user_id: BlueSky DID
+
+    Returns:
+        dict or None: User profile item if found
+    """
+    response = await table.get_item(
+        Key={"PK": f"USER#{user_id}", "SK": "PROFILE"}
+    )
+    return response.get("Item")
+
+
+async def update_user_profile(
+    table,
+    user_id: str,
+    display_name: Optional[str] = None,
+    avatar: Optional[str] = None,
+    bio: Optional[str] = None,
+    location: Optional[str] = None,
+    email: Optional[str] = None
+) -> Optional[dict]:
+    """
+    Update user profile.
+
+    Args:
+        table: DynamoDB table resource
+        user_id: BlueSky DID
+        display_name: New display name (optional)
+        avatar: New avatar URL (optional)
+        bio: New bio text (optional)
+        location: New location (optional)
+        email: New email (optional)
+
+    Returns:
+        dict or None: Updated user profile item
+    """
+    # Build update expression dynamically
+    update_expr = ["updated_at = :updated_at"]
+    expr_values = {":updated_at": now_iso()}
+
+    if display_name is not None:
+        update_expr.append("display_name = :display_name")
+        expr_values[":display_name"] = display_name
+
+    if avatar is not None:
+        update_expr.append("avatar = :avatar")
+        expr_values[":avatar"] = avatar
+
+    if bio is not None:
+        update_expr.append("bio = :bio")
+        expr_values[":bio"] = bio
+
+    if location is not None:
+        update_expr.append("location = :location")
+        expr_values[":location"] = location
+
+    if email is not None:
+        update_expr.append("email = :email")
+        expr_values[":email"] = email
+
+    response = await table.update_item(
+        Key={"PK": f"USER#{user_id}", "SK": "PROFILE"},
+        UpdateExpression="SET " + ", ".join(update_expr),
+        ExpressionAttributeValues=expr_values,
+        ReturnValues="ALL_NEW"
+    )
+
+    return response.get("Attributes")
+
+
+async def get_user_profiles_batch(table, user_ids: List[str]) -> Dict[str, dict]:
+    """
+    Batch get multiple user profiles.
+
+    Args:
+        table: DynamoDB table resource
+        user_ids: List of BlueSky DIDs
+
+    Returns:
+        dict: Dictionary mapping user_id to profile (only for found profiles)
+    """
+    if not user_ids:
+        return {}
+
+    # DynamoDB batch_get_item limits to 100 items
+    user_ids = user_ids[:100]
+
+    # Build keys for batch get
+    keys = [{"PK": f"USER#{user_id}", "SK": "PROFILE"} for user_id in user_ids]
+
+    # Use batch_get_item
+    import aioboto3
+    session = aioboto3.Session()
+
+    # Get table name and endpoint from environment
+    import os
+    table_name = os.getenv("DYNAMODB_TABLE_NAME", "nbhd-city")
+    endpoint_url = os.getenv("DYNAMODB_ENDPOINT_URL")
+    region = os.getenv("AWS_REGION", "us-east-1")
+
+    async with session.resource(
+        'dynamodb',
+        endpoint_url=endpoint_url,
+        region_name=region
+    ) as dynamodb:
+        dyn_table = await dynamodb.Table(table_name)
+
+        # Batch get items
+        response = await dyn_table.meta.client.batch_get_item(
+            RequestItems={
+                table_name: {
+                    'Keys': keys
+                }
+            }
+        )
+
+        # Build result dictionary
+        profiles = {}
+        for item in response.get('Responses', {}).get(table_name, []):
+            profiles[item['user_id']] = item
+
+        return profiles
+
+
+async def list_all_users(
+    table,
+    limit: int = 100,
+    last_key: Optional[dict] = None
+) -> Tuple[List[dict], Optional[dict]]:
+    """
+    List all users, paginated.
+
+    Args:
+        table: DynamoDB table resource
+        limit: Maximum number of items to return
+        last_key: Last evaluated key from previous query (for pagination)
+
+    Returns:
+        tuple: (list of user profile items, next pagination key or None)
+    """
+    params = {
+        "IndexName": "GSI1",
+        "KeyConditionExpression": Key("entity_type").eq("user"),
+        "ScanIndexForward": False,  # Descending order (newest first)
+        "Limit": limit
+    }
+
+    if last_key:
+        params["ExclusiveStartKey"] = last_key
+
+    response = await table.query(**params)
+    return response.get("Items", []), response.get("LastEvaluatedKey")

@@ -6,6 +6,11 @@ app goals and description:
     - the nbhd page is an aggregator of its nbrs' posts and any others the group decides to add from the bsky pipeline 
 
     
+lets change how the homepage folder works. currently it is a just a REACT based website. 
+
+We are going to instead implement using HUGO, the static site generator to generate the files for 'homepages' like this for each user via the API. update the api to use the HUGO project. 
+
+add options to user creation for homepage generation to use separate domain but to add and use a subdomain of the nbhd domain by default
 
 tickets
 

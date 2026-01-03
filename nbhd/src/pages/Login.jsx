@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import styles from '../styles/Login.module.css';
 
 export default function Login() {
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, needsOnboarding, login } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState(import.meta.env.BSKY_USERNAME || '');
   const [password, setPassword] = useState(import.meta.env.BSKY_PASSWORD || '');
@@ -13,9 +13,14 @@ export default function Login() {
 
   React.useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      // Redirect to profile if onboarding needed, otherwise dashboard
+      if (needsOnboarding) {
+        navigate('/profile');
+      } else {
+        navigate('/dashboard');
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, needsOnboarding, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
