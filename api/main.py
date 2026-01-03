@@ -8,8 +8,10 @@ import os
 import httpx
 from dotenv import load_dotenv
 
-# Load environment variables from .env.local file
-load_dotenv('.env.local')
+# Load environment variables from .env.local file in project root
+import pathlib
+project_root = pathlib.Path(__file__).parent.parent
+load_dotenv(project_root / '.env.local')
 
 from models import Token, User, UserProfile
 from auth import create_access_token, get_current_user, get_bluesky_token

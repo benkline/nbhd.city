@@ -11,7 +11,11 @@ import sys
 from pathlib import Path
 import aioboto3
 from botocore.exceptions import ClientError
+from dotenv import load_dotenv
 
+# Load environment variables from project root .env.local
+project_root = Path(__file__).parent.parent.parent
+load_dotenv(project_root / '.env.local')
 
 # Configuration
 DYNAMODB_ENDPOINT_URL = os.getenv("DYNAMODB_ENDPOINT_URL", "http://localhost:8000")

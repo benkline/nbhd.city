@@ -27,7 +27,7 @@ That's it! Your local DynamoDB is ready.
 
 ### Update Your API Environment
 
-Edit `api/.env.local`:
+Edit `.env.local` in the project root:
 
 ```bash
 # DynamoDB Configuration
@@ -155,7 +155,7 @@ These features work in production but are ignored locally.
 ### API can't connect
 
 1. Verify DynamoDB is running: `./scripts/check_health.sh`
-2. Check API `.env.local` has correct settings
+2. Check `.env.local` in project root has correct settings
 3. Ensure `DYNAMODB_ENDPOINT_URL=http://localhost:8000`
 
 ### Reset isn't working
@@ -230,7 +230,7 @@ Perfect for debugging and development.
 ## Next Steps
 
 1. Start services: `./scripts/start.sh`
-2. Update API config: Edit `api/.env.local`
+2. Update API config: Edit `.env.local` in project root
 3. Seed data: `python init/seed_data.py`
 4. Start API: `cd ../api && uvicorn main:app --reload`
 5. Open Admin GUI: http://localhost:8001

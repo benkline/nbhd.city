@@ -7,9 +7,14 @@ import asyncio
 import os
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from project root .env.local
+project_root = Path(__file__).parent.parent.parent
+load_dotenv(project_root / '.env.local')
 
 # Add parent directory to path to import from api/
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'api'))
+sys.path.insert(0, str(project_root / 'api'))
 
 from dynamodb_client import get_table
 from dynamodb_repository import create_neighborhood, create_membership, create_user_profile
@@ -74,7 +79,7 @@ TEST_NEIGHBORHOODS = [
     {
         "name": "East Austin",
         "description": "East Austin community hub",
-        "created_by": TEST_USERS[3],
+        "created_by": TEST_USERS[0],  # Alice creates this one too
     },
 ]
 
@@ -174,11 +179,17 @@ async def seed_data():
 
 
 if __name__ == "__main__":
-    # Set environment for local DynamoDB
-    os.environ["DYNAMODB_ENDPOINT_URL"] = "http://localhost:8000"
-    os.environ["DYNAMODB_TABLE_NAME"] = "nbhd-city-development"
-    os.environ["AWS_REGION"] = "us-east-1"
-    os.environ["AWS_ACCESS_KEY_ID"] = "dummy"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "dummy"
+    # Environment variables are loaded from .env.local
+    # Set defaults for local development if not already set
+    if not os.getenv("DYNAMODB_ENDPOINT_URL"):
+        os.environ["DYNAMODB_ENDPOINT_URL"] = "http://localhost:8000"
+    if not os.getenv("DYNAMODB_TABLE_NAME"):
+        os.environ["DYNAMODB_TABLE_NAME"] = "nbhd-city-development"
+    if not os.getenv("AWS_REGION"):
+        os.environ["AWS_REGION"] = "us-east-1"
+    if not os.getenv("AWS_ACCESS_KEY_ID"):
+        os.environ["AWS_ACCESS_KEY_ID"] = "dummy"
+    if not os.getenv("AWS_SECRET_ACCESS_KEY"):
+        os.environ["AWS_SECRET_ACCESS_KEY"] = "dummy"
 
     asyncio.run(seed_data())
