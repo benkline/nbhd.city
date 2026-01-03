@@ -1,10 +1,15 @@
 
 title: nbhd.city
 app goals and description: 
-    - an online static site generator - generates homepages w/ blogs for each of its members (nbrs) 
-    - nbrs pages have blogs which are published as posts to the at:\\ protocol 
-    - the nbhd page is an aggregator of its nbrs' posts and any others the group decides to add from the bsky pipeline 
+    
+    - a mulit-user website to collaboration on a group blog/page
+    - view the posts of the members of that nbhd   
+    - an online static site generator 
+        - generates homepages w/ blogs for each of its members (nbrs)
+        - generates pages for specific projects 
+    - posts are published to the at:\\ protocol 
 
+    - plugin system for other collaboration tools 
     
 lets change how the homepage folder works. currently it is a just a REACT based website. 
 
