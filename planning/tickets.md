@@ -1,308 +1,496 @@
-# nbhd.city Project Tickets
+# nbhd.city Development Tickets
 
-## Overview
-This document contains epics, user stories, and tasks for nbhd.city - an online static site generator that creates homepages with blogs for members, aggregates posts, and provides collaboration tools via a plugin system.
-
----
-
-## Epic 1: AT Protocol Integration
-
-### User Story 1.1: Personal Data Store (PDS) Implementation
-**As a** neighborhood system administrator
-**I want** the nbhd to have a database that functions as a PDS for users
-**So that** users can store and manage their personal data according to AT Protocol standards
-
-**Tasks:**
-- [ ] Research AT Protocol PDS requirements and specifications
-- [ ] Evaluate DynamoDB vs other database options for PDS implementation
-- [ ] Design PDS data schema compatible with AT Protocol
-- [ ] Implement core PDS storage layer
-- [ ] Create PDS read/write API endpoints
-- [ ] Add authentication/authorization for PDS access
-- [ ] Write unit tests for PDS functionality
-- [ ] Document PDS architecture and usage
+**Last Updated:** 2026-01-10
+**Phase:** 2 (Static Sites + AT Protocol PDS)
+**Priority:** High
 
 ---
 
-## Epic 2: Core API Development
+## Phase 2 Overview
 
-### User Story 2.1: Account Management
-**As a** new user
-**I want** to create an account on nbhd.city
-**So that** I can have my own homepage and participate in the neighborhood
-
-**Tasks:**
-- [ ] Design user account data model
-- [ ] Create POST /api/accounts endpoint for account creation
-
-- [ ] Implement account validation (username, email, etc.)
-- [ ] Add subdomain generation for user accounts
-- [ ] Integrate with Bluesky authentication option
-- [ ] Create account activation/verification flow
-- [ ] Write API documentation for account endpoints
-- [ ] Add integration tests for account creation
-
-### User Story 2.2: Static Site Generator - MVP Themes
-**As a** user
-**I want** to choose from pre-built themes for my homepage
-**So that** I can quickly get a professional-looking site without design work
-
-**Tasks:**
-- [ ] Design theme system architecture
-- [ ] Create theme configuration schema (colors, fonts, layouts)
-- [ ] Implement Theme 1: Minimal/Clean design
-- [ ] Implement Theme 2: Bold/Modern design
-- [ ] Build theme selection interface
-- [ ] Create homepage generation engine from theme templates
-- [ ] Add theme preview functionality
-- [ ] Write tests for theme rendering
-
-### User Story 2.3: AI Agent Theme Generator
-**As a** user
-**I want** to generate a custom theme using AI from my logo, colors, and style preferences
-**So that** I can have a unique homepage that matches my personal brand
-
-**Tasks:**
-- [ ] Research AI models for design generation (consider Claude, GPT-4 Vision, etc.)
-- [ ] Design theme generation prompt templates
-- [ ] Create API endpoint for theme generation request
-- [ ] Implement logo upload and processing
-- [ ] Build color palette extraction/suggestion system
-- [ ] Integrate AI model for theme generation
-- [ ] Create theme preview and refinement interface
-- [ ] Add fallback mechanism if AI generation fails
-- [ ] Test with various input types and validate outputs
-
-### User Story 2.4: Database Migration to DynamoDB
-**As a** system administrator
-**I want** to migrate from external Postgres to embedded DynamoDB
-**So that** the system is simpler to deploy and maintain
-
-**Tasks:**
-- [ ] Audit current Postgres schema and usage patterns
-- [ ] Design DynamoDB database schema
-- [ ] Create migration scripts from Postgres to DynamoDB
-- [ ] Update database connection layer to support DynamoDB
-
-### User Story 2.5: Database needs for at://
-**As a** system administrator
-**I want** to... 
-**So that** ...
-**Tasks:**
-- [ ] Configure DynamoDB for PDS requirements
-- [ ] Implement data backup and recovery procedures
-- [ ] Performance test DynamoDB under expected load
-- [ ] Update deployment documentation
+Phase 2 focuses on two major features:
+1. **Static Site Generation** - Members can create beautiful static sites using 11ty templates
+2. **AT Protocol PDS** - Each nbhd becomes a full Personal Data Server on the AT Protocol network
 
 ---
 
-## Epic 3: Neighborhood (nbhd) Features
+## Static Site Generation Tickets
 
-### User Story 3.1: Neighborhood Landing Page
-**As a** visitor
-**I want** to view a neighborhood landing page with login capability
-**So that** I can learn about the neighborhood and access my account
+### Frontend: Template System & UI
 
-**Tasks:**
-- [ ] Design landing page layout and content structure
-- [ ] Implement landing page with neighborhood description
-- [ ] Create login form component
-- [ ] Add "Create Account" call-to-action
-- [ ] Implement responsive design for mobile/tablet
-- [ ] Add neighborhood branding/customization options
-- [ ] Create tests for landing page functionality
+#### SSG-001: Create Template Gallery UI Component
+- **Description:** Build a `TemplateGallery` component that displays available 11ty templates
+- **Requirements:**
+  - Fetch templates from API (`GET /api/templates`)
+  - Display template cards with preview images, name, description
+  - "Select template" button to start site configuration
+  - Show template tags (blog, project, newsletter, etc)
+- **Acceptance Criteria:**
+  - Component renders templates from API
+  - Clicking "Select" navigates to config form
+  - Mobile-responsive grid layout
+  - Error handling for API failures
+- **Type:** Feature
+- **Estimate:** M
 
-### User Story 3.2: Account Creation Flow
-**As a** new user
-**I want** multiple options to create an account (native or Bluesky)
-**So that** I can choose the authentication method that works best for me
+#### SSG-002: Build Site Configuration Form
+- **Description:** Create dynamic form generator for template-specific config fields
+- **Requirements:**
+  - Read `config.schema.json` from selected template
+  - Generate form inputs based on schema (text, textarea, color picker, etc)
+  - Real-time preview updates as user types
+  - Save draft configurations locally (localStorage)
+  - "Preview" and "Deploy" buttons
+- **Acceptance Criteria:**
+  - Form renders all schema fields correctly
+  - Draft auto-saves every 30 seconds
+  - Validation matches schema constraints
+  - Form persists across page refreshes
+- **Type:** Feature
+- **Estimate:** M
 
-**Tasks:**
-- [ ] Design account creation UI with option selection
-- [ ] Implement native account creation flow
-- [ ] Integrate Bluesky OAuth authentication
+#### SSG-003: Integrate 11ty WASM for Client-Side Preview
+- **Description:** Implement Eleventy compiled to WebAssembly for instant in-browser previews
+- **Requirements:**
+  - Research/integrate 11ty WASM build
+  - Load WASM in browser when user edits config
+  - Render preview HTML without server calls
+  - Display preview in side panel or modal
+  - Handle WASM loading errors gracefully
+- **Acceptance Criteria:**
+  - Preview updates within 1 second of config change
+  - WASM successfully generates HTML output
+  - Works offline (no server required for preview)
+  - Graceful fallback if WASM unavailable
+- **Type:** Feature
+- **Estimate:** L (first time integrating WASM)
 
-- [ ] Create subdomain assignment logic based on username
-- [ ] Add subdomain availability checking
-- [ ] Implement email verification for native accounts
-- [ ] Create onboarding flow after account creation
-- [ ] Add error handling and user feedback
+#### SSG-004: Site Management Dashboard
+- **Description:** Build dashboard to view/manage user's static sites
+- **Requirements:**
+  - List all user's sites with status (draft, building, published)
+  - Show site URL and deployment status
+  - "Edit" button to re-configure
+  - "Delete" button with confirmation
+  - "View Live" link to published site
+- **Acceptance Criteria:**
+  - Displays all user sites from API
+  - Can edit existing sites
+  - Delete removes site from dashboard
+  - Links work correctly
+- **Type:** Feature
+- **Estimate:** M
 
-### User Story 3.3: Project Homepage Management
-**As a** user
-**I want** to create homepages for projects separate from my account
-**So that** I can showcase different projects independently
+### Backend: API Endpoints
 
-**Tasks:**
-- [ ] Design project data model (separate from user accounts)
-- [ ] Create UI for project creation and management
-- [ ] Implement project-to-user relationship
-- [ ] Add project subdomain/slug generation
-- [ ] Build project homepage configuration interface
-- [ ] Allow theme selection per project
-- [ ] Create project listing page for users
-- [ ] Add project privacy settings (public/private)
+#### SSG-005: Template Management API
+- **Description:** Implement API endpoints for template discovery and metadata
+- **Requirements:**
+  - `GET /api/templates` - List all available templates
+  - `GET /api/templates/{id}` - Get single template metadata
+  - `GET /api/templates/{id}/schema` - Get config schema
+  - `GET /api/templates/{id}/preview` - Get preview image URL
+  - Each template includes: name, description, author, version, tags
+- **Acceptance Criteria:**
+  - All endpoints return correct JSON structure
+  - Pagination for large template lists
+  - Proper error handling (404 for missing templates)
+  - Schema validation works
+- **Type:** Backend
+- **Estimate:** S
 
-### User Story 3.4: Bluesky List Integration
-**As a** neighborhood member
-**I want** to integrate with Bluesky lists
-**So that** I can follow and organize neighborhood members on Bluesky
+#### SSG-006: Site Configuration Storage API
+- **Description:** Implement endpoints to save and retrieve site configurations
+- **Requirements:**
+  - `POST /api/sites` - Create new site from template + config
+  - `GET /api/sites/{id}` - Retrieve site config
+  - `PUT /api/sites/{id}` - Update site config
+  - `GET /api/sites` - List user's sites
+  - `DELETE /api/sites/{id}` - Delete site
+  - Store config JSON in DynamoDB
+- **Acceptance Criteria:**
+  - Configs persist to DynamoDB
+  - Config validation against schema
+  - User can only access their own sites
+  - Returns proper error codes (400, 401, 404)
+- **Type:** Backend
+- **Estimate:** M
 
-**Tasks:**
-- [ ] Research Bluesky List API capabilities
-- [ ] Design list sync architecture
-- [ ] Create API endpoints for list management
-- [ ] Implement list creation from neighborhood members
-- [ ] Add ability to import existing Bluesky lists
-- [ ] Build UI for viewing and managing lists
-- [ ] Add automatic list updates when members join
-- [ ] Test list synchronization
+#### SSG-007: Site Build Trigger API
+- **Description:** Endpoint to initiate Lambda build process
+- **Requirements:**
+  - `POST /api/sites/{id}/build` - Trigger build
+  - Returns build status/job ID immediately
+  - Validates user owns the site
+  - Returns build URL once complete
+  - Store build history (timestamp, status, log URL)
+- **Acceptance Criteria:**
+  - Returns 202 Accepted with job ID
+  - Build can be monitored via polling
+  - Proper error handling for invalid sites
+  - User sees build progress
+- **Type:** Backend
+- **Estimate:** M
 
-### User Story 3.5: Plugin System Foundation
-**As a** developer
-**I want** a plugin system architecture
-**So that** the neighborhood can be extended with collaboration tools
+### Lambda/Infrastructure: Build System
 
-**Tasks:**
-- [ ] Design plugin architecture and lifecycle
-- [ ] Define plugin API and interfaces
-- [ ] Create plugin registration system
-- [ ] Implement plugin discovery and loading
-- [ ] Add plugin configuration management
-- [ ] Create plugin sandbox/security boundaries
-- [ ] Write plugin developer documentation
-- [ ] Build example "Hello World" plugin
+#### SSG-008: 11ty Lambda Build Function
+- **Description:** Create Lambda function to build sites server-side
+- **Requirements:**
+  - Clone template repo from Git
+  - Merge user config JSON into template data files
+  - Run 11ty build process
+  - Upload output to S3 bucket (per-site)
+  - Invalidate CloudFront cache
+  - Return signed URL to built site
+  - Log errors to CloudWatch
+- **Acceptance Criteria:**
+  - Successfully builds all 3 template types
+  - Output correctly uploaded to S3
+  - CloudFront serves latest version
+  - Build errors logged and returned to user
+  - Build timeout gracefully (30s limit)
+- **Type:** Backend/Infrastructure
+- **Estimate:** L
 
-### User Story 3.6: Chat and Collaboration Plugins
-**As a** neighborhood member
-**I want** access to chat and collaboration tools
-**So that** I can communicate and work with other members
+#### SSG-009: Subdomain Routing Setup
+- **Description:** Configure Route53 + CloudFront for subdomain deployment
+- **Requirements:**
+  - Create wildcard DNS record (`*.nbhd.city`)
+  - Create CloudFront distribution for subdomains
+  - Map `{username}.nbhd.city` → S3 bucket for that user
+  - Support custom domains (future: DNS validation)
+  - Terraform code for DNS infrastructure
+- **Acceptance Criteria:**
+  - Wildcard DNS resolves correctly
+  - CloudFront serves user's S3 bucket
+  - Multiple subdomains work independently
+  - Proper SSL/TLS for all subdomains
+- **Type:** Infrastructure
+- **Estimate:** M
 
-**Tasks:**
-- [ ] Design real-time chat plugin architecture
-- [ ] Implement WebSocket/real-time connection layer
-- [ ] Create chat room/channel system
-- [ ] Build chat UI component
-- [ ] Add direct messaging functionality
-- [ ] Implement notification system for new messages
-- [ ] Create file sharing capability in chat
-- [ ] Add message history and search
+#### SSG-010: Site Export to ZIP
+- **Description:** Generate downloadable ZIP of built site files
+- **Requirements:**
+  - Endpoint: `GET /api/sites/{id}/export`
+  - Downloads all static files from S3 as ZIP
+  - Includes README with deployment instructions
+  - Users can self-host the generated site anywhere
+- **Acceptance Criteria:**
+  - ZIP contains all necessary files
+  - ZIP is downloadable and extractable
+  - Can be deployed to any static host
+  - File structure is clear
+- **Type:** Backend
+- **Estimate:** S
 
-### User Story 3.7: AI Plugin Generator
-**As a** neighborhood administrator
-**I want** an AI agent that can create custom plugins
-**So that** I can quickly add new functionality without manual coding
+### Templates: Initial Implementations
 
-**Tasks:**
-- [ ] Design plugin generation prompt system
-- [ ] Create UI for describing desired plugin functionality
-- [ ] Implement AI code generation for plugins
-- [ ] Add plugin validation and testing automation
-- [ ] Create plugin preview/sandbox environment
-- [ ] Implement plugin installation from generated code
-- [ ] Add feedback loop for plugin refinement
-- [ ] Document plugin generation capabilities and limitations
+#### SSG-011: Blog Template (11ty)
+- **Description:** Personal blog template with posts, tags, and RSS
+- **Requirements:**
+  - Homepage with recent posts
+  - Individual post pages (Markdown)
+  - Tag archive pages
+  - RSS feed generation
+  - Config schema: site title, author, description, accent color
+  - Responsive mobile-first design
+- **Acceptance Criteria:**
+  - All pages render correctly
+  - Posts display from data files
+  - RSS feed is valid
+  - Looks good on mobile/tablet/desktop
+- **Type:** Template
+- **Estimate:** M
+
+#### SSG-012: Project Showcase Template (11ty)
+- **Description:** Team project page with gallery and contributors
+- **Requirements:**
+  - Project overview
+  - Team member cards
+  - Image gallery
+  - Project status/progress
+  - Config schema: project name, description, team list, gallery images
+- **Acceptance Criteria:**
+  - Team members display correctly
+  - Gallery images load
+  - Mobile responsive
+  - Professional appearance
+- **Type:** Template
+- **Estimate:** M
+
+#### SSG-013: Newsletter Archive Template (11ty)
+- **Description:** Email newsletter archive with latest/past issues
+- **Requirements:**
+  - Latest issue featured
+  - Archive of past issues
+  - Email signup form
+  - Mobile-optimized layout
+  - Config schema: title, description, signup URL
+- **Acceptance Criteria:**
+  - Archives display correctly
+  - Form submits properly
+  - Optimized for mobile readers
+- **Type:** Template
+- **Estimate:** M
 
 ---
 
-## Epic 4: Homepage Features
+## AT Protocol PDS Tickets
 
-### User Story 4.1: Static Site Generation
-**As a** user
-**I want** my homepage to be a static site that doesn't require login
-**So that** visitors can view my content without barriers
+### Research & Specification
 
-**Tasks:**
-- [ ] Design static site generation pipeline
-- [ ] Create homepage template system
-- [ ] Implement site build process
-- [ ] Add automatic rebuilding on content updates
-- [ ] Configure CDN/hosting for static sites
-- [ ] Optimize asset delivery (images, CSS, JS)
-- [ ] Add sitemap.xml generation
-- [ ] Implement RSS feed for blog posts
+#### ATP-001: AT Protocol PDS Research & Design
+- **Description:** Deep dive into AT Protocol and design nbhd as PDS
+- **Requirements:**
+  - Study AT Protocol documentation
+  - Understand PDS (Personal Data Server) spec
+  - Design: How do nbhd members register DIDs?
+  - Plan: How is neighborhood data federated?
+  - Create ADR (Architecture Decision Record)
+- **Acceptance Criteria:**
+  - Clear understanding of PDS requirements
+  - Design document for AT Protocol integration
+  - Decision record on implementation approach
+- **Type:** Research
+- **Estimate:** L
 
-### User Story 4.2: Blog with Markdown Editor
-**As a** user
-**I want** to write blog posts using an open-source JavaScript Markdown editor
-**So that** I can create formatted content easily
+#### ATP-002: BlueSky Integration Review
+- **Description:** Review current BlueSky OAuth and plan AT Protocol sync
+- **Requirements:**
+  - Audit current BlueSky integration
+  - Map BlueSky user profiles to AT Protocol DIDs
+  - Plan sync of profile data
+  - Identify gaps in current implementation
+- **Acceptance Criteria:**
+  - Clear mapping between BlueSky profiles and DIDs
+  - Plan for keeping data in sync
+- **Type:** Research
+- **Estimate:** M
 
-**Tasks:**
-- [ ] Evaluate and select open-source Markdown editor (e.g., CodeMirror, EasyMDE)
-- [ ] Integrate Markdown editor into blog creation UI
-- [ ] Implement blog post data model
-- [ ] Create blog post CRUD endpoints
-- [ ] Add blog post preview functionality
-- [ ] Implement draft vs published status
-- [ ] Add image upload and embedding in posts
-- [ ] Create blog post listing and detail pages
+### DID & Identity
 
-### User Story 4.3: Blog Post to Bluesky Integration
-**As a** user
-**I want** to automatically publish blog summaries as Bluesky posts (skeets)
-**So that** my followers on Bluesky are notified of new content
+#### ATP-003: DID Registration for Members
+- **Description:** Implement DID (Decentralized Identifier) registration for nbhd members
+- **Requirements:**
+  - Generate unique DID for each member
+  - Store DID in user profile (DynamoDB)
+  - DID format: `did:plc:{key}` or similar
+  - Create keypair for member account
+  - Store keys securely (AWS Secrets Manager or KMS)
+- **Acceptance Criteria:**
+  - Each member gets unique DID on signup
+  - DID stored and retrievable
+  - Keypair generated and stored securely
+  - Can verify ownership of DID
+- **Type:** Backend
+- **Estimate:** M
 
-**Tasks:**
-- [ ] Design blog-to-Bluesky sync system
-- [ ] Implement summary generation (manual or AI-powered)
-- [ ] Create Bluesky posting API integration
-- [ ] Add opt-in/opt-out toggle for auto-posting
-- [ ] Include link back to full blog post
-- [ ] Handle character limits and formatting
-- [ ] Add post status tracking (posted/failed)
-- [ ] Create manual retry mechanism for failed posts
+#### ATP-004: DID to BlueSky Handle Mapping
+- **Description:** Link member DIDs to BlueSky handles
+- **Requirements:**
+  - Member DIDs linked to BlueSky DIDs
+  - Verify BlueSky ownership (using OAuth)
+  - Store mapping in DynamoDB
+  - Support profile sync from BlueSky
+- **Acceptance Criteria:**
+  - Member DID maps to BlueSky DID
+  - Profile data syncs from BlueSky
+  - Verification is cryptographic
+- **Type:** Backend
+- **Estimate:** M
 
-### User Story 4.4: Neighborhood Directory
-**As a** visitor
-**I want** to see a list of neighborhoods on a user's homepage
-**So that** I can discover and navigate to other neighborhoods
+### Repository & Data Storage
 
-**Tasks:**
-- [ ] Design neighborhood directory UI component
-- [ ] Create endpoint to fetch neighborhood list
-- [ ] Implement neighborhood search/filter functionality
-- [ ] Add neighborhood metadata (description, member count, etc.)
-- [ ] Create neighborhood card component
-- [ ] Add pagination for large neighborhood lists
-- [ ] Implement neighborhood categories/tags
-- [ ] Make directory embeddable on homepages
+#### ATP-005: Personal Data Repository (PDS) Implementation
+- **Description:** Implement nbhd as AT Protocol PDS for members
+- **Requirements:**
+  - Create PDS service that speaks AT Protocol
+  - Store member data in AT Protocol format
+  - Implement PDS endpoints (getRepo, etc)
+  - Data types: profiles, posts, follows
+  - Replicate/sync with BlueSky network
+- **Acceptance Criteria:**
+  - nbhd can be queried as AT Protocol PDS
+  - Member data retrievable via AT Protocol APIs
+  - BlueSky can verify data from nbhd PDS
+  - Proper error handling
+- **Type:** Backend/Infrastructure
+- **Estimate:** XL (complex new feature)
 
-### User Story 4.5: DNS for Bluesky Authentication
-**As a** user
-**I want** to use DNS for Bluesky authentication on my custom domain
-**So that** my Bluesky identity is verified with my homepage domain
+#### ATP-006: Data Sync from blueSky Firehose
+- **Description:** Stream member posts/activities into nbhd PDS
+- **Requirements:**
+  - Subscribe to BlueSky firehose (or relevant subset)
+  - Capture posts by neighborhood members
+  - Store in PDS format
+  - Update member timelines
+  - Handle rate limiting and errors
+- **Acceptance Criteria:**
+  - Posts from BlueSky appear in nbhd
+  - Sync is near real-time
+  - No data loss
+  - Handles network failures gracefully
+- **Type:** Backend
+- **Estimate:** L
 
-**Tasks:**
-- [ ] Research Bluesky DNS verification requirements
-- [ ] Document DNS record requirements for users
-- [ ] Create DNS configuration guide
-- [ ] Implement DNS verification check
-- [ ] Add verification status display in admin panel
-- [ ] Create automated DNS setup for supported providers
-- [ ] Add troubleshooting documentation
-- [ ] Test with various DNS providers
+### Data Export & Portability
 
-### User Story 4.6: Homepage Administration Panel
-**As a** user
-**I want** an admin page to configure my custom domain and update content
-**So that** I can manage my homepage without technical knowledge
+#### ATP-007: AT Protocol Data Export
+- **Description:** Export member data in standard AT Protocol format
+- **Requirements:**
+  - Endpoint: `GET /api/user/export/atproto`
+  - Exports all user data as AT Protocol records
+  - Includes profiles, posts, follows, custom data
+  - Downloadable ZIP or JSON
+  - Supports data portability (GDPR right)
+- **Acceptance Criteria:**
+  - Export contains all user data
+  - Format is AT Protocol compliant
+  - Can be imported to other PDS
+  - Includes metadata
+- **Type:** Backend
+- **Estimate:** M
 
-**Tasks:**
-- [ ] Design admin panel UI/UX
-- [ ] Create custom domain configuration interface
-- [ ] Implement domain verification process
-- [ ] Add SSL certificate management
-- [ ] Build content editing interface
-- [ ] Create theme customization controls
-- [ ] Add homepage preview functionality
-- [ ] Implement navigation menu editor
-- [ ] Add SEO settings (meta tags, descriptions)
-- [ ] Create backup and restore functionality
+#### ATP-008: Data Migration Between nbhds
+- **Description:** Allow members to transfer data to different nbhd instances
+- **Requirements:**
+  - Import exported AT Protocol data
+  - Map old DIDs to new DIDs
+  - Preserve post history and metadata
+  - Update BlueSky records
+- **Acceptance Criteria:**
+  - Member data successfully migrates
+  - History preserved
+  - BlueSky profile updated
+  - No data loss
+- **Type:** Backend
+- **Estimate:** L
+
+### Federation & Interoperability
+
+#### ATP-009: PDS Federation Setup
+- **Description:** Configure nbhd PDS to federate with BlueSky network
+- **Requirements:**
+  - Register nbhd PDS with AT Protocol network
+  - Implement federation protocols
+  - Handle PDS-to-PDS communication
+  - Subscribe to federation events
+- **Acceptance Criteria:**
+  - nbhd visible as federated PDS
+  - Can exchange data with other PDSs
+  - Federation is discoverable
+- **Type:** Infrastructure
+- **Estimate:** L
+
+#### ATP-010: Cross-PDS Neighborhood Lists
+- **Description:** Create neighborhood member lists as AT Protocol lists
+- **Requirements:**
+  - Neighborhood members as AT list
+  - Shareable to BlueSky profiles
+  - Can be subscribed to by other users
+  - Lists update when membership changes
+- **Acceptance Criteria:**
+  - Lists are created as AT records
+  - Visible on BlueSky
+  - Can be shared/subscribed
+  - Updates work correctly
+- **Type:** Backend
+- **Estimate:** M
 
 ---
 
-## Notes
-- Priority order should be determined based on MVP requirements and dependencies
-- Each task should be estimated and assigned to sprints
-- Consider technical dependencies when scheduling (e.g., PDS must be completed before certain API features)
-- Security review needed for authentication, PDS, and plugin system stories
+## Testing & Documentation
+
+#### TEST-001: Phase 2 Integration Tests
+- **Description:** Write integration tests for static sites + PDS
+- **Requirements:**
+  - Test template selection → config → build workflow
+  - Test site deployment to subdomain
+  - Test DID creation and management
+  - Test data export/import
+  - E2E tests for key user flows
+- **Type:** Testing
+- **Estimate:** L
+
+#### DOC-001: Static Sites User Guide
+- **Description:** Documentation for creating and managing static sites
+- **Requirements:**
+  - Step-by-step guide for selecting template
+  - Configuration instructions
+  - Preview and publishing workflow
+  - Troubleshooting guide
+  - Examples for each template type
+- **Type:** Documentation
+- **Estimate:** M
+
+#### DOC-002: AT Protocol PDS Architecture Document
+- **Description:** Internal documentation on PDS implementation
+- **Requirements:**
+  - DID management flow
+  - Data storage architecture
+  - Federation overview
+  - API reference
+  - Troubleshooting
+- **Type:** Documentation
+- **Estimate:** M
+
+---
+
+## Priority Order (Recommended Sequence)
+
+### Week 1-2: Foundation
+1. SSG-005 (Template API)
+2. SSG-006 (Site Config API)
+3. ATP-001 (AT Protocol Research)
+
+### Week 3-4: Frontend
+4. SSG-001 (Template Gallery)
+5. SSG-002 (Config Form)
+6. SSG-004 (Site Dashboard)
+
+### Week 5-6: Build System
+7. SSG-008 (Lambda Build)
+8. SSG-009 (Subdomain Routing)
+9. SSG-007 (Build Trigger API)
+
+### Week 7-8: Templates
+10. SSG-011 (Blog Template)
+11. SSG-012 (Project Template)
+12. SSG-013 (Newsletter Template)
+
+### Week 9-10: Preview & Export
+13. SSG-003 (WASM Preview)
+14. SSG-010 (Site Export)
+
+### Week 11+: AT Protocol Core
+15. ATP-003 (DID Registration)
+16. ATP-004 (BlueSky Mapping)
+17. ATP-005 (PDS Implementation)
+18. ATP-006 (Firehose Sync)
+
+### Ongoing
+- TEST-001 (Testing throughout)
+- DOC-001, DOC-002 (Documentation)
+
+---
+
+## Ticket Labels (for GitHub)
+
+- `phase-2` - Phase 2 feature
+- `static-sites` - Static site generation
+- `atproto` - AT Protocol / PDS
+- `backend` - Backend/API work
+- `frontend` - Frontend/React work
+- `infrastructure` - Infrastructure/Lambda/Terraform
+- `template` - 11ty template work
+- `research` - Research/investigation needed
+- `testing` - Tests
+- `docs` - Documentation
+- `priority-high` - Must do
+- `priority-medium` - Should do
+- `priority-low` - Nice to have
+
+---
+
+**End of Tickets Document**
