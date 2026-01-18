@@ -81,12 +81,11 @@ This will:
 ### Seed Test Data
 
 ```bash
-python init/seed_data.py
+python init/seed_users.py
 ```
 
 This creates:
-- 5 test neighborhoods
-- Multiple test memberships
+- 3 test user profiles
 - Sample data for development
 
 ### Export Data
@@ -113,7 +112,7 @@ devlocal/
 ├── Dockerfile.init          # Table initialization image
 ├── init/
 │   ├── create_tables.py     # Table creation (auto-runs)
-│   └── seed_data.py         # Test data seeding
+│   └── seed_users.py        # Test user data seeding
 ├── scripts/
 │   ├── start.sh             # Start services
 │   ├── stop.sh              # Stop services
@@ -172,7 +171,7 @@ docker-compose up -d    # Restart
 
 ```bash
 ./scripts/reset.sh          # Reset everything
-python init/seed_data.py    # Add test data
+python init/seed_users.py   # Add test data
 cd ../api && uvicorn main:app --reload
 ```
 
@@ -231,7 +230,7 @@ Perfect for debugging and development.
 
 1. Start services: `./scripts/start.sh`
 2. Update API config: Edit `.env.local` in project root
-3. Seed data: `python init/seed_data.py`
+3. Seed data: `python init/seed_users.py`
 4. Start API: `cd ../api && uvicorn main:app --reload`
 5. Open Admin GUI: http://localhost:8001
 6. Start developing!

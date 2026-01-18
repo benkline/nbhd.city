@@ -10,7 +10,6 @@ from auth import get_current_user
 from dynamodb_client import get_table
 from dynamodb_repository import (
     create_membership,
-    create_neighborhood,
     delete_membership,
     get_membership,
     get_neighborhood,
@@ -19,7 +18,6 @@ from dynamodb_repository import (
     get_user_memberships,
 )
 from models import (
-    NbhdCreate,
     NbhdDetailResponse,
     NbhdResponse,
     UserMembershipsResponse,
@@ -74,41 +72,6 @@ async def get_nbhd_detail(nbhd_id: str):
             member_count=nbhd.get("member_count", 0),
             members=member_responses,
         )
-
-
-@router.post("/api/nbhds", response_model=NbhdResponse, status_code=201)
-async def create_new_nbhd(
-    nbhd_data: NbhdCreate,
-    user_id: str = Depends(get_current_user),
-):
-    """
-    Create a new nbhd.
-    Requires authentication. Creator is automatically added as first member.
-    """
-    async with get_table() as table:
-        try:
-            # Create nbhd
-            nbhd = await create_neighborhood(
-                table, nbhd_data.name, nbhd_data.description, user_id
-            )
-
-            # Auto-join the creator
-            await create_membership(table, user_id, nbhd["id"])
-
-            return NbhdResponse(
-                id=nbhd["id"],
-                name=nbhd["name"],
-                description=nbhd["description"],
-                created_by=nbhd["created_by"],
-                created_at=nbhd["created_at"],
-                member_count=1,
-            )
-
-        except ValueError as e:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=str(e)
-            )
 
 
 @router.get("/api/users/me/nbhds", response_model=UserMembershipsResponse)

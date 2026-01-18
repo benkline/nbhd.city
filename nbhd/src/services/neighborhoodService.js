@@ -28,16 +28,6 @@ export const nbhdService = {
   },
 
   /**
-   * Create a new nbhd
-   * @param {Object} data - Nbhd data (name, description)
-   * @returns {Promise<Object>} Created nbhd
-   */
-  async createNbhd(data) {
-    const response = await apiClient.post('/api/nbhds', data);
-    return response.data;
-  },
-
-  /**
    * Get current user's nbhd memberships
    * @returns {Promise<Object>} User's nbhds
    */
