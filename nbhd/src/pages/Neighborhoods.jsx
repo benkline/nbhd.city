@@ -1,18 +1,10 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React from 'react';
 import { useNbhds } from '../hooks/useNeighborhoods';
 import NbhdCard from '../components/NeighborhoodCard';
-import CreateNbhdModal from '../components/CreateNeighborhoodModal';
 import styles from '../styles/Nbhds.module.css';
 
 export default function Nbhds() {
-  const { isAuthenticated } = useAuth();
   const { nbhds, loading, error, refresh } = useNbhds();
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const handleCreateSuccess = () => {
-    refresh();
-  };
 
   if (loading) {
     return (
@@ -45,15 +37,6 @@ export default function Nbhds() {
             {nbhds.length} nbhd{nbhds.length !== 1 ? 's' : ''}
           </p>
         </div>
-
-        {isAuthenticated && (
-          <button
-            onClick={() => setModalOpen(true)}
-            className={styles.createButton}
-          >
-            <span className={styles.icon}>+</span> Create Nbhd
-          </button>
-        )}
       </div>
 
       {nbhds.length > 0 ? (
@@ -69,23 +52,8 @@ export default function Nbhds() {
         <div className={styles.empty}>
           <div className={styles.emptyIcon}>🏘️</div>
           <h2>No nbhds yet</h2>
-          <p>Be the first to create a community!</p>
-          {isAuthenticated && (
-            <button
-              onClick={() => setModalOpen(true)}
-              className={styles.createButton}
-            >
-              Create First Nbhd
-            </button>
-          )}
         </div>
       )}
-
-      <CreateNbhdModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSuccess={handleCreateSuccess}
-      />
     </div>
   );
 }

@@ -25,54 +25,6 @@ def now_iso() -> str:
 
 # Neighborhood Operations
 
-async def create_neighborhood(table, name: str, description: Optional[str], created_by: str) -> dict:
-    """
-    Create a new neighborhood.
-
-    Args:
-        table: DynamoDB table resource
-        name: Neighborhood name (must be unique)
-        description: Optional description
-        created_by: BlueSky DID of creator
-
-    Returns:
-        dict: Created neighborhood item
-
-    Raises:
-        ValueError: If neighborhood name already exists
-    """
-    # Check if name already exists using GSI2
-    response = await table.query(
-        IndexName="GSI2",
-        KeyConditionExpression=Key("name_lower").eq(name.lower()),
-        Limit=1
-    )
-
-    if response.get("Items"):
-        raise ValueError(f"Neighborhood with name '{name}' already exists")
-
-    # Generate ID and create item
-    nbhd_id = generate_id()
-    timestamp = now_iso()
-
-    item = {
-        "PK": f"NBHD#{nbhd_id}",
-        "SK": "METADATA",
-        "id": nbhd_id,
-        "name": name,
-        "name_lower": name.lower(),
-        "description": description or "",
-        "created_by": created_by,
-        "created_at": timestamp,
-        "updated_at": timestamp,
-        "member_count": 0,  # Will be incremented when creator joins
-        "entity_type": "neighborhood"
-    }
-
-    await table.put_item(Item=item)
-    return item
-
-
 async def get_neighborhood(table, nbhd_id: str) -> Optional[dict]:
     """
     Get neighborhood by ID.
@@ -146,61 +98,6 @@ async def get_neighborhood_with_members(table, nbhd_id: str) -> Tuple[Optional[d
             members.append(item)
 
     return nbhd, members
-
-
-async def update_neighborhood(
-    table,
-    nbhd_id: str,
-    name: Optional[str] = None,
-    description: Optional[str] = None
-) -> Optional[dict]:
-    """
-    Update neighborhood metadata.
-
-    Args:
-        table: DynamoDB table resource
-        nbhd_id: Neighborhood UUID
-        name: New name (optional)
-        description: New description (optional)
-
-    Returns:
-        dict or None: Updated neighborhood item
-
-    Raises:
-        ValueError: If new name conflicts with existing neighborhood
-    """
-    # Build update expression dynamically
-    update_expr = ["updated_at = :updated_at"]
-    expr_values = {":updated_at": now_iso()}
-
-    if name is not None:
-        # Check if new name conflicts with existing neighborhood
-        response = await table.query(
-            IndexName="GSI2",
-            KeyConditionExpression=Key("name_lower").eq(name.lower()),
-            Limit=1
-        )
-        existing = response.get("Items", [])
-        if existing and existing[0]["id"] != nbhd_id:
-            raise ValueError(f"Neighborhood with name '{name}' already exists")
-
-        update_expr.append("name = :name")
-        update_expr.append("name_lower = :name_lower")
-        expr_values[":name"] = name
-        expr_values[":name_lower"] = name.lower()
-
-    if description is not None:
-        update_expr.append("description = :description")
-        expr_values[":description"] = description
-
-    response = await table.update_item(
-        Key={"PK": f"NBHD#{nbhd_id}", "SK": "METADATA"},
-        UpdateExpression="SET " + ", ".join(update_expr),
-        ExpressionAttributeValues=expr_values,
-        ReturnValues="ALL_NEW"
-    )
-
-    return response.get("Attributes")
 
 
 # Membership Operations
