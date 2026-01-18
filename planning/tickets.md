@@ -12,6 +12,17 @@ Phase 2 focuses on two major features:
 1. **Static Site Generation** - Members can create beautiful static sites using 11ty templates
 2. **AT Protocol PDS** - Each nbhd becomes a full Personal Data Server on the AT Protocol network
 
+### Relevant Documentation for Phase 2
+
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System design and tech stack
+- **[DATABASE.md](./DATABASE.md)** - DynamoDB schema for static sites and PDS data
+- **[API.md](./API.md)** - REST endpoints for templates, sites, and PDS
+- **[FRONTEND.md](./FRONTEND.md)** - React components for site builder
+- **[INFRASTRUCTURE.md](./INFRASTRUCTURE.md)** - Lambda builds, S3, CloudFront, Terraform
+- **[SECURITY.md](./SECURITY.md)** - DID key management, authentication
+- **[ATPROTOCOL.md](./ATPROTOCOL.md)** - PDS implementation details
+- **[TESTING.md](./TESTING.md)** - Testing strategy for Phase 2
+
 ---
 
 ## Static Site Generation Tickets
@@ -21,63 +32,63 @@ Phase 2 focuses on two major features:
 #### SSG-001: Create Template Gallery UI Component
 - **Description:** Build a `TemplateGallery` component that displays available 11ty templates
 - **Requirements:**
-  - Fetch templates from API (`GET /api/templates`)
-  - Display template cards with preview images, name, description
-  - "Select template" button to start site configuration
-  - Show template tags (blog, project, newsletter, etc)
+  - [ ] Fetch templates from API (`GET /api/templates`)
+  - [ ] Display template cards with preview images, name, description
+  - [ ] "Select template" button to start site configuration
+  - [ ] Show template tags (blog, project, newsletter, etc)
 - **Acceptance Criteria:**
-  - Component renders templates from API
-  - Clicking "Select" navigates to config form
-  - Mobile-responsive grid layout
-  - Error handling for API failures
+  - [ ] Component renders templates from API
+  - [ ] Clicking "Select" navigates to config form
+  - [ ] Mobile-responsive grid layout
+  - [ ] Error handling for API failures
 - **Type:** Feature
 - **Estimate:** M
 
 #### SSG-002: Build Site Configuration Form
 - **Description:** Create dynamic form generator for template-specific config fields
 - **Requirements:**
-  - Read `config.schema.json` from selected template
-  - Generate form inputs based on schema (text, textarea, color picker, etc)
-  - Real-time preview updates as user types
-  - Save draft configurations locally (localStorage)
-  - "Preview" and "Deploy" buttons
+  - [ ] Read `config.schema.json` from selected template
+  - [ ] Generate form inputs based on schema (text, textarea, color picker, etc)
+  - [ ] Real-time preview updates as user types
+  - [ ] Save draft configurations locally (localStorage)
+  - [ ] "Preview" and "Deploy" buttons
 - **Acceptance Criteria:**
-  - Form renders all schema fields correctly
-  - Draft auto-saves every 30 seconds
-  - Validation matches schema constraints
-  - Form persists across page refreshes
+  - [ ] Form renders all schema fields correctly
+  - [ ] Draft auto-saves every 30 seconds
+  - [ ] Validation matches schema constraints
+  - [ ] Form persists across page refreshes
 - **Type:** Feature
 - **Estimate:** M
 
 #### SSG-003: Integrate 11ty WASM for Client-Side Preview
 - **Description:** Implement Eleventy compiled to WebAssembly for instant in-browser previews
 - **Requirements:**
-  - Research/integrate 11ty WASM build
-  - Load WASM in browser when user edits config
-  - Render preview HTML without server calls
-  - Display preview in side panel or modal
-  - Handle WASM loading errors gracefully
+  - [ ] Research/integrate 11ty WASM build
+  - [ ] Load WASM in browser when user edits config
+  - [ ] Render preview HTML without server calls
+  - [ ] Display preview in side panel or modal
+  - [ ] Handle WASM loading errors gracefully
 - **Acceptance Criteria:**
-  - Preview updates within 1 second of config change
-  - WASM successfully generates HTML output
-  - Works offline (no server required for preview)
-  - Graceful fallback if WASM unavailable
+  - [ ] Preview updates within 1 second of config change
+  - [ ] WASM successfully generates HTML output
+  - [ ] Works offline (no server required for preview)
+  - [ ] Graceful fallback if WASM unavailable
 - **Type:** Feature
 - **Estimate:** L (first time integrating WASM)
 
 #### SSG-004: Site Management Dashboard
 - **Description:** Build dashboard to view/manage user's static sites
 - **Requirements:**
-  - List all user's sites with status (draft, building, published)
-  - Show site URL and deployment status
-  - "Edit" button to re-configure
-  - "Delete" button with confirmation
-  - "View Live" link to published site
+  - [ ] List all user's sites with status (draft, building, published)
+  - [ ] Show site URL and deployment status
+  - [ ] "Edit" button to re-configure
+  - [ ] "Delete" button with confirmation
+  - [ ] "View Live" link to published site
 - **Acceptance Criteria:**
-  - Displays all user sites from API
-  - Can edit existing sites
-  - Delete removes site from dashboard
-  - Links work correctly
+  - [ ] Displays all user sites from API
+  - [ ] Can edit existing sites
+  - [ ] Delete removes site from dashboard
+  - [ ] Links work correctly
 - **Type:** Feature
 - **Estimate:** M
 
@@ -86,49 +97,49 @@ Phase 2 focuses on two major features:
 #### SSG-005: Template Management API
 - **Description:** Implement API endpoints for template discovery and metadata
 - **Requirements:**
-  - `GET /api/templates` - List all available templates
-  - `GET /api/templates/{id}` - Get single template metadata
-  - `GET /api/templates/{id}/schema` - Get config schema
-  - `GET /api/templates/{id}/preview` - Get preview image URL
-  - Each template includes: name, description, author, version, tags
+  - [ ] `GET /api/templates` - List all available templates
+  - [ ] `GET /api/templates/{id}` - Get single template metadata
+  - [ ] `GET /api/templates/{id}/schema` - Get config schema
+  - [ ] `GET /api/templates/{id}/preview` - Get preview image URL
+  - [ ] Each template includes: name, description, author, version, tags
 - **Acceptance Criteria:**
-  - All endpoints return correct JSON structure
-  - Pagination for large template lists
-  - Proper error handling (404 for missing templates)
-  - Schema validation works
+  - [ ] All endpoints return correct JSON structure
+  - [ ] Pagination for large template lists
+  - [ ] Proper error handling (404 for missing templates)
+  - [ ] Schema validation works
 - **Type:** Backend
 - **Estimate:** S
 
 #### SSG-006: Site Configuration Storage API
 - **Description:** Implement endpoints to save and retrieve site configurations
 - **Requirements:**
-  - `POST /api/sites` - Create new site from template + config
-  - `GET /api/sites/{id}` - Retrieve site config
-  - `PUT /api/sites/{id}` - Update site config
-  - `GET /api/sites` - List user's sites
-  - `DELETE /api/sites/{id}` - Delete site
-  - Store config JSON in DynamoDB
+  - [ ] `POST /api/sites` - Create new site from template + config
+  - [ ] `GET /api/sites/{id}` - Retrieve site config
+  - [ ] `PUT /api/sites/{id}` - Update site config
+  - [ ] `GET /api/sites` - List user's sites
+  - [ ] `DELETE /api/sites/{id}` - Delete site
+  - [ ] Store config JSON in DynamoDB
 - **Acceptance Criteria:**
-  - Configs persist to DynamoDB
-  - Config validation against schema
-  - User can only access their own sites
-  - Returns proper error codes (400, 401, 404)
+  - [ ] Configs persist to DynamoDB
+  - [ ] Config validation against schema
+  - [ ] User can only access their own sites
+  - [ ] Returns proper error codes (400, 401, 404)
 - **Type:** Backend
 - **Estimate:** M
 
 #### SSG-007: Site Build Trigger API
 - **Description:** Endpoint to initiate Lambda build process
 - **Requirements:**
-  - `POST /api/sites/{id}/build` - Trigger build
-  - Returns build status/job ID immediately
-  - Validates user owns the site
-  - Returns build URL once complete
-  - Store build history (timestamp, status, log URL)
+  - [ ] `POST /api/sites/{id}/build` - Trigger build
+  - [ ] Returns build status/job ID immediately
+  - [ ] Validates user owns the site
+  - [ ] Returns build URL once complete
+  - [ ] Store build history (timestamp, status, log URL)
 - **Acceptance Criteria:**
-  - Returns 202 Accepted with job ID
-  - Build can be monitored via polling
-  - Proper error handling for invalid sites
-  - User sees build progress
+  - [ ] Returns 202 Accepted with job ID
+  - [ ] Build can be monitored via polling
+  - [ ] Proper error handling for invalid sites
+  - [ ] User sees build progress
 - **Type:** Backend
 - **Estimate:** M
 
@@ -137,50 +148,50 @@ Phase 2 focuses on two major features:
 #### SSG-008: 11ty Lambda Build Function
 - **Description:** Create Lambda function to build sites server-side
 - **Requirements:**
-  - Clone template repo from Git
-  - Merge user config JSON into template data files
-  - Run 11ty build process
-  - Upload output to S3 bucket (per-site)
-  - Invalidate CloudFront cache
-  - Return signed URL to built site
-  - Log errors to CloudWatch
+  - [ ] Clone template repo from Git
+  - [ ] Merge user config JSON into template data files
+  - [ ] Run 11ty build process
+  - [ ] Upload output to S3 bucket (per-site)
+  - [ ] Invalidate CloudFront cache
+  - [ ] Return signed URL to built site
+  - [ ] Log errors to CloudWatch
 - **Acceptance Criteria:**
-  - Successfully builds all 3 template types
-  - Output correctly uploaded to S3
-  - CloudFront serves latest version
-  - Build errors logged and returned to user
-  - Build timeout gracefully (30s limit)
+  - [ ] Successfully builds all 3 template types
+  - [ ] Output correctly uploaded to S3
+  - [ ] CloudFront serves latest version
+  - [ ] Build errors logged and returned to user
+  - [ ] Build timeout gracefully (30s limit)
 - **Type:** Backend/Infrastructure
 - **Estimate:** L
 
 #### SSG-009: Subdomain Routing Setup
 - **Description:** Configure Route53 + CloudFront for subdomain deployment
 - **Requirements:**
-  - Create wildcard DNS record (`*.nbhd.city`)
-  - Create CloudFront distribution for subdomains
-  - Map `{username}.nbhd.city` → S3 bucket for that user
-  - Support custom domains (future: DNS validation)
-  - Terraform code for DNS infrastructure
+  - [ ] Create wildcard DNS record (`*.nbhd.city`)
+  - [ ] Create CloudFront distribution for subdomains
+  - [ ] Map `{username}.nbhd.city` → S3 bucket for that user
+  - [ ] Support custom domains (future: DNS validation)
+  - [ ] Terraform code for DNS infrastructure
 - **Acceptance Criteria:**
-  - Wildcard DNS resolves correctly
-  - CloudFront serves user's S3 bucket
-  - Multiple subdomains work independently
-  - Proper SSL/TLS for all subdomains
+  - [ ] Wildcard DNS resolves correctly
+  - [ ] CloudFront serves user's S3 bucket
+  - [ ] Multiple subdomains work independently
+  - [ ] Proper SSL/TLS for all subdomains
 - **Type:** Infrastructure
 - **Estimate:** M
 
 #### SSG-010: Site Export to ZIP
 - **Description:** Generate downloadable ZIP of built site files
 - **Requirements:**
-  - Endpoint: `GET /api/sites/{id}/export`
-  - Downloads all static files from S3 as ZIP
-  - Includes README with deployment instructions
-  - Users can self-host the generated site anywhere
+  - [ ] Endpoint: `GET /api/sites/{id}/export`
+  - [ ] Downloads all static files from S3 as ZIP
+  - [ ] Includes README with deployment instructions
+  - [ ] Users can self-host the generated site anywhere
 - **Acceptance Criteria:**
-  - ZIP contains all necessary files
-  - ZIP is downloadable and extractable
-  - Can be deployed to any static host
-  - File structure is clear
+  - [ ] ZIP contains all necessary files
+  - [ ] ZIP is downloadable and extractable
+  - [ ] Can be deployed to any static host
+  - [ ] File structure is clear
 - **Type:** Backend
 - **Estimate:** S
 
@@ -189,48 +200,48 @@ Phase 2 focuses on two major features:
 #### SSG-011: Blog Template (11ty)
 - **Description:** Personal blog template with posts, tags, and RSS
 - **Requirements:**
-  - Homepage with recent posts
-  - Individual post pages (Markdown)
-  - Tag archive pages
-  - RSS feed generation
-  - Config schema: site title, author, description, accent color
-  - Responsive mobile-first design
+  - [ ] Homepage with recent posts
+  - [ ] Individual post pages (Markdown)
+  - [ ] Tag archive pages
+  - [ ] RSS feed generation
+  - [ ] Config schema: site title, author, description, accent color
+  - [ ] Responsive mobile-first design
 - **Acceptance Criteria:**
-  - All pages render correctly
-  - Posts display from data files
-  - RSS feed is valid
-  - Looks good on mobile/tablet/desktop
+  - [ ] All pages render correctly
+  - [ ] Posts display from data files
+  - [ ] RSS feed is valid
+  - [ ] Looks good on mobile/tablet/desktop
 - **Type:** Template
 - **Estimate:** M
 
 #### SSG-012: Project Showcase Template (11ty)
 - **Description:** Team project page with gallery and contributors
 - **Requirements:**
-  - Project overview
-  - Team member cards
-  - Image gallery
-  - Project status/progress
-  - Config schema: project name, description, team list, gallery images
+  - [ ] Project overview
+  - [ ] Team member cards
+  - [ ] Image gallery
+  - [ ] Project status/progress
+  - [ ] Config schema: project name, description, team list, gallery images
 - **Acceptance Criteria:**
-  - Team members display correctly
-  - Gallery images load
-  - Mobile responsive
-  - Professional appearance
+  - [ ] Team members display correctly
+  - [ ] Gallery images load
+  - [ ] Mobile responsive
+  - [ ] Professional appearance
 - **Type:** Template
 - **Estimate:** M
 
 #### SSG-013: Newsletter Archive Template (11ty)
 - **Description:** Email newsletter archive with latest/past issues
 - **Requirements:**
-  - Latest issue featured
-  - Archive of past issues
-  - Email signup form
-  - Mobile-optimized layout
-  - Config schema: title, description, signup URL
+  - [ ] Latest issue featured
+  - [ ] Archive of past issues
+  - [ ] Email signup form
+  - [ ] Mobile-optimized layout
+  - [ ] Config schema: title, description, signup URL
 - **Acceptance Criteria:**
-  - Archives display correctly
-  - Form submits properly
-  - Optimized for mobile readers
+  - [ ] Archives display correctly
+  - [ ] Form submits properly
+  - [ ] Optimized for mobile readers
 - **Type:** Template
 - **Estimate:** M
 
@@ -243,28 +254,28 @@ Phase 2 focuses on two major features:
 #### ATP-001: AT Protocol PDS Research & Design
 - **Description:** Deep dive into AT Protocol and design nbhd as PDS
 - **Requirements:**
-  - Study AT Protocol documentation
-  - Understand PDS (Personal Data Server) spec
-  - Design: How do nbhd members register DIDs?
-  - Plan: How is neighborhood data federated?
-  - Create ADR (Architecture Decision Record)
+  - [ ] Study AT Protocol documentation
+  - [ ] Understand PDS (Personal Data Server) spec
+  - [ ] Design: How do nbhd members register DIDs?
+  - [ ] Plan: How is neighborhood data federated?
+  - [ ] Create ADR (Architecture Decision Record)
 - **Acceptance Criteria:**
-  - Clear understanding of PDS requirements
-  - Design document for AT Protocol integration
-  - Decision record on implementation approach
+  - [ ] Clear understanding of PDS requirements
+  - [ ] Design document for AT Protocol integration
+  - [ ] Decision record on implementation approach
 - **Type:** Research
 - **Estimate:** L
 
 #### ATP-002: BlueSky Integration Review
 - **Description:** Review current BlueSky OAuth and plan AT Protocol sync
 - **Requirements:**
-  - Audit current BlueSky integration
-  - Map BlueSky user profiles to AT Protocol DIDs
-  - Plan sync of profile data
-  - Identify gaps in current implementation
+  - [ ] Audit current BlueSky integration
+  - [ ] Map BlueSky user profiles to AT Protocol DIDs
+  - [ ] Plan sync of profile data
+  - [ ] Identify gaps in current implementation
 - **Acceptance Criteria:**
-  - Clear mapping between BlueSky profiles and DIDs
-  - Plan for keeping data in sync
+  - [ ] Clear mapping between BlueSky profiles and DIDs
+  - [ ] Plan for keeping data in sync
 - **Type:** Research
 - **Estimate:** M
 
@@ -273,30 +284,30 @@ Phase 2 focuses on two major features:
 #### ATP-003: DID Registration for Members
 - **Description:** Implement DID (Decentralized Identifier) registration for nbhd members
 - **Requirements:**
-  - Generate unique DID for each member
-  - Store DID in user profile (DynamoDB)
-  - DID format: `did:plc:{key}` or similar
-  - Create keypair for member account
-  - Store keys securely (AWS Secrets Manager or KMS)
+  - [ ] Generate unique DID for each member
+  - [ ] Store DID in user profile (DynamoDB)
+  - [ ] DID format: `did:plc:{key}` or similar
+  - [ ] Create keypair for member account
+  - [ ] Store keys securely (AWS Secrets Manager or KMS)
 - **Acceptance Criteria:**
-  - Each member gets unique DID on signup
-  - DID stored and retrievable
-  - Keypair generated and stored securely
-  - Can verify ownership of DID
+  - [ ] Each member gets unique DID on signup
+  - [ ] DID stored and retrievable
+  - [ ] Keypair generated and stored securely
+  - [ ] Can verify ownership of DID
 - **Type:** Backend
 - **Estimate:** M
 
 #### ATP-004: DID to BlueSky Handle Mapping
 - **Description:** Link member DIDs to BlueSky handles
 - **Requirements:**
-  - Member DIDs linked to BlueSky DIDs
-  - Verify BlueSky ownership (using OAuth)
-  - Store mapping in DynamoDB
-  - Support profile sync from BlueSky
+  - [ ] Member DIDs linked to BlueSky DIDs
+  - [ ] Verify BlueSky ownership (using OAuth)
+  - [ ] Store mapping in DynamoDB
+  - [ ] Support profile sync from BlueSky
 - **Acceptance Criteria:**
-  - Member DID maps to BlueSky DID
-  - Profile data syncs from BlueSky
-  - Verification is cryptographic
+  - [ ] Member DID maps to BlueSky DID
+  - [ ] Profile data syncs from BlueSky
+  - [ ] Verification is cryptographic
 - **Type:** Backend
 - **Estimate:** M
 
@@ -305,32 +316,32 @@ Phase 2 focuses on two major features:
 #### ATP-005: Personal Data Repository (PDS) Implementation
 - **Description:** Implement nbhd as AT Protocol PDS for members
 - **Requirements:**
-  - Create PDS service that speaks AT Protocol
-  - Store member data in AT Protocol format
-  - Implement PDS endpoints (getRepo, etc)
-  - Data types: profiles, posts, follows
-  - Replicate/sync with BlueSky network
+  - [ ] Create PDS service that speaks AT Protocol
+  - [ ] Store member data in AT Protocol format
+  - [ ] Implement PDS endpoints (getRepo, etc)
+  - [ ] Data types: profiles, posts, follows
+  - [ ] Replicate/sync with BlueSky network
 - **Acceptance Criteria:**
-  - nbhd can be queried as AT Protocol PDS
-  - Member data retrievable via AT Protocol APIs
-  - BlueSky can verify data from nbhd PDS
-  - Proper error handling
+  - [ ] nbhd can be queried as AT Protocol PDS
+  - [ ] Member data retrievable via AT Protocol APIs
+  - [ ] BlueSky can verify data from nbhd PDS
+  - [ ] Proper error handling
 - **Type:** Backend/Infrastructure
 - **Estimate:** XL (complex new feature)
 
 #### ATP-006: Data Sync from blueSky Firehose
 - **Description:** Stream member posts/activities into nbhd PDS
 - **Requirements:**
-  - Subscribe to BlueSky firehose (or relevant subset)
-  - Capture posts by neighborhood members
-  - Store in PDS format
-  - Update member timelines
-  - Handle rate limiting and errors
+  - [ ] Subscribe to BlueSky firehose (or relevant subset)
+  - [ ] Capture posts by neighborhood members
+  - [ ] Store in PDS format
+  - [ ] Update member timelines
+  - [ ] Handle rate limiting and errors
 - **Acceptance Criteria:**
-  - Posts from BlueSky appear in nbhd
-  - Sync is near real-time
-  - No data loss
-  - Handles network failures gracefully
+  - [ ] Posts from BlueSky appear in nbhd
+  - [ ] Sync is near real-time
+  - [ ] No data loss
+  - [ ] Handles network failures gracefully
 - **Type:** Backend
 - **Estimate:** L
 
@@ -339,31 +350,31 @@ Phase 2 focuses on two major features:
 #### ATP-007: AT Protocol Data Export
 - **Description:** Export member data in standard AT Protocol format
 - **Requirements:**
-  - Endpoint: `GET /api/user/export/atproto`
-  - Exports all user data as AT Protocol records
-  - Includes profiles, posts, follows, custom data
-  - Downloadable ZIP or JSON
-  - Supports data portability (GDPR right)
+  - [ ] Endpoint: `GET /api/user/export/atproto`
+  - [ ] Exports all user data as AT Protocol records
+  - [ ] Includes profiles, posts, follows, custom data
+  - [ ] Downloadable ZIP or JSON
+  - [ ] Supports data portability (GDPR right)
 - **Acceptance Criteria:**
-  - Export contains all user data
-  - Format is AT Protocol compliant
-  - Can be imported to other PDS
-  - Includes metadata
+  - [ ] Export contains all user data
+  - [ ] Format is AT Protocol compliant
+  - [ ] Can be imported to other PDS
+  - [ ] Includes metadata
 - **Type:** Backend
 - **Estimate:** M
 
 #### ATP-008: Data Migration Between nbhds
 - **Description:** Allow members to transfer data to different nbhd instances
 - **Requirements:**
-  - Import exported AT Protocol data
-  - Map old DIDs to new DIDs
-  - Preserve post history and metadata
-  - Update BlueSky records
+  - [ ] Import exported AT Protocol data
+  - [ ] Map old DIDs to new DIDs
+  - [ ] Preserve post history and metadata
+  - [ ] Update BlueSky records
 - **Acceptance Criteria:**
-  - Member data successfully migrates
-  - History preserved
-  - BlueSky profile updated
-  - No data loss
+  - [ ] Member data successfully migrates
+  - [ ] History preserved
+  - [ ] BlueSky profile updated
+  - [ ] No data loss
 - **Type:** Backend
 - **Estimate:** L
 
@@ -372,29 +383,29 @@ Phase 2 focuses on two major features:
 #### ATP-009: PDS Federation Setup
 - **Description:** Configure nbhd PDS to federate with BlueSky network
 - **Requirements:**
-  - Register nbhd PDS with AT Protocol network
-  - Implement federation protocols
-  - Handle PDS-to-PDS communication
-  - Subscribe to federation events
+  - [ ] Register nbhd PDS with AT Protocol network
+  - [ ] Implement federation protocols
+  - [ ] Handle PDS-to-PDS communication
+  - [ ] Subscribe to federation events
 - **Acceptance Criteria:**
-  - nbhd visible as federated PDS
-  - Can exchange data with other PDSs
-  - Federation is discoverable
+  - [ ] nbhd visible as federated PDS
+  - [ ] Can exchange data with other PDSs
+  - [ ] Federation is discoverable
 - **Type:** Infrastructure
 - **Estimate:** L
 
 #### ATP-010: Cross-PDS Neighborhood Lists
 - **Description:** Create neighborhood member lists as AT Protocol lists
 - **Requirements:**
-  - Neighborhood members as AT list
-  - Shareable to BlueSky profiles
-  - Can be subscribed to by other users
-  - Lists update when membership changes
+  - [ ] Neighborhood members as AT list
+  - [ ] Shareable to BlueSky profiles
+  - [ ] Can be subscribed to by other users
+  - [ ] Lists update when membership changes
 - **Acceptance Criteria:**
-  - Lists are created as AT records
-  - Visible on BlueSky
-  - Can be shared/subscribed
-  - Updates work correctly
+  - [ ] Lists are created as AT records
+  - [ ] Visible on BlueSky
+  - [ ] Can be shared/subscribed
+  - [ ] Updates work correctly
 - **Type:** Backend
 - **Estimate:** M
 
@@ -405,33 +416,45 @@ Phase 2 focuses on two major features:
 #### TEST-001: Phase 2 Integration Tests
 - **Description:** Write integration tests for static sites + PDS
 - **Requirements:**
-  - Test template selection → config → build workflow
-  - Test site deployment to subdomain
-  - Test DID creation and management
-  - Test data export/import
-  - E2E tests for key user flows
+  - [ ] Test template selection → config → build workflow
+  - [ ] Test site deployment to subdomain
+  - [ ] Test DID creation and management
+  - [ ] Test data export/import
+  - [ ] E2E tests for key user flows
+- **Acceptance Criteria:**
+  - [ ] All critical paths covered by tests
+  - [ ] Tests pass locally and in CI/CD
+  - [ ] Coverage > 70% for new code
 - **Type:** Testing
 - **Estimate:** L
 
 #### DOC-001: Static Sites User Guide
 - **Description:** Documentation for creating and managing static sites
 - **Requirements:**
-  - Step-by-step guide for selecting template
-  - Configuration instructions
-  - Preview and publishing workflow
-  - Troubleshooting guide
-  - Examples for each template type
+  - [ ] Step-by-step guide for selecting template
+  - [ ] Configuration instructions
+  - [ ] Preview and publishing workflow
+  - [ ] Troubleshooting guide
+  - [ ] Examples for each template type
+- **Acceptance Criteria:**
+  - [ ] Guide is clear and accessible
+  - [ ] All features documented
+  - [ ] Examples work as described
 - **Type:** Documentation
 - **Estimate:** M
 
 #### DOC-002: AT Protocol PDS Architecture Document
 - **Description:** Internal documentation on PDS implementation
 - **Requirements:**
-  - DID management flow
-  - Data storage architecture
-  - Federation overview
-  - API reference
-  - Troubleshooting
+  - [ ] DID management flow
+  - [ ] Data storage architecture
+  - [ ] Federation overview
+  - [ ] API reference
+  - [ ] Troubleshooting
+- **Acceptance Criteria:**
+  - [ ] Complete reference for developers
+  - [ ] All endpoints documented
+  - [ ] Architecture clear
 - **Type:** Documentation
 - **Estimate:** M
 
@@ -440,38 +463,38 @@ Phase 2 focuses on two major features:
 ## Priority Order (Recommended Sequence)
 
 ### Week 1-2: Foundation
-1. SSG-005 (Template API)
-2. SSG-006 (Site Config API)
-3. ATP-001 (AT Protocol Research)
+- [ ] SSG-005 (Template API)
+- [ ] SSG-006 (Site Config API)
+- [ ] ATP-001 (AT Protocol Research)
 
 ### Week 3-4: Frontend
-4. SSG-001 (Template Gallery)
-5. SSG-002 (Config Form)
-6. SSG-004 (Site Dashboard)
+- [ ] SSG-001 (Template Gallery)
+- [ ] SSG-002 (Config Form)
+- [ ] SSG-004 (Site Dashboard)
 
 ### Week 5-6: Build System
-7. SSG-008 (Lambda Build)
-8. SSG-009 (Subdomain Routing)
-9. SSG-007 (Build Trigger API)
+- [ ] SSG-008 (Lambda Build)
+- [ ] SSG-009 (Subdomain Routing)
+- [ ] SSG-007 (Build Trigger API)
 
 ### Week 7-8: Templates
-10. SSG-011 (Blog Template)
-11. SSG-012 (Project Template)
-12. SSG-013 (Newsletter Template)
+- [ ] SSG-011 (Blog Template)
+- [ ] SSG-012 (Project Template)
+- [ ] SSG-013 (Newsletter Template)
 
 ### Week 9-10: Preview & Export
-13. SSG-003 (WASM Preview)
-14. SSG-010 (Site Export)
+- [ ] SSG-003 (WASM Preview)
+- [ ] SSG-010 (Site Export)
 
 ### Week 11+: AT Protocol Core
-15. ATP-003 (DID Registration)
-16. ATP-004 (BlueSky Mapping)
-17. ATP-005 (PDS Implementation)
-18. ATP-006 (Firehose Sync)
+- [ ] ATP-003 (DID Registration)
+- [ ] ATP-004 (BlueSky Mapping)
+- [ ] ATP-005 (PDS Implementation)
+- [ ] ATP-006 (Firehose Sync)
 
 ### Ongoing
-- TEST-001 (Testing throughout)
-- DOC-001, DOC-002 (Documentation)
+- [ ] TEST-001 (Testing throughout)
+- [ ] DOC-001, DOC-002 (Documentation)
 
 ---
 
