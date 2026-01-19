@@ -7,7 +7,7 @@ Complete guide with battle-tested prompt templates for using Ralph Wiggum in Cla
 ### Quick Start: Complete a Single Ticket
 
 ```bash
-/ralph-loop 
+Follow these phases and complete these steps to add a new feature to the project:
 "TICKET ASSIGNMENT & DISCOVERY (Phase 1)
 - Read planning/tickets.md
 - Identify first incomplete ticket (first unchecked [ ] in priority order) - this is your currently assigned ticket
@@ -79,7 +79,6 @@ CRITICAL RULES (from AGENTS.md)
 - Test locally before committing
 - If test fails, DO NOT commit - fix and re-test
 - Mark ticket complete in tickets.md BEFORE committing
-- Update GitHub issue status BEFORE committing
 
 OUTPUT
 Success: <promise>DONE</promise> (ticket complete, tested, committed, pushed)

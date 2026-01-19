@@ -79,16 +79,16 @@ Phase 2 focuses on two major features:
 #### SSG-004: Site Management Dashboard
 - **Description:** Build dashboard to view/manage user's static sites
 - **Requirements:**
-  - [ ] List all user's sites with status (draft, building, published)
-  - [ ] Show site URL and deployment status
-  - [ ] "Edit" button to re-configure
-  - [ ] "Delete" button with confirmation
-  - [ ] "View Live" link to published site
+  - [x] List all user's sites with status (draft, building, published)
+  - [x] Show site URL and deployment status
+  - [x] "Edit" button to re-configure
+  - [x] "Delete" button with confirmation
+  - [x] "View Live" link to published site
 - **Acceptance Criteria:**
-  - [ ] Displays all user sites from API
-  - [ ] Can edit existing sites
-  - [ ] Delete removes site from dashboard
-  - [ ] Links work correctly
+  - [x] Displays all user sites from API
+  - [x] Can edit existing sites
+  - [x] Delete removes site from dashboard
+  - [x] Links work correctly
 - **Type:** Feature
 - **Estimate:** M
 
@@ -305,20 +305,6 @@ Phase 2 focuses on two major features:
 - **Type:** Template
 - **Estimate:** M
 
-#### SSG-017: Newsletter Archive Template (11ty)
-- **Description:** Email newsletter archive with latest/past issues
-- **Requirements:**
-  - [ ] Latest issue featured
-  - [ ] Archive of past issues
-  - [ ] Email signup form
-  - [ ] Mobile-optimized layout
-  - [ ] Config schema: title, description, signup URL
-- **Acceptance Criteria:**
-  - [ ] Archives display correctly
-  - [ ] Form submits properly
-  - [ ] Optimized for mobile readers
-- **Type:** Template
-- **Estimate:** M
 
 ---
 
@@ -544,7 +530,7 @@ Phase 2 focuses on two major features:
 ### Week 3-4: Frontend
 - [x] SSG-001 (Template Gallery)
 - [x] SSG-002 (Config Form)
-- [ ] SSG-004 (Site Dashboard)
+- [x] SSG-004 (Site Dashboard)
 
 ### Week 4-5: Custom Template System
 - [ ] SSG-011 (Template Schema Research & Design)
