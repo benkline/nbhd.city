@@ -32,15 +32,15 @@ Phase 2 focuses on two major features:
 #### SSG-001: Create Template Gallery UI Component
 - **Description:** Build a `TemplateGallery` component that displays available 11ty templates
 - **Requirements:**
-  - [ ] Fetch templates from API (`GET /api/templates`)
-  - [ ] Display template cards with preview images, name, description
-  - [ ] "Select template" button to start site configuration
-  - [ ] Show template tags (blog, project, newsletter, etc)
+  - [x] Fetch templates from API (`GET /api/templates`)
+  - [x] Display template cards with preview images, name, description
+  - [x] "Select template" button to start site configuration
+  - [x] Show template tags (blog, project, newsletter, etc)
 - **Acceptance Criteria:**
-  - [ ] Component renders templates from API
-  - [ ] Clicking "Select" navigates to config form
-  - [ ] Mobile-responsive grid layout
-  - [ ] Error handling for API failures
+  - [x] Component renders templates from API
+  - [x] Clicking "Select" navigates to config form
+  - [x] Mobile-responsive grid layout
+  - [x] Error handling for API failures
 - **Type:** Feature
 - **Estimate:** M
 
@@ -465,10 +465,9 @@ Phase 2 focuses on two major features:
 ### Week 1-2: Foundation
 - [x] SSG-005 (Template API)
 - [x] SSG-006 (Site Config API)
-- [ ] ATP-001 (AT Protocol Research)
 
 ### Week 3-4: Frontend
-- [ ] SSG-001 (Template Gallery)
+- [x] SSG-001 (Template Gallery)
 - [ ] SSG-002 (Config Form)
 - [ ] SSG-004 (Site Dashboard)
 
@@ -487,6 +486,7 @@ Phase 2 focuses on two major features:
 - [ ] SSG-010 (Site Export)
 
 ### Week 11+: AT Protocol Core
+- [ ] ATP-001 (AT Protocol Research)
 - [ ] ATP-003 (DID Registration)
 - [ ] ATP-004 (BlueSky Mapping)
 - [ ] ATP-005 (PDS Implementation)
