@@ -47,16 +47,16 @@ Phase 2 focuses on two major features:
 #### SSG-002: Build Site Configuration Form
 - **Description:** Create dynamic form generator for template-specific config fields
 - **Requirements:**
-  - [ ] Read `config.schema.json` from selected template
-  - [ ] Generate form inputs based on schema (text, textarea, color picker, etc)
-  - [ ] Real-time preview updates as user types
-  - [ ] Save draft configurations locally (localStorage)
-  - [ ] "Preview" and "Deploy" buttons
+  - [x] Read `config.schema.json` from selected template
+  - [x] Generate form inputs based on schema (text, textarea, color picker, etc)
+  - [x] Real-time preview updates as user types
+  - [x] Save draft configurations locally (localStorage)
+  - [x] "Preview" and "Deploy" buttons
 - **Acceptance Criteria:**
-  - [ ] Form renders all schema fields correctly
-  - [ ] Draft auto-saves every 30 seconds
-  - [ ] Validation matches schema constraints
-  - [ ] Form persists across page refreshes
+  - [x] Form renders all schema fields correctly
+  - [x] Draft auto-saves every 30 seconds
+  - [x] Validation matches schema constraints
+  - [x] Form persists across page refreshes
 - **Type:** Feature
 - **Estimate:** M
 
@@ -195,9 +195,84 @@ Phase 2 focuses on two major features:
 - **Type:** Backend
 - **Estimate:** S
 
+### Custom Template System
+
+#### SSG-011: Template Schema Format Research & Design
+- **Description:** Define standard template schema format and analysis approach for custom templates
+- **Requirements:**
+  - [ ] Research 11ty template structure and conventions
+  - [ ] Define standardized `template.config.json` format that all templates must provide
+  - [ ] Design schema extraction algorithm for analyzing template structure
+  - [ ] Document template requirements (folder structure, data files, etc)
+  - [ ] Create architecture decision record (ADR) for custom template system
+- **Acceptance Criteria:**
+  - [ ] Clear documentation of expected template structure
+  - [ ] Schema format defined and documented
+  - [ ] Examples for Blog, Project, Newsletter templates
+  - [ ] Design document ready for implementation
+- **Type:** Research/Design
+- **Estimate:** M
+
+#### SSG-012: Custom Template Registration API
+- **Description:** Implement API endpoints for users to register and manage custom 11ty templates from Git repos
+- **Requirements:**
+  - [ ] `POST /api/templates/register` - Register new template from Git URL
+  - [ ] `GET /api/templates/{id}/analyze` - Trigger template analysis and schema generation
+  - [ ] `GET /api/templates/custom` - List user's custom templates
+  - [ ] `DELETE /api/templates/{id}` - Remove custom template
+  - [ ] Validate Git repo is accessible and contains valid 11ty template
+  - [ ] Store template metadata in DynamoDB (repo URL, analysis status, schema, etc)
+- **Acceptance Criteria:**
+  - [ ] Can register templates from public Git repos
+  - [ ] Validation checks template structure before registering
+  - [ ] Schema generation triggered automatically on registration
+  - [ ] Custom templates stored in DynamoDB with proper user ownership
+  - [ ] Returns 400 for invalid templates, 201 for successful registration
+- **Type:** Backend/API
+- **Estimate:** M
+
+#### SSG-013: Template Analyzer Python Script
+- **Description:** Create Python utility to analyze 11ty templates and auto-generate config schemas
+- **Requirements:**
+  - [ ] Clone/fetch 11ty template from Git repo
+  - [ ] Analyze template structure (pages, layouts, data files, assets)
+  - [ ] Extract config variables from template documentation/code comments
+  - [ ] Generate JSON schema from config requirements
+  - [ ] Validate schema against template code
+  - [ ] Support multiple template types (blog, portfolio, documentation, etc)
+  - [ ] Handle errors gracefully (missing files, invalid syntax, etc)
+- **Acceptance Criteria:**
+  - [ ] Successfully analyzes Blog, Project, Newsletter templates
+  - [ ] Generates valid JSON schemas matching actual template config needs
+  - [ ] Handles edge cases (no config docs, custom 11ty plugins, etc)
+  - [ ] Runs in under 10 seconds per template
+  - [ ] Clear error messages for invalid templates
+- **Type:** Backend/Utility
+- **Estimate:** L
+
+#### SSG-014: Custom Template Selection & Analysis UI
+- **Description:** Build frontend UI for users to register and select custom templates from Git
+- **Requirements:**
+  - [ ] Form component to input Git repo URL (HTTPS)
+  - [ ] "Analyze Template" button to trigger schema generation
+  - [ ] Real-time status updates (analyzing, success, error)
+  - [ ] Display extracted schema fields and validation rules
+  - [ ] "Save Template" to add to user's available templates
+  - [ ] Updated TemplateGallery to show both built-in and custom templates
+  - [ ] Template preview/details modal with documentation
+- **Acceptance Criteria:**
+  - [ ] Can input and validate Git URLs
+  - [ ] Displays analysis progress to user
+  - [ ] Shows generated schema in readable format
+  - [ ] Custom templates appear in TemplateGallery alongside built-in ones
+  - [ ] Error handling for invalid repos, network issues, etc
+  - [ ] Mobile-responsive design
+- **Type:** Frontend
+- **Estimate:** M
+
 ### Templates: Initial Implementations
 
-#### SSG-011: Blog Template (11ty)
+#### SSG-015: Blog Template (11ty)
 - **Description:** Personal blog template with posts, tags, and RSS
 - **Requirements:**
   - [ ] Homepage with recent posts
@@ -214,7 +289,7 @@ Phase 2 focuses on two major features:
 - **Type:** Template
 - **Estimate:** M
 
-#### SSG-012: Project Showcase Template (11ty)
+#### SSG-016: Project Showcase Template (11ty)
 - **Description:** Team project page with gallery and contributors
 - **Requirements:**
   - [ ] Project overview
@@ -230,7 +305,7 @@ Phase 2 focuses on two major features:
 - **Type:** Template
 - **Estimate:** M
 
-#### SSG-013: Newsletter Archive Template (11ty)
+#### SSG-017: Newsletter Archive Template (11ty)
 - **Description:** Email newsletter archive with latest/past issues
 - **Requirements:**
   - [ ] Latest issue featured
@@ -468,24 +543,30 @@ Phase 2 focuses on two major features:
 
 ### Week 3-4: Frontend
 - [x] SSG-001 (Template Gallery)
-- [ ] SSG-002 (Config Form)
+- [x] SSG-002 (Config Form)
 - [ ] SSG-004 (Site Dashboard)
 
-### Week 5-6: Build System
+### Week 4-5: Custom Template System
+- [ ] SSG-011 (Template Schema Research & Design)
+- [ ] SSG-012 (Custom Template Registration API)
+- [ ] SSG-013 (Template Analyzer Python Script)
+- [ ] SSG-014 (Custom Template Selection UI)
+
+### Week 6-7: Build System
 - [ ] SSG-008 (Lambda Build)
 - [ ] SSG-009 (Subdomain Routing)
 - [ ] SSG-007 (Build Trigger API)
 
-### Week 7-8: Templates
-- [ ] SSG-011 (Blog Template)
-- [ ] SSG-012 (Project Template)
-- [ ] SSG-013 (Newsletter Template)
+### Week 8-9: Templates (Using Procedural Forms)
+- [ ] SSG-015 (Blog Template)
+- [ ] SSG-016 (Project Template)
+- [ ] SSG-017 (Newsletter Template)
 
-### Week 9-10: Preview & Export
+### Week 10-11: Preview & Export
 - [ ] SSG-003 (WASM Preview)
 - [ ] SSG-010 (Site Export)
 
-### Week 11+: AT Protocol Core
+### Week 12+: AT Protocol Core
 - [ ] ATP-001 (AT Protocol Research)
 - [ ] ATP-003 (DID Registration)
 - [ ] ATP-004 (BlueSky Mapping)
