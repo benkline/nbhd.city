@@ -97,16 +97,16 @@ Phase 2 focuses on two major features:
 #### SSG-005: Template Management API
 - **Description:** Implement API endpoints for template discovery and metadata
 - **Requirements:**
-  - [ ] `GET /api/templates` - List all available templates
-  - [ ] `GET /api/templates/{id}` - Get single template metadata
-  - [ ] `GET /api/templates/{id}/schema` - Get config schema
-  - [ ] `GET /api/templates/{id}/preview` - Get preview image URL
-  - [ ] Each template includes: name, description, author, version, tags
+  - [x] `GET /api/templates` - List all available templates
+  - [x] `GET /api/templates/{id}` - Get single template metadata
+  - [x] `GET /api/templates/{id}/schema` - Get config schema
+  - [x] `GET /api/templates/{id}/preview` - Get preview image URL
+  - [x] Each template includes: name, description, author, version, tags
 - **Acceptance Criteria:**
-  - [ ] All endpoints return correct JSON structure
-  - [ ] Pagination for large template lists
-  - [ ] Proper error handling (404 for missing templates)
-  - [ ] Schema validation works
+  - [x] All endpoints return correct JSON structure
+  - [x] Pagination for large template lists
+  - [x] Proper error handling (404 for missing templates)
+  - [x] Schema validation works
 - **Type:** Backend
 - **Estimate:** S
 
@@ -463,7 +463,7 @@ Phase 2 focuses on two major features:
 ## Priority Order (Recommended Sequence)
 
 ### Week 1-2: Foundation
-- [ ] SSG-005 (Template API)
+- [x] SSG-005 (Template API)
 - [ ] SSG-006 (Site Config API)
 - [ ] ATP-001 (AT Protocol Research)
 

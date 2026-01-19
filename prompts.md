@@ -7,15 +7,15 @@ Complete guide with battle-tested prompt templates for using Ralph Wiggum in Cla
 ### Quick Start: Complete a Single Ticket
 
 ```bash
-/ralph-loop "
-TICKET ASSIGNMENT & DISCOVERY (Phase 1)
+/ralph-loop 
+"TICKET ASSIGNMENT & DISCOVERY (Phase 1)
 - Read planning/tickets.md
-- Identify next incomplete ticket (first unchecked [ ] in priority order)
+- Identify first incomplete ticket (first unchecked [ ] in priority order) - this is your currently assigned ticket
 - Read full ticket requirements and acceptance criteria
 - Identify all [ ] checkboxes that need completion
 
 CONTEXT & PLANNING (Phase 2)
-- Read Phase Overview in tickets.md to find 'Relevant Documentation' section
+- Read Phase Overview for the currently assigned ticket in tickets.md to find 'Relevant Documentation' section
 - Read those specific planning docs (ARCHITECTURE.md, API.md, FRONTEND.md, etc.)
 - Note: programming language, test framework, test command, project structure
 - Note: file locations where changes will be made
@@ -84,7 +84,7 @@ CRITICAL RULES (from AGENTS.md)
 OUTPUT
 Success: <promise>DONE</promise> (ticket complete, tested, committed, pushed)
 Blocked: <promise>BLOCKED</promise> (document blocker, update ticket, push progress)
-" --max-iterations 25
+" --max-iterations 5
 ```
 
 ## Best Practices

@@ -111,3 +111,30 @@ class UserMembershipsResponse(BaseModel):
     """Schema for user's nbhd memberships."""
 
     neighborhoods: List[NbhdResponse]
+
+
+# Static Site Template Models
+
+class TemplateResponse(BaseModel):
+    """Schema for template metadata in list/detail responses."""
+
+    id: str
+    name: str
+    description: str
+    author: str
+    version: str
+    tags: List[str]
+    preview_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class TemplateSchemaResponse(BaseModel):
+    """Schema for template configuration schema."""
+
+    id: str
+    schema: Dict
+
+    class Config:
+        from_attributes = True
