@@ -1,0 +1,287 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.container h1 {
+  font-size: 2rem;
+  margin: 0 0 0.5rem 0;
+  color: #333;
+}
+
+.subtitle {
+  color: #666;
+  margin: 0 0 2rem 0;
+  font-size: 1.05rem;
+}
+
+.loadingState,
+.emptyState,
+.errorState {
+  padding: 2rem;
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.emptyState p:first-child {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.emptyDescription {
+  color: #999 !important;
+  font-size: 0.95rem !important;
+}
+
+.errorMessage {
+  color: #dc3545;
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.cardHeader {
+  padding: 1.25rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #333;
+  flex: 1;
+  word-break: break-word;
+}
+
+.status {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.statusDraft {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.statusBuilding {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.statusPublished {
+  background: #d4edda;
+  color: #155724;
+}
+
+.cardBody {
+  padding: 1.25rem;
+  flex-grow: 1;
+}
+
+.info {
+  display: flex;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.info:last-child {
+  margin-bottom: 0;
+}
+
+.info label {
+  font-weight: 500;
+  color: #666;
+  min-width: 80px;
+  margin-right: 0.5rem;
+}
+
+.info span {
+  color: #333;
+  word-break: break-word;
+}
+
+.url {
+  color: #007bff !important;
+  font-family: monospace;
+  font-size: 0.85rem !important;
+}
+
+.date {
+  color: #999 !important;
+  font-size: 0.85rem !important;
+}
+
+.cardActions {
+  padding: 1rem;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.viewLiveLink,
+.editButton,
+.deleteButton,
+.confirmButton,
+.cancelButton {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.viewLiveLink {
+  background: #17a2b8;
+  color: white;
+  flex-grow: 1;
+}
+
+.viewLiveLink:hover {
+  background: #138496;
+}
+
+.editButton {
+  background: #6c757d;
+  color: white;
+  flex-grow: 1;
+}
+
+.editButton:hover {
+  background: #5a6268;
+}
+
+.deleteButton {
+  background: #dc3545;
+  color: white;
+  flex-grow: 1;
+}
+
+.deleteButton:hover {
+  background: #c82333;
+}
+
+.confirmButton {
+  background: #dc3545;
+  color: white;
+}
+
+.confirmButton:hover {
+  background: #c82333;
+}
+
+.cancelButton {
+  background: #6c757d;
+  color: white;
+}
+
+.cancelButton:hover {
+  background: #5a6268;
+}
+
+.confirmDialog {
+  grid-column: 1 / -1;
+  padding: 1rem;
+  background: #fff3cd;
+  border-radius: 6px;
+  border: 1px solid #ffc107;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.confirmDialog p {
+  margin: 0 0 0.75rem 0;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.confirmButtons .confirmButton,
+.confirmButtons .cancelButton {
+  flex: 1;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .container h1 {
+    font-size: 1.5rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardActions {
+    flex-direction: column;
+  }
+
+  .viewLiveLink,
+  .editButton,
+  .deleteButton,
+  .confirmButton,
+  .cancelButton {
+    flex: auto;
+    width: 100%;
+  }
+
+  .titleSection {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
