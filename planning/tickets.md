@@ -113,17 +113,17 @@ Phase 2 focuses on two major features:
 #### SSG-006: Site Configuration Storage API
 - **Description:** Implement endpoints to save and retrieve site configurations
 - **Requirements:**
-  - [ ] `POST /api/sites` - Create new site from template + config
-  - [ ] `GET /api/sites/{id}` - Retrieve site config
-  - [ ] `PUT /api/sites/{id}` - Update site config
-  - [ ] `GET /api/sites` - List user's sites
-  - [ ] `DELETE /api/sites/{id}` - Delete site
-  - [ ] Store config JSON in DynamoDB
+  - [x] `POST /api/sites` - Create new site from template + config
+  - [x] `GET /api/sites/{id}` - Retrieve site config
+  - [x] `PUT /api/sites/{id}` - Update site config
+  - [x] `GET /api/sites` - List user's sites
+  - [x] `DELETE /api/sites/{id}` - Delete site
+  - [x] Store config JSON in DynamoDB
 - **Acceptance Criteria:**
-  - [ ] Configs persist to DynamoDB
-  - [ ] Config validation against schema
-  - [ ] User can only access their own sites
-  - [ ] Returns proper error codes (400, 401, 404)
+  - [x] Configs persist to DynamoDB
+  - [x] Config validation against schema
+  - [x] User can only access their own sites
+  - [x] Returns proper error codes (400, 401, 404)
 - **Type:** Backend
 - **Estimate:** M
 
@@ -464,7 +464,7 @@ Phase 2 focuses on two major features:
 
 ### Week 1-2: Foundation
 - [x] SSG-005 (Template API)
-- [ ] SSG-006 (Site Config API)
+- [x] SSG-006 (Site Config API)
 - [ ] ATP-001 (AT Protocol Research)
 
 ### Week 3-4: Frontend
