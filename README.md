@@ -1,10 +1,6 @@
 # nbhd.city
 
-A collaborative neighborhood platform where members can create beautiful static sites using pre-built templates. Each neighborhood instance is fully autonomous—deployed independently with its own database, infrastructure, and users.
-
-nbhd.city enables community members to publish sites without technical knowledge through an intuitive site builder. Users select from a gallery of 11ty-powered templates, customize with a dynamic form, and deploy instantly. Every published site gets a professional subdomain (e.g., `username.nbhd.city`) backed by CloudFront CDN.
-
-The platform is built on modern, serverless architecture: a React frontend for the UI, FastAPI backend for APIs, DynamoDB for storage, and AWS Lambda for building static sites. Future phases will add AT Protocol integration, allowing each neighborhood to become a Personal Data Server on the decentralized web.
+A collaborative community platform built on modern, serverless architecture: a React frontend for the UI, FastAPI backend for APIs, DynamoDB for storage, and AWS Lambda. Nbhds are on the AT Protocol serving as the Personal Data Server for its nbrs. Collaborate to create static sites using pre-built templates and uploaded 11ty templates. Nbhds utilize a plug-in system to add features for additional collaboration methods.
 
 ---
 
@@ -104,42 +100,6 @@ BLUESKY_CLIENT_SECRET=your_client_secret
 VITE_API_URL=http://localhost:8000
 ```
 
----
-
-## Project Structure
-
-```
-nbhd.city/
-├── nbhd/                    # React frontend (Vite)
-│   ├── src/
-│   │   ├── pages/          # Page-level components
-│   │   ├── components/     # Reusable components
-│   │   │   └── SiteBuilder/
-│   │   ├── __tests__/      # Component tests
-│   │   └── App.jsx
-│   ├── vite.config.js
-│   └── package.json
-│
-├── api/                     # FastAPI backend
-│   ├── main.py             # App entry point
-│   ├── models.py           # Data models
-│   ├── users/              # User endpoints
-│   ├── nbhds/              # Neighborhood endpoints
-│   ├── templates.py        # Template endpoints
-│   ├── sites/              # Site endpoints
-│   ├── requirements.txt
-│   └── tests/
-│
-└── planning/               # Documentation
-    ├── tickets.md          # Development tickets
-    ├── ARCHITECTURE.md     # System design
-    ├── API.md              # API documentation
-    ├── FRONTEND.md         # Frontend guide
-    └── DATABASE.md         # Data schema
-```
-
----
-
 ## Key Features (Phase 2)
 
 ### Static Site Generation
@@ -148,34 +108,14 @@ nbhd.city/
 - **Live Preview** - See changes instantly as you configure
 - **One-Click Deployment** - Publish to `username.nbhd.city` with custom domain support
 - **Site Management** - Edit, delete, and manage published sites
-
-### API Endpoints
-
-**Templates:**
-- `GET /api/templates` - List all available templates
-- `GET /api/templates/{id}` - Get template metadata
-- `GET /api/templates/{id}/schema` - Get configuration schema
-- `GET /api/templates/{id}/preview` - Get preview image
-
-**Sites:**
-- `GET /api/sites` - List user's sites
-- `POST /api/sites` - Create new site from template
-- `GET /api/sites/{id}` - Get site configuration
-- `PUT /api/sites/{id}` - Update site configuration
-- `DELETE /api/sites/{id}` - Delete site
-
-**Authentication:**
-- `GET /auth/bluesky` - BlueSky OAuth login
-- `POST /auth/callback` - OAuth callback handler
-
----
+- **Plugin System for Addtional Features** - Shop for and add plugins giving each nbhd its own personality
 
 ## Testing
 
 ### Frontend Tests
 ```bash
 cd nbhd
-npm test                    # Run all tests
+npm test                  # Run all tests
 npm run test:watch        # Watch mode
 npm run test:coverage     # Coverage report
 ```
@@ -185,7 +125,7 @@ Tests use Vitest + React Testing Library. Components are tested in isolation wit
 ### Backend Tests
 ```bash
 cd api
-pytest                     # Run all tests
+pytest                   # Run all tests
 pytest --cov             # With coverage
 pytest -v                # Verbose output
 ```
@@ -205,48 +145,6 @@ The application follows a serverless architecture:
 - **Authentication:** BlueSky OAuth 2.0 → JWT tokens
 
 See `planning/ARCHITECTURE.md` for detailed system design.
-
----
-
-## Documentation
-
-Comprehensive planning and architecture docs are in `planning/`:
-
-- **tickets.md** - Development roadmap and task tracking
-- **ARCHITECTURE.md** - System design and tech stack
-- **API.md** - REST API endpoint specifications
-- **DATABASE.md** - DynamoDB schema design
-- **FRONTEND.md** - Frontend component structure
-- **INFRASTRUCTURE.md** - AWS deployment guide
-- **SECURITY.md** - Authentication and key management
-
----
-
-## Contributing
-
-1. Check `planning/tickets.md` for current work
-2. Create a feature branch: `git checkout -b feature/SSG-###`
-3. Write tests first (TDD approach)
-4. Implement features
-5. Ensure all tests pass
-6. Commit with descriptive message
-7. Push and create pull request
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, Vite, React Router, CSS Modules |
-| Backend | FastAPI, Python 3.11 |
-| Database | DynamoDB |
-| Deployment | AWS Lambda, S3, CloudFront |
-| Testing | Vitest, Pytest |
-| Authentication | BlueSky OAuth 2.0 |
-| Static Generator | 11ty (Eleventy) |
-
----
 
 ## License
 
