@@ -1,0 +1,198 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.form {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 1.75rem;
+  margin: 0 0 0.5rem 0;
+  color: #333;
+}
+
+.description {
+  color: #666;
+  margin: 0 0 2rem 0;
+  font-size: 1rem;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-weight: 500;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.input,
+.textarea,
+.colorInput {
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input:focus,
+.textarea:focus,
+.colorInput:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.colorInput {
+  max-width: 80px;
+  height: 50px;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.hint {
+  color: #999;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.errorSummary {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  color: #721c24;
+}
+
+.errorSummary p {
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.errorSummary ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.errorSummary li {
+  margin: 0.25rem 0;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.previewButton,
+.deployButton {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.previewButton {
+  background: #6c757d;
+  color: white;
+}
+
+.previewButton:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+.previewButton:active:not(:disabled) {
+  background: #4e555b;
+}
+
+.previewButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.deployButton {
+  background: #28a745;
+  color: white;
+}
+
+.deployButton:hover:not(:disabled) {
+  background: #218838;
+}
+
+.deployButton:active:not(:disabled) {
+  background: #1e7e34;
+}
+
+.deployButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.draftIndicator {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: #e7f3ff;
+  border-left: 4px solid #007bff;
+  color: #004085;
+  font-size: 0.9rem;
+  border-radius: 4px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .form {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .previewButton,
+  .deployButton {
+    flex: auto;
+  }
+}

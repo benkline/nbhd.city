@@ -7,15 +7,15 @@ Complete guide with battle-tested prompt templates for using Ralph Wiggum in Cla
 ### Quick Start: Complete a Single Ticket
 
 ```bash
-/ralph-loop "
-TICKET ASSIGNMENT & DISCOVERY (Phase 1)
+Follow these phases and complete these steps to add a new feature to the project:
+"TICKET ASSIGNMENT & DISCOVERY (Phase 1)
 - Read planning/tickets.md
-- Identify next incomplete ticket (first unchecked [ ] in priority order)
+- Identify first incomplete ticket (first unchecked [ ] in priority order) - this is your currently assigned ticket
 - Read full ticket requirements and acceptance criteria
 - Identify all [ ] checkboxes that need completion
 
 CONTEXT & PLANNING (Phase 2)
-- Read Phase Overview in tickets.md to find 'Relevant Documentation' section
+- Read Phase Overview for the currently assigned ticket in tickets.md to find 'Relevant Documentation' section
 - Read those specific planning docs (ARCHITECTURE.md, API.md, FRONTEND.md, etc.)
 - Note: programming language, test framework, test command, project structure
 - Note: file locations where changes will be made
@@ -34,6 +34,9 @@ IMPLEMENTATION (Phase 4)
 - Follow patterns and conventions from planning docs
 - Do NOT over-engineer or add extra features
 - Mark completed [ ] checkboxes in test code comments as you go
+- AS EACH TEST PASSES:
+  * Mark the corresponding [ ] as [x] in planning/tickets.md for this ticket
+  * Do NOT commit yet - just update the file to track progress
 
 TEST & ITERATE (Phase 5)
 LOOP until ALL tests pass:
@@ -41,11 +44,20 @@ LOOP until ALL tests pass:
   2. Read error messages carefully
   3. Fix ONE specific issue at a time
   4. Re-run tests
-  5. If passing, break loop
+  5. If any test passes:
+     - Update planning/tickets.md: mark that requirement's [ ] as [x]
+     - Do not commit yet, just track progress
+  6. If ALL tests passing, break loop
 
 COMPLETION & HANDOFF (Phase 6)
-- Update tickets.md: mark ALL [ ] items as [x] for this ticket
-- Update GitHub issue: change status to complete, add comment with implementation details
+- UPDATE BOTH TRACKING LOCATIONS:
+  * In planning/tickets.md: Verify ALL [ ] items for this ticket are marked [x]
+  * In GitHub issue (#NN): Use 'gh issue view <issue> --web' to verify and update
+    - Click issue to open on GitHub.com
+    - Click "Projects" on right sidebar
+    - Set status to "Done"
+    - Add comment: "Implemented in feature/TICKET-ID - all acceptance criteria met"
+    - Link any related issues if applicable
 - Review requirements met: 'git diff HEAD~1' shows changes match ticket scope
 - Create commit (MANDATORY):
   git add .
@@ -67,12 +79,11 @@ CRITICAL RULES (from AGENTS.md)
 - Test locally before committing
 - If test fails, DO NOT commit - fix and re-test
 - Mark ticket complete in tickets.md BEFORE committing
-- Update GitHub issue status BEFORE committing
 
 OUTPUT
 Success: <promise>DONE</promise> (ticket complete, tested, committed, pushed)
 Blocked: <promise>BLOCKED</promise> (document blocker, update ticket, push progress)
-" --max-iterations 25
+" --max-iterations 5
 ```
 
 ## Best Practices
@@ -139,20 +150,27 @@ feat(TICKET-ID): brief one-line description
 Fixes: TICKET-ID
 ```
 
-8. **Update tickets.md as you work**
+8. **Update BOTH tracking locations continuously**
 ```
-Before commit:
-- Check ALL [ ] items in requirements for this ticket
-- Mark each completed as [x]
-- Verify acceptance criteria all marked [x]
+AS EACH TEST PASSES (during Phase 5):
+- In planning/tickets.md: Mark the [ ] requirement as [x]
+- This shows progress and helps Ralph see what's done
+
+Before commit (Phase 6):
+- Verify ALL [ ] items in requirements marked [x]
+- Verify ALL [ ] items in acceptance criteria marked [x]
 ```
 
-9. **Update GitHub issue status**
+9. **Update GitHub issue status (REQUIRED before pushing)**
 ```
-Before pushing:
-- Change GitHub issue to "Done" status
-- Add comment: "Implemented in feature/TICKET-ID"
-- Link to any related issues
+Before pushing (Phase 6):
+- Open GitHub issue: gh issue view <ISSUE_NUMBER> --web
+- Click Projects → Set status to "Done"
+- Add comment: "✅ Implemented in feature/TICKET-ID
+  - All acceptance criteria met
+  - Tests passing
+  - Ready for review"
+- Do NOT push until GitHub issue is updated
 ```
 
 10. **Always push immediately after commit**
@@ -229,22 +247,41 @@ Verify: git log origin/feature/TICKET-ID -1 shows your commit
 
 ## Ticket Workflow Checklist
 
-When starting a ticket:
-
+### Discovery & Setup
 - [ ] Read planning/tickets.md - identify TICKET-ID and next incomplete ticket
 - [ ] Read "Relevant Documentation" section for your phase
 - [ ] Read each relevant planning doc - note language, frameworks, locations
+- [ ] Find corresponding GitHub issue number: `gh issue list | grep TICKET-ID`
+
+### Development (TDD)
 - [ ] Create feature branch: `git checkout -b feature/TICKET-ID`
 - [ ] Write tests for ALL acceptance criteria [ ]
 - [ ] Run tests - should FAIL initially
+
+### Implementation & Progress Tracking
 - [ ] Implement code to pass tests
-- [ ] Run tests - iterate until ALL PASS
-- [ ] Mark ALL [ ] items as [x] in tickets.md
-- [ ] Review: git diff shows only expected changes
-- [ ] Create commit with proper message format
-- [ ] Update GitHub issue status
+- [ ] Run tests - iterate until EACH test passes
+- [ ] **AS EACH TEST PASSES:** Mark corresponding [ ] as [x] in planning/tickets.md
+- [ ] Continue until ALL tests PASS
+
+### Completion (Before Commit)
+- [ ] Verify in planning/tickets.md: ALL [ ] items for ticket marked [x]
+- [ ] Review: `git diff HEAD` shows only expected changes (no extra refactoring)
+- [ ] Create commit with proper Conventional Commits format
+
+### Update Both Tracking Systems (CRITICAL)
+- [ ] Update planning/tickets.md: ALL [ ] items as [x]
+- [ ] Update GitHub issue (#NN):
+  - [ ] Run: `gh issue view <ISSUE_NUMBER> --web`
+  - [ ] Set Project status to "Done"
+  - [ ] Add comment with implementation summary
+  - [ ] Verify status changed on GitHub
+
+### Push (MANDATORY & FINAL)
+- [ ] Create commit with message
 - [ ] Push to origin: `git push origin feature/TICKET-ID`
-- [ ] Verify commit exists on GitHub
+- [ ] Verify: `git log origin/feature/TICKET-ID -1` shows your commit
+- [ ] Do NOT proceed if push fails - debug and retry
 
 ---
 

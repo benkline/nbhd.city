@@ -111,3 +111,69 @@ class UserMembershipsResponse(BaseModel):
     """Schema for user's nbhd memberships."""
 
     neighborhoods: List[NbhdResponse]
+
+
+# Static Site Template Models
+
+class TemplateResponse(BaseModel):
+    """Schema for template metadata in list/detail responses."""
+
+    id: str
+    name: str
+    description: str
+    author: str
+    version: str
+    tags: List[str]
+    preview_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class TemplateSchemaResponse(BaseModel):
+    """Schema for template configuration schema."""
+
+    id: str
+    schema: Dict
+
+    class Config:
+        from_attributes = True
+
+
+# Site Models
+
+class SiteCreate(BaseModel):
+    """Schema for creating a new site."""
+
+    title: str
+    template: str
+    config: Dict = {}
+
+    class Config:
+        from_attributes = True
+
+
+class SiteUpdate(BaseModel):
+    """Schema for updating a site."""
+
+    title: Optional[str] = None
+    config: Optional[Dict] = None
+
+    class Config:
+        from_attributes = True
+
+
+class SiteResponse(BaseModel):
+    """Schema for site responses."""
+
+    site_id: str
+    user_id: str
+    title: str
+    template: str
+    status: str = "draft"
+    config: Dict
+    created_at: str
+    updated_at: str
+
+    class Config:
+        from_attributes = True
