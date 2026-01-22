@@ -32,31 +32,31 @@ Phase 2 focuses on two major features:
 #### SSG-001: Create Template Gallery UI Component
 - **Description:** Build a `TemplateGallery` component that displays available 11ty templates
 - **Requirements:**
-  - [ ] Fetch templates from API (`GET /api/templates`)
-  - [ ] Display template cards with preview images, name, description
-  - [ ] "Select template" button to start site configuration
-  - [ ] Show template tags (blog, project, newsletter, etc)
+  - [x] Fetch templates from API (`GET /api/templates`)
+  - [x] Display template cards with preview images, name, description
+  - [x] "Select template" button to start site configuration
+  - [x] Show template tags (blog, project, newsletter, etc)
 - **Acceptance Criteria:**
-  - [ ] Component renders templates from API
-  - [ ] Clicking "Select" navigates to config form
-  - [ ] Mobile-responsive grid layout
-  - [ ] Error handling for API failures
+  - [x] Component renders templates from API
+  - [x] Clicking "Select" navigates to config form
+  - [x] Mobile-responsive grid layout
+  - [x] Error handling for API failures
 - **Type:** Feature
 - **Estimate:** M
 
 #### SSG-002: Build Site Configuration Form
 - **Description:** Create dynamic form generator for template-specific config fields
 - **Requirements:**
-  - [ ] Read `config.schema.json` from selected template
-  - [ ] Generate form inputs based on schema (text, textarea, color picker, etc)
-  - [ ] Real-time preview updates as user types
-  - [ ] Save draft configurations locally (localStorage)
-  - [ ] "Preview" and "Deploy" buttons
+  - [x] Read `config.schema.json` from selected template
+  - [x] Generate form inputs based on schema (text, textarea, color picker, etc)
+  - [x] Real-time preview updates as user types
+  - [x] Save draft configurations locally (localStorage)
+  - [x] "Preview" and "Deploy" buttons
 - **Acceptance Criteria:**
-  - [ ] Form renders all schema fields correctly
-  - [ ] Draft auto-saves every 30 seconds
-  - [ ] Validation matches schema constraints
-  - [ ] Form persists across page refreshes
+  - [x] Form renders all schema fields correctly
+  - [x] Draft auto-saves every 30 seconds
+  - [x] Validation matches schema constraints
+  - [x] Form persists across page refreshes
 - **Type:** Feature
 - **Estimate:** M
 
@@ -64,16 +64,16 @@ Phase 2 focuses on two major features:
 #### SSG-004: Site Management Dashboard
 - **Description:** Build dashboard to view/manage user's static sites
 - **Requirements:**
-  - [ ] List all user's sites with status (draft, building, published)
-  - [ ] Show site URL and deployment status
-  - [ ] "Edit" button to re-configure
-  - [ ] "Delete" button with confirmation
-  - [ ] "View Live" link to published site
+  - [x] List all user's sites with status (draft, building, published)
+  - [x] Show site URL and deployment status
+  - [x] "Edit" button to re-configure
+  - [x] "Delete" button with confirmation
+  - [x] "View Live" link to published site
 - **Acceptance Criteria:**
-  - [ ] Displays all user sites from API
-  - [ ] Can edit existing sites
-  - [ ] Delete removes site from dashboard
-  - [ ] Links work correctly
+  - [x] Displays all user sites from API
+  - [x] Can edit existing sites
+  - [x] Delete removes site from dashboard
+  - [x] Links work correctly
 - **Type:** Feature
 - **Estimate:** M
 
@@ -82,33 +82,33 @@ Phase 2 focuses on two major features:
 #### SSG-005: Template Management API
 - **Description:** Implement API endpoints for template discovery and metadata
 - **Requirements:**
-  - [ ] `GET /api/templates` - List all available templates
-  - [ ] `GET /api/templates/{id}` - Get single template metadata
-  - [ ] `GET /api/templates/{id}/schema` - Get config schema
-  - [ ] `GET /api/templates/{id}/preview` - Get preview image URL
-  - [ ] Each template includes: name, description, author, version, tags
+  - [x] `GET /api/templates` - List all available templates
+  - [x] `GET /api/templates/{id}` - Get single template metadata
+  - [x] `GET /api/templates/{id}/schema` - Get config schema
+  - [x] `GET /api/templates/{id}/preview` - Get preview image URL
+  - [x] Each template includes: name, description, author, version, tags
 - **Acceptance Criteria:**
-  - [ ] All endpoints return correct JSON structure
-  - [ ] Pagination for large template lists
-  - [ ] Proper error handling (404 for missing templates)
-  - [ ] Schema validation works
+  - [x] All endpoints return correct JSON structure
+  - [x] Pagination for large template lists
+  - [x] Proper error handling (404 for missing templates)
+  - [x] Schema validation works
 - **Type:** Backend
 - **Estimate:** S
 
 #### SSG-006: Site Configuration Storage API
 - **Description:** Implement endpoints to save and retrieve site configurations
 - **Requirements:**
-  - [ ] `POST /api/sites` - Create new site from template + config
-  - [ ] `GET /api/sites/{id}` - Retrieve site config
-  - [ ] `PUT /api/sites/{id}` - Update site config
-  - [ ] `GET /api/sites` - List user's sites
-  - [ ] `DELETE /api/sites/{id}` - Delete site
-  - [ ] Store config JSON in DynamoDB
+  - [x] `POST /api/sites` - Create new site from template + config
+  - [x] `GET /api/sites/{id}` - Retrieve site config
+  - [x] `PUT /api/sites/{id}` - Update site config
+  - [x] `GET /api/sites` - List user's sites
+  - [x] `DELETE /api/sites/{id}` - Delete site
+  - [x] Store config JSON in DynamoDB
 - **Acceptance Criteria:**
-  - [ ] Configs persist to DynamoDB
-  - [ ] Config validation against schema
-  - [ ] User can only access their own sites
-  - [ ] Returns proper error codes (400, 401, 404)
+  - [x] Configs persist to DynamoDB
+  - [x] Config validation against schema
+  - [x] User can only access their own sites
+  - [x] Returns proper error codes (400, 401, 404)
 - **Type:** Backend
 - **Estimate:** M
 
