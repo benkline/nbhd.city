@@ -1,6 +1,6 @@
 # nbhd.city Development Tickets
 
-**Last Updated:** 2026-01-10
+**Last Updated:** 2026-01-21
 **Phase:** 2 (Static Sites + AT Protocol PDS)
 **Priority:** High
 
@@ -25,7 +25,7 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Static Site Generation Tickets
+## Phase 2a: MVP Foundation ✅ COMPLETE
 
 ### Frontend: Template System & UI
 
@@ -60,21 +60,6 @@ Phase 2 focuses on two major features:
 - **Type:** Feature
 - **Estimate:** M
 
-#### SSG-003: Integrate 11ty WASM for Client-Side Preview
-- **Description:** Implement Eleventy compiled to WebAssembly for instant in-browser previews
-- **Requirements:**
-  - [ ] Research/integrate 11ty WASM build
-  - [ ] Load WASM in browser when user edits config
-  - [ ] Render preview HTML without server calls
-  - [ ] Display preview in side panel or modal
-  - [ ] Handle WASM loading errors gracefully
-- **Acceptance Criteria:**
-  - [ ] Preview updates within 1 second of config change
-  - [ ] WASM successfully generates HTML output
-  - [ ] Works offline (no server required for preview)
-  - [ ] Graceful fallback if WASM unavailable
-- **Type:** Feature
-- **Estimate:** L (first time integrating WASM)
 
 #### SSG-004: Site Management Dashboard
 - **Description:** Build dashboard to view/manage user's static sites
@@ -127,127 +112,377 @@ Phase 2 focuses on two major features:
 - **Type:** Backend
 - **Estimate:** M
 
-#### SSG-007: Site Build Trigger API
+---
+
+## Phase 2b: AT Protocol Foundation 🔧
+
+**Critical:** This foundation must be built before content management. The build pipeline depends on content being stored as AT Protocol records.
+
+### Core AT Protocol Infrastructure
+
+#### ATP-FOUND-001: AT Protocol Record Schema in DynamoDB
+- **Description:** Extend DynamoDB schema to support AT Protocol record structure
+- **Requirements:**
+  - [ ] Define `RECORD#` partition/sort key pattern
+  - [ ] Add record fields: uri, cid, record_type, rkey, value, created_at, indexed_at
+  - [ ] Create GSI for querying by collection type (GSI7: user_did, record_type#created_at)
+  - [ ] Update DynamoDB table definition in Terraform
+  - [ ] Document schema in DATABASE.md
+  - [ ] Add migration path from current site schema
+- **Acceptance Criteria:**
+  - [ ] Record schema supports all AT Protocol fields
+  - [ ] GSI enables efficient queries by content type
+  - [ ] Can store app.nbhd.blog.post and app.bsky.feed.post records
+  - [ ] Schema is backward compatible with existing site records
+- **Type:** Backend/Infrastructure
+- **Estimate:** M
+- **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
+
+#### ATP-FOUND-002: CID Generation Utilities
+- **Description:** Implement Content Identifier (CID) generation for AT Protocol records
+- **Requirements:**
+  - [ ] Install dag-cbor library for CBOR encoding
+  - [ ] Install multihash library for hashing
+  - [ ] Implement CID v1 generation (SHA-256 + base32)
+  - [ ] Create `generate_cid(record_value)` function
+  - [ ] Ensure immutability (same content → same CID)
+  - [ ] Add validation for CID format
+  - [ ] Create utility file: `/api/atproto/cid.py`
+- **Acceptance Criteria:**
+  - [ ] CID generation produces valid CIDv1 strings
+  - [ ] Same record value always produces same CID
+  - [ ] Different record values produce different CIDs
+  - [ ] CIDs are base32 encoded (e.g., "bafyreib2rxk3rh6kzwq...")
+  - [ ] Unit tests cover edge cases
+- **Type:** Backend
+- **Estimate:** S
+- **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
+
+#### ATP-FOUND-003: Record Key (rkey) Generation
+- **Description:** Implement TID (Timestamp Identifier) format for record keys
+- **Requirements:**
+  - [ ] Create `generate_rkey()` function
+  - [ ] Use TID format: timestamp (microseconds) + random bits
+  - [ ] Base32 encoding for human-readable keys
+  - [ ] Ensure chronological sorting (newer records sort later)
+  - [ ] Ensure global uniqueness (no collisions)
+  - [ ] Create utility file: `/api/atproto/tid.py`
+- **Acceptance Criteria:**
+  - [ ] rkeys sort chronologically
+  - [ ] No collisions in 10,000+ generations
+  - [ ] rkeys are URL-safe (base32 encoded)
+  - [ ] Format matches AT Protocol spec
+  - [ ] Example: "3jzfcijpj2z2a"
+- **Type:** Backend
+- **Estimate:** S
+- **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
+
+#### ATP-FOUND-004: Basic Record CRUD Operations
+- **Description:** Implement core CRUD operations for AT Protocol records in DynamoDB
+- **Requirements:**
+  - [ ] `create_record(user_did, collection, value)` - Create with CID/rkey
+  - [ ] `get_record(uri)` - Get by AT URI (at://did/collection/rkey)
+  - [ ] `query_records(user_did, collection)` - List records by type
+  - [ ] `update_record(uri, new_value)` - Create new version (immutable)
+  - [ ] `delete_record(uri)` - Soft delete (mark as deleted)
+  - [ ] Link old/new versions on update
+  - [ ] Add to `/api/dynamodb_repository.py`
+- **Acceptance Criteria:**
+  - [ ] Can create records with valid CID and rkey
+  - [ ] Can retrieve records by AT URI
+  - [ ] Can query all posts for a user
+  - [ ] Updates create new record version (preserves history)
+  - [ ] Deletes are soft (record still exists, marked deleted)
+  - [ ] All operations have error handling
+- **Type:** Backend
+- **Estimate:** M
+- **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
+
+---
+
+## Phase 2c: Content Management ✍️
+
+**Depends on:** Phase 2b (AT Protocol Foundation)
+
+### Content Records & Editor
+
+#### SSG-011: Content Records API
+- **Description:** API for creating and managing content as AT Protocol records
+- **Requirements:**
+  - [ ] `POST /api/sites/{id}/content` - Create blog post/page
+  - [ ] `GET /api/sites/{id}/content` - List all content
+  - [ ] `GET /api/sites/{id}/content/{rkey}` - Get specific content
+  - [ ] `PUT /api/sites/{id}/content/{rkey}` - Update content
+  - [ ] `DELETE /api/sites/{id}/content/{rkey}` - Delete content
+  - [ ] Store as AT Protocol records (app.nbhd.blog.post)
+  - [ ] Use CID generation from ATP-FOUND-002
+  - [ ] Use rkey generation from ATP-FOUND-003
+  - [ ] Use record CRUD from ATP-FOUND-004
+- **Acceptance Criteria:**
+  - [ ] Content stored in DynamoDB with AT Protocol schema
+  - [ ] CID generation works correctly
+  - [ ] Record URIs follow at:// format
+  - [ ] Query by site_id works
+  - [ ] Pagination implemented
+- **Type:** Backend
+- **Estimate:** M
+- **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
+
+#### SSG-012: Content Editor UI Component
+- **Description:** Rich content editor for creating blog posts and pages
+- **Requirements:**
+  - [ ] Markdown editor with preview
+  - [ ] Frontmatter form (title, date, tags, custom fields)
+  - [ ] "Publish to BlueSky" toggle
+  - [ ] "Auto-rebuild site" toggle
+  - [ ] Draft saving to localStorage
+  - [ ] Validation against template schema
+  - [ ] Image upload (future)
+- **Acceptance Criteria:**
+  - [ ] Users can write markdown content
+  - [ ] Frontmatter fields match template schema
+  - [ ] Preview shows rendered markdown
+  - [ ] Drafts auto-save every 30 seconds
+  - [ ] Can create and publish content
+- **Type:** Frontend
+- **Estimate:** L
+
+#### SSG-013: Dual Record Creation (BlueSky Integration)
+- **Description:** Create linked AT Protocol records for blog posts and BlueSky summaries
+- **Requirements:**
+  - [ ] Generate BlueSky summary from blog post (excerpt + link)
+  - [ ] Create app.nbhd.blog.post record (full content)
+  - [ ] Create app.bsky.feed.post record (summary)
+  - [ ] Link records together (linked_record field)
+  - [ ] Generate link facets for URL in BlueSky post
+  - [ ] Publish to BlueSky firehose (stub for now)
+  - [ ] Handle publish toggle (optional BlueSky posting)
+- **Acceptance Criteria:**
+  - [ ] Both records created in DynamoDB
+  - [ ] Records properly linked
+  - [ ] BlueSky summary under 300 chars
+  - [ ] Link facets correctly formatted
+  - [ ] Can create blog post without BlueSky posting
+- **Type:** Backend
+- **Estimate:** M
+- **Reference:** See [BLUESKY_INTEGRATION.md](./BLUESKY_INTEGRATION.md), [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
+
+#### SSG-014: Smart Content Prefilling
+- **Description:** Auto-map user profile data to template content fields
+- **Requirements:**
+  - [ ] `GET /api/sites/{id}/prefill` - Get prefill suggestions
+  - [ ] Field mapping algorithm (display_name → author, bio → about)
+  - [ ] Support multiple data sources (profile, previous sites)
+  - [ ] Preview UI showing suggested mappings
+  - [ ] User can accept or decline prefilling
+  - [ ] Apply mappings to site config
+- **Acceptance Criteria:**
+  - [ ] Profile data correctly mapped to template fields
+  - [ ] Preview shows "field → value" mappings
+  - [ ] Users can apply or skip prefilling
+  - [ ] Works with BlueSky profile data
+  - [ ] Works with previous site data
+- **Type:** Backend + Frontend
+- **Estimate:** M
+- **Reference:** See [CONTENT_PREFILLING.md](./CONTENT_PREFILLING.md)
+
+---
+
+## Phase 2d: Template Analysis System 📐
+
+**Can run in parallel with Phase 2c**
+
+### Template Analysis System
+
+#### SSG-007: Template Schema Inference Research
+- **Description:** Research and design frontmatter scanning and JSON schema inference
+- **Requirements:**
+  - [ ] Study 5+ popular 11ty starter templates
+  - [ ] Document common frontmatter patterns (title, date, tags, etc.)
+  - [ ] Design algorithm for type inference (string, date, array, boolean)
+  - [ ] Define required field detection logic (>80% occurrence)
+  - [ ] Create spec document for template analyzer
+- **Acceptance Criteria:**
+  - [ ] Clear algorithm for scanning .md files
+  - [ ] Type inference rules documented
+  - [ ] Edge cases identified and handled
+  - [ ] Spec approved and ready for implementation
+- **Type:** Research
+- **Estimate:** S
+- **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
+
+#### SSG-008: Custom Template Registration API
+- **Description:** API endpoints for registering custom 11ty templates from GitHub
+- **Requirements:**
+  - [ ] `POST /api/templates/custom` - Register template from GitHub URL
+  - [ ] `GET /api/templates/custom/{id}/status` - Check analysis status
+  - [ ] `GET /api/templates/{id}/content-types` - Get inferred content types
+  - [ ] GitHub URL validation (github.com, gitlab.com, bitbucket.org)
+  - [ ] Store template metadata in DynamoDB
+  - [ ] Async invocation of analyzer Lambda
+- **Acceptance Criteria:**
+  - [ ] Valid GitHub URLs accepted
+  - [ ] Invalid URLs rejected with error
+  - [ ] Returns 202 Accepted with template_id
+  - [ ] Status polling works correctly
+  - [ ] Template record created in DynamoDB
+- **Type:** Backend
+- **Estimate:** M
+- **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
+
+#### SSG-009: Template Analyzer Lambda Function
+- **Description:** Lambda function to clone, validate, and analyze 11ty templates
+- **Requirements:**
+  - [ ] Clone GitHub repo to /tmp (shallow clone)
+  - [ ] Validate 11ty project (check eleventy.config.js, package.json)
+  - [ ] Find content directory (content/, posts/, src/)
+  - [ ] Scan all .md files and parse frontmatter
+  - [ ] Group by content type (posts, pages, etc.)
+  - [ ] Infer JSON schema from frontmatter samples
+  - [ ] Store schema and content types in DynamoDB
+  - [ ] Handle errors and update status
+- **Acceptance Criteria:**
+  - [ ] Successfully analyzes eleventy-base-blog
+  - [ ] Correctly infers schema for common fields
+  - [ ] Handles invalid repos gracefully
+  - [ ] Completes within 5 minute timeout
+  - [ ] Updates template status to "ready" or "failed"
+- **Type:** Backend/Lambda
+- **Estimate:** L
+- **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
+
+#### SSG-010: Custom Template Selection UI
+- **Description:** UI for users to add and select custom templates
+- **Requirements:**
+  - [ ] "Add Custom Template" button in template gallery
+  - [ ] Modal with GitHub URL input
+  - [ ] Template validation and analysis progress
+  - [ ] Display custom templates alongside built-in ones
+  - [ ] Show analysis status (analyzing, ready, failed)
+  - [ ] Error messages for failed analysis
+- **Acceptance Criteria:**
+  - [ ] Users can paste GitHub URL
+  - [ ] Shows "Analyzing..." progress
+  - [ ] Template appears in gallery when ready
+  - [ ] Failed templates show error message
+  - [ ] Can select custom template for site creation
+- **Type:** Frontend
+- **Estimate:** M
+
+---
+
+## Phase 2e: Build Pipeline & Deployment 🏗️
+
+**Depends on:** Phase 2c (Content Management - SSG-011)
+
+#### SSG-015: Site Build Trigger API
 - **Description:** Endpoint to initiate Lambda build process
 - **Requirements:**
   - [ ] `POST /api/sites/{id}/build` - Trigger build
-  - [ ] Returns build status/job ID immediately
+  - [ ] `GET /api/sites/{id}/builds/{job_id}` - Get build status
+  - [ ] `GET /api/sites/{id}/builds` - List build history
+  - [ ] Returns build status/job ID immediately (202 Accepted)
   - [ ] Validates user owns the site
-  - [ ] Returns build URL once complete
+  - [ ] Create build job record in DynamoDB
+  - [ ] Invoke build Lambda asynchronously
   - [ ] Store build history (timestamp, status, log URL)
 - **Acceptance Criteria:**
   - [ ] Returns 202 Accepted with job ID
-  - [ ] Build can be monitored via polling
+  - [ ] Build job created in DynamoDB
+  - [ ] Lambda invoked successfully
+  - [ ] Status polling works
   - [ ] Proper error handling for invalid sites
-  - [ ] User sees build progress
 - **Type:** Backend
 - **Estimate:** M
 
-### Lambda/Infrastructure: Build System
-
-#### SSG-008: 11ty Lambda Build Function
-- **Description:** Create Lambda function to build sites server-side
+#### SSG-016: 11ty Lambda Build Function
+- **Description:** Lambda function to build static sites from templates and content
 - **Requirements:**
-  - [ ] Clone template repo from Git
-  - [ ] Merge user config JSON into template data files
-  - [ ] Run 11ty build process
-  - [ ] Upload output to S3 bucket (per-site)
+  - [ ] Clone template repo from GitHub to /tmp
+  - [ ] Query content records from DynamoDB (app.nbhd.blog.post)
+  - [ ] Transform AT Protocol records to 11ty data format
+  - [ ] Write _data/posts.json, _data/site.json
+  - [ ] Run npm install (with timeout)
+  - [ ] Run npm run build (11ty build)
+  - [ ] Upload _site/ output to S3
   - [ ] Invalidate CloudFront cache
-  - [ ] Return signed URL to built site
+  - [ ] Update build job status in DynamoDB
   - [ ] Log errors to CloudWatch
 - **Acceptance Criteria:**
-  - [ ] Successfully builds all 3 template types
+  - [ ] Successfully builds sites with blog content
   - [ ] Output correctly uploaded to S3
   - [ ] CloudFront serves latest version
-  - [ ] Build errors logged and returned to user
-  - [ ] Build timeout gracefully (30s limit)
-- **Type:** Backend/Infrastructure
-- **Estimate:** L
+  - [ ] Build errors logged and returned
+  - [ ] Completes within 5 minute timeout
+  - [ ] Handles build failures gracefully
+- **Type:** Backend/Lambda/Infrastructure
+- **Estimate:** XL
 
-#### SSG-009: Subdomain Routing Setup
+#### SSG-017: Subdomain Routing Setup
 - **Description:** Configure Route53 + CloudFront for subdomain deployment
 - **Requirements:**
   - [ ] Create wildcard DNS record (`*.nbhd.city`)
   - [ ] Create CloudFront distribution for subdomains
-  - [ ] Map `{username}.nbhd.city` → S3 bucket for that user
-  - [ ] Support custom domains (future: DNS validation)
+  - [ ] Map `{subdomain}.nbhd.city` → S3 bucket paths
+  - [ ] Configure origin routing based on subdomain
+  - [ ] SSL/TLS certificates for wildcard domain
   - [ ] Terraform code for DNS infrastructure
 - **Acceptance Criteria:**
   - [ ] Wildcard DNS resolves correctly
-  - [ ] CloudFront serves user's S3 bucket
+  - [ ] CloudFront serves correct S3 path per subdomain
   - [ ] Multiple subdomains work independently
-  - [ ] Proper SSL/TLS for all subdomains
+  - [ ] HTTPS works for all subdomains
+  - [ ] 404 handling for non-existent subdomains
 - **Type:** Infrastructure
-- **Estimate:** M
+- **Estimate:** L
 
-#### SSG-010: Site Export to ZIP
+#### SSG-018: Site Export to ZIP
 - **Description:** Generate downloadable ZIP of built site files
 - **Requirements:**
   - [ ] Endpoint: `GET /api/sites/{id}/export`
   - [ ] Downloads all static files from S3 as ZIP
   - [ ] Includes README with deployment instructions
   - [ ] Users can self-host the generated site anywhere
+  - [ ] Include source content (markdown) as backup
 - **Acceptance Criteria:**
   - [ ] ZIP contains all necessary files
   - [ ] ZIP is downloadable and extractable
-  - [ ] Can be deployed to any static host
+  - [ ] Can be deployed to any static host (Netlify, Vercel, etc.)
+  - [ ] README explains how to deploy
   - [ ] File structure is clear
 - **Type:** Backend
 - **Estimate:** S
 
-### Templates: Initial Implementations
+---
 
-#### SSG-011: Blog Template (11ty)
-- **Description:** Personal blog template with posts, tags, and RSS
-- **Requirements:**
-  - [ ] Homepage with recent posts
-  - [ ] Individual post pages (Markdown)
-  - [ ] Tag archive pages
-  - [ ] RSS feed generation
-  - [ ] Config schema: site title, author, description, accent color
-  - [ ] Responsive mobile-first design
-- **Acceptance Criteria:**
-  - [ ] All pages render correctly
-  - [ ] Posts display from data files
-  - [ ] RSS feed is valid
-  - [ ] Looks good on mobile/tablet/desktop
-- **Type:** Template
-- **Estimate:** M
+## Phase 2f: Polish & Optional Features 🎨
 
-#### SSG-012: Project Showcase Template (11ty)
-- **Description:** Team project page with gallery and contributors
-- **Requirements:**
-  - [ ] Project overview
-  - [ ] Team member cards
-  - [ ] Image gallery
-  - [ ] Project status/progress
-  - [ ] Config schema: project name, description, team list, gallery images
-- **Acceptance Criteria:**
-  - [ ] Team members display correctly
-  - [ ] Gallery images load
-  - [ ] Mobile responsive
-  - [ ] Professional appearance
-- **Type:** Template
-- **Estimate:** M
+### Client-Side Preview
 
-#### SSG-013: Newsletter Archive Template (11ty)
-- **Description:** Email newsletter archive with latest/past issues
+#### SSG-003: Integrate 11ty WASM for Client-Side Preview
+- **Description:** Implement Eleventy compiled to WebAssembly for instant in-browser previews
 - **Requirements:**
-  - [ ] Latest issue featured
-  - [ ] Archive of past issues
-  - [ ] Email signup form
-  - [ ] Mobile-optimized layout
-  - [ ] Config schema: title, description, signup URL
+  - [ ] Research/integrate 11ty WASM build
+  - [ ] Load WASM in browser when user edits config
+  - [ ] Render preview HTML without server calls
+  - [ ] Display preview in side panel or modal
+  - [ ] Handle WASM loading errors gracefully
 - **Acceptance Criteria:**
-  - [ ] Archives display correctly
-  - [ ] Form submits properly
-  - [ ] Optimized for mobile readers
-- **Type:** Template
-- **Estimate:** M
+  - [ ] Preview updates within 1 second of config change
+  - [ ] WASM successfully generates HTML output
+  - [ ] Works offline (no server required for preview)
+  - [ ] Graceful fallback if WASM unavailable
+- **Type:** Feature
+- **Estimate:** L (first time integrating WASM)
+- **Priority:** Optional - Nice to have but not critical for MVP
 
 ---
 
-## AT Protocol PDS Tickets
+## Phase 3: AT Protocol Federation & Full PDS 🌐
+
+**NOTE:** The foundation (ATP-FOUND tickets) has already been completed in Phase 2b. These tickets implement the full federated PDS features.
+
+### AT Protocol PDS Tickets
 
 ### Research & Specification
 
@@ -460,41 +695,63 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Priority Order (Recommended Sequence)
+## Priority Order & Timeline
 
-### Week 1-2: Foundation
-- [ ] SSG-005 (Template API)
-- [ ] SSG-006 (Site Config API)
-- [ ] ATP-001 (AT Protocol Research)
+**NOTE:** Tickets are now listed above in execution order. This section provides the week-by-week timeline.
 
-### Week 3-4: Frontend
-- [ ] SSG-001 (Template Gallery)
-- [ ] SSG-002 (Config Form)
-- [ ] SSG-004 (Site Dashboard)
+### ✅ Phase 2a: MVP Foundation (Weeks 1-4) - COMPLETE
+- [x] SSG-001 (Template Gallery UI)
+- [x] SSG-002 (Site Configuration Form)
+- [x] SSG-004 (Site Management Dashboard)
+- [x] SSG-005 (Template Management API)
+- [x] SSG-006 (Site Configuration Storage API)
 
-### Week 5-6: Build System
-- [ ] SSG-008 (Lambda Build)
-- [ ] SSG-009 (Subdomain Routing)
-- [ ] SSG-007 (Build Trigger API)
+### 🔧 Phase 2b: AT Protocol Foundation (Weeks 5-6) **← CRITICAL: DO THIS FIRST**
+- [ ] ATP-FOUND-001 (AT Protocol Record Schema in DynamoDB)
+- [ ] ATP-FOUND-002 (CID Generation Utilities)
+- [ ] ATP-FOUND-003 (Record Key/rkey Generation)
+- [ ] ATP-FOUND-004 (Basic Record CRUD Operations)
 
-### Week 7-8: Templates
-- [ ] SSG-011 (Blog Template)
-- [ ] SSG-012 (Project Template)
-- [ ] SSG-013 (Newsletter Template)
+**Why this comes first:** The entire build pipeline depends on content being stored as AT Protocol records. Build this foundation before creating content.
 
-### Week 9-10: Preview & Export
-- [ ] SSG-003 (WASM Preview)
-- [ ] SSG-010 (Site Export)
+### ✍️ Phase 2c: Content Management (Weeks 6-7)
+- [ ] SSG-011 (Content Records API) ← Uses ATP-FOUND utilities
+- [ ] SSG-012 (Content Editor UI)
+- [ ] SSG-013 (Dual Record Creation - BlueSky Integration)
+- [ ] SSG-014 (Smart Content Prefilling)
 
-### Week 11+: AT Protocol Core
-- [ ] ATP-003 (DID Registration)
-- [ ] ATP-004 (BlueSky Mapping)
-- [ ] ATP-005 (PDS Implementation)
-- [ ] ATP-006 (Firehose Sync)
+### 📐 Phase 2d: Template Analysis System (Weeks 7-8) **← Can run parallel with 2c**
+- [ ] SSG-007 (Template Schema Inference Research)
+- [ ] SSG-008 (Custom Template Registration API)
+- [ ] SSG-009 (Template Analyzer Lambda Function)
+- [ ] SSG-010 (Custom Template Selection UI)
 
-### Ongoing
-- [ ] TEST-001 (Testing throughout)
-- [ ] DOC-001, DOC-002 (Documentation)
+### 🏗️ Phase 2e: Build Pipeline & Deployment (Weeks 8-10)
+- [ ] SSG-015 (Site Build Trigger API)
+- [ ] SSG-016 (11ty Lambda Build Function) ← Queries content from ATP-FOUND
+- [ ] SSG-017 (Subdomain Routing Setup)
+- [ ] SSG-018 (Site Export to ZIP)
+
+### 🎨 Phase 2f: Polish & Optional Features (Week 11)
+- [ ] SSG-003 (WASM Preview - Optional, nice to have)
+
+### 🌐 Phase 3: AT Protocol Federation (Weeks 12+)
+Full PDS features (foundation already built in Phase 2b):
+- [ ] ATP-001 (AT Protocol PDS Research & Design)
+- [ ] ATP-002 (BlueSky Integration Review)
+- [ ] ATP-003 (DID Registration for Members)
+- [ ] ATP-004 (DID to BlueSky Handle Mapping)
+- [ ] ATP-005 (Personal Data Repository Implementation)
+- [ ] ATP-006 (Data Sync from BlueSky Firehose)
+- [ ] ATP-007 (AT Protocol Data Export)
+- [ ] ATP-008 (Data Migration Between nbhds)
+- [ ] ATP-009 (PDS Federation Setup)
+- [ ] ATP-010 (Cross-PDS Neighborhood Lists)
+
+### 📝 Ongoing (Throughout All Phases)
+- [ ] TEST-001 (Phase 2 Integration Tests)
+- [ ] DOC-001 (Static Sites User Guide)
+- [ ] DOC-002 (AT Protocol PDS Architecture Document)
 
 ---
 
