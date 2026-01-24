@@ -123,20 +123,22 @@ Phase 2 focuses on two major features:
 #### ATP-FOUND-001: AT Protocol Record Schema in DynamoDB
 - **Description:** Extend DynamoDB schema to support AT Protocol record structure
 - **Requirements:**
-  - [ ] Define `RECORD#` partition/sort key pattern
-  - [ ] Add record fields: uri, cid, record_type, rkey, value, created_at, indexed_at
-  - [ ] Create GSI for querying by collection type (GSI7: user_did, record_type#created_at)
-  - [ ] Update DynamoDB table definition in Terraform
-  - [ ] Document schema in DATABASE.md
-  - [ ] Add migration path from current site schema
+  - [x] Define `RECORD#` partition/sort key pattern
+  - [x] Add record fields: uri, cid, record_type, rkey, value, created_at, indexed_at
+  - [x] Create GSI for querying by collection type (GSI7: user_did, record_type#created_at)
+  - [x] Update DynamoDB table definition in Terraform
+  - [x] Document schema in DATABASE.md
+  - [x] Add migration path from current site schema
 - **Acceptance Criteria:**
-  - [ ] Record schema supports all AT Protocol fields
-  - [ ] GSI enables efficient queries by content type
-  - [ ] Can store app.nbhd.blog.post and app.bsky.feed.post records
-  - [ ] Schema is backward compatible with existing site records
+  - [x] Record schema supports all AT Protocol fields
+  - [x] GSI enables efficient queries by content type
+  - [x] Can store app.nbhd.blog.post and app.bsky.feed.post records
+  - [x] Schema is backward compatible with existing site records
 - **Type:** Backend/Infrastructure
 - **Estimate:** M
 - **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
+- **Status:** COMPLETED
+- **Tests:** `api/tests/integration/test_at_protocol_schema.py` (8 tests passing)
 
 #### ATP-FOUND-002: CID Generation Utilities
 - **Description:** Implement Content Identifier (CID) generation for AT Protocol records
