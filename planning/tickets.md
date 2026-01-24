@@ -260,22 +260,24 @@ Phase 2 focuses on two major features:
 #### SSG-013: Dual Record Creation (BlueSky Integration)
 - **Description:** Create linked AT Protocol records for blog posts and BlueSky summaries
 - **Requirements:**
-  - [ ] Generate BlueSky summary from blog post (excerpt + link)
-  - [ ] Create app.nbhd.blog.post record (full content)
-  - [ ] Create app.bsky.feed.post record (summary)
-  - [ ] Link records together (linked_record field)
-  - [ ] Generate link facets for URL in BlueSky post
-  - [ ] Publish to BlueSky firehose (stub for now)
-  - [ ] Handle publish toggle (optional BlueSky posting)
+  - [x] Generate BlueSky summary from blog post (excerpt + link)
+  - [x] Create app.nbhd.blog.post record (full content)
+  - [x] Create app.bsky.feed.post record (summary)
+  - [x] Link records together (linked_record field)
+  - [x] Generate link facets for URL in BlueSky post
+  - [x] Publish to BlueSky firehose (stub for now)
+  - [x] Handle publish toggle (optional BlueSky posting)
 - **Acceptance Criteria:**
-  - [ ] Both records created in DynamoDB
-  - [ ] Records properly linked
-  - [ ] BlueSky summary under 300 chars
-  - [ ] Link facets correctly formatted
-  - [ ] Can create blog post without BlueSky posting
+  - [x] Both records created in DynamoDB
+  - [x] Records properly linked
+  - [x] BlueSky summary under 300 chars
+  - [x] Link facets correctly formatted
+  - [x] Can create blog post without BlueSky posting
 - **Type:** Backend
 - **Estimate:** M
 - **Reference:** See [BLUESKY_INTEGRATION.md](./BLUESKY_INTEGRATION.md), [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
+- **Status:** COMPLETED
+- **Tests:** `api/tests/unit/test_bluesky_integration.py` (29 tests passing)
 
 #### SSG-014: Smart Content Prefilling
 - **Description:** Auto-map user profile data to template content fields
