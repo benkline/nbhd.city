@@ -239,21 +239,23 @@ Phase 2 focuses on two major features:
 #### SSG-012: Content Editor UI Component
 - **Description:** Rich content editor for creating blog posts and pages
 - **Requirements:**
-  - [ ] Markdown editor with preview
-  - [ ] Frontmatter form (title, date, tags, custom fields)
-  - [ ] "Publish to BlueSky" toggle
-  - [ ] "Auto-rebuild site" toggle
-  - [ ] Draft saving to localStorage
-  - [ ] Validation against template schema
+  - [x] Markdown editor with preview
+  - [x] Frontmatter form (title, date, tags, custom fields)
+  - [x] "Publish to BlueSky" toggle
+  - [x] "Auto-rebuild site" toggle
+  - [x] Draft saving to localStorage
+  - [x] Validation against template schema
   - [ ] Image upload (future)
 - **Acceptance Criteria:**
-  - [ ] Users can write markdown content
-  - [ ] Frontmatter fields match template schema
-  - [ ] Preview shows rendered markdown
-  - [ ] Drafts auto-save every 30 seconds
-  - [ ] Can create and publish content
+  - [x] Users can write markdown content
+  - [x] Frontmatter fields match template schema
+  - [x] Preview shows rendered markdown
+  - [x] Drafts auto-save every 30 seconds
+  - [x] Can create and publish content
 - **Type:** Frontend
 - **Estimate:** L
+- **Status:** COMPLETED
+- **Tests:** `src/__tests__/components/ContentEditor.test.jsx` (40+ tests covering all requirements)
 
 #### SSG-013: Dual Record Creation (BlueSky Integration)
 - **Description:** Create linked AT Protocol records for blog posts and BlueSky summaries
