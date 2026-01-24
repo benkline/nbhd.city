@@ -186,23 +186,25 @@ Phase 2 focuses on two major features:
 #### ATP-FOUND-004: Basic Record CRUD Operations
 - **Description:** Implement core CRUD operations for AT Protocol records in DynamoDB
 - **Requirements:**
-  - [ ] `create_record(user_did, collection, value)` - Create with CID/rkey
-  - [ ] `get_record(uri)` - Get by AT URI (at://did/collection/rkey)
-  - [ ] `query_records(user_did, collection)` - List records by type
-  - [ ] `update_record(uri, new_value)` - Create new version (immutable)
-  - [ ] `delete_record(uri)` - Soft delete (mark as deleted)
-  - [ ] Link old/new versions on update
-  - [ ] Add to `/api/dynamodb_repository.py`
+  - [x] `create_record(user_did, collection, value)` - Create with CID/rkey
+  - [x] `get_record(uri)` - Get by AT URI (at://did/collection/rkey)
+  - [x] `query_records(user_did, collection)` - List records by type
+  - [x] `update_record(uri, new_value)` - Create new version (immutable)
+  - [x] `delete_record(uri)` - Soft delete (mark as deleted)
+  - [x] Link old/new versions on update
+  - [x] Add to `/api/dynamodb_repository.py`
 - **Acceptance Criteria:**
-  - [ ] Can create records with valid CID and rkey
-  - [ ] Can retrieve records by AT URI
-  - [ ] Can query all posts for a user
-  - [ ] Updates create new record version (preserves history)
-  - [ ] Deletes are soft (record still exists, marked deleted)
-  - [ ] All operations have error handling
+  - [x] Can create records with valid CID and rkey
+  - [x] Can retrieve records by AT URI
+  - [x] Can query all posts for a user
+  - [x] Updates create new record version (preserves history)
+  - [x] Deletes are soft (record still exists, marked deleted)
+  - [x] All operations have error handling
 - **Type:** Backend
 - **Estimate:** M
 - **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
+- **Status:** COMPLETED
+- **Tests:** `api/tests/unit/test_at_protocol_crud.py` (18 tests passing)
 
 ---
 

@@ -458,3 +458,296 @@ async def list_all_users(
 
     response = await table.query(**params)
     return response.get("Items", []), response.get("LastEvaluatedKey")
+
+
+# AT Protocol Record Operations (ATP-FOUND-004)
+
+def _validate_did(did: str) -> None:
+    """
+    Validate DID format (did:plc:... or similar).
+
+    Args:
+        did: DID to validate
+
+    Raises:
+        ValueError: If DID is invalid
+    """
+    if not isinstance(did, str) or not did.startswith("did:"):
+        raise ValueError(f"Invalid DID format: {did}")
+
+
+def _validate_uri(uri: str) -> Tuple[str, str, str]:
+    """
+    Parse and validate AT Protocol URI format.
+
+    URI format: at://did:plc:abc123/app.nbhd.blog.post/3jzfcijpj2z2a
+
+    Args:
+        uri: AT URI to parse
+
+    Returns:
+        tuple: (user_did, collection, rkey)
+
+    Raises:
+        ValueError: If URI format is invalid
+    """
+    if not isinstance(uri, str) or not uri.startswith("at://"):
+        raise ValueError(f"Invalid AT URI format: {uri}")
+
+    # Parse: at://DID/COLLECTION/RKEY
+    parts = uri[5:].split("/")  # Remove "at://" prefix
+    if len(parts) != 3:
+        raise ValueError(f"Invalid AT URI format: {uri}")
+
+    user_did, collection, rkey = parts
+    if not user_did.startswith("did:"):
+        raise ValueError(f"Invalid DID in URI: {user_did}")
+
+    return user_did, collection, rkey
+
+
+async def create_record(
+    table,
+    user_did: str,
+    collection: str,
+    value: Dict,
+    cid: str,
+    rkey: str
+) -> Dict:
+    """
+    Create an AT Protocol record in DynamoDB.
+
+    REQUIREMENT: [ ] `create_record(user_did, collection, value)` - Create with CID/rkey
+    ACCEPTANCE CRITERIA: [ ] Can create records with valid CID and rkey
+
+    Args:
+        table: DynamoDB table resource
+        user_did: User's DID (e.g., "did:plc:abc123")
+        collection: Collection type (e.g., "app.nbhd.blog.post")
+        value: Record value (the actual content)
+        cid: Content Identifier (immutable hash)
+        rkey: Record key (TID format)
+
+    Returns:
+        dict: Created record item
+
+    Raises:
+        ValueError: If parameters are invalid
+    """
+    # Validate inputs
+    _validate_did(user_did)
+    if not isinstance(collection, str) or not collection:
+        raise ValueError("Collection must be non-empty string")
+    if not isinstance(value, dict):
+        raise ValueError("Value must be dict")
+    if not isinstance(cid, str) or not cid:
+        raise ValueError("CID must be non-empty string")
+    if not isinstance(rkey, str) or not rkey:
+        raise ValueError("rkey must be non-empty string")
+
+    # Build AT Protocol URI
+    uri = f"at://{user_did}/{collection}/{rkey}"
+    timestamp = now_iso()
+
+    # Create record item
+    item = {
+        "PK": f"USER#{user_did}",
+        "SK": f"RECORD#{collection}#{rkey}",
+        "uri": uri,
+        "cid": cid,
+        "record_type": collection,
+        "rkey": rkey,
+        "user_did": user_did,
+        "value": value,
+        "linked_record": None,
+        "created_at": timestamp,
+        "indexed_at": timestamp,
+        "updated_at": timestamp
+    }
+
+    # Store in DynamoDB
+    await table.put_item(Item=item)
+
+    return item
+
+
+async def get_record(table, uri: str) -> Optional[Dict]:
+    """
+    Get record by AT Protocol URI.
+
+    REQUIREMENT: [ ] `get_record(uri)` - Get by AT URI
+    ACCEPTANCE CRITERIA: [ ] Can retrieve records by AT URI
+
+    Args:
+        table: DynamoDB table resource
+        uri: AT URI (e.g., "at://did:plc:abc123/app.nbhd.blog.post/3jzfcijpj2z2a")
+
+    Returns:
+        dict or None: Record item if found
+
+    Raises:
+        ValueError: If URI format is invalid
+    """
+    # Parse URI
+    user_did, collection, rkey = _validate_uri(uri)
+
+    # Get from DynamoDB
+    response = await table.get_item(
+        Key={
+            "PK": f"USER#{user_did}",
+            "SK": f"RECORD#{collection}#{rkey}"
+        }
+    )
+
+    return response.get("Item")
+
+
+async def query_records(
+    table,
+    user_did: str,
+    collection: str
+) -> List[Dict]:
+    """
+    Query all records of a collection for a user.
+
+    REQUIREMENT: [ ] `query_records(user_did, collection)` - List records by type
+    ACCEPTANCE CRITERIA: [ ] Can query all posts for a user
+
+    Args:
+        table: DynamoDB table resource
+        user_did: User's DID
+        collection: Collection type (e.g., "app.nbhd.blog.post")
+
+    Returns:
+        list: List of record items
+
+    Raises:
+        ValueError: If parameters are invalid
+    """
+    # Validate inputs
+    _validate_did(user_did)
+    if not isinstance(collection, str) or not collection:
+        raise ValueError("Collection must be non-empty string")
+
+    # Query by PK and SK prefix
+    response = await table.query(
+        KeyConditionExpression=Key("PK").eq(f"USER#{user_did}") & Key("SK").begins_with(f"RECORD#{collection}#"),
+        ScanIndexForward=False  # Newest first
+    )
+
+    return response.get("Items", [])
+
+
+async def update_record(
+    table,
+    uri: str,
+    new_value: Dict
+) -> Dict:
+    """
+    Update an AT Protocol record (immutable - creates new version).
+
+    REQUIREMENT: [ ] `update_record(uri, new_value)` - Create new version (immutable)
+    ACCEPTANCE CRITERIA: [ ] Updates create new record version (preserves history)
+    REQUIREMENT: [ ] Link old/new versions on update
+
+    Args:
+        table: DynamoDB table resource
+        uri: AT URI of record to update
+        new_value: New record value
+
+    Returns:
+        dict: New record item with link to old version
+
+    Raises:
+        ValueError: If URI or value is invalid
+    """
+    # Validate inputs
+    user_did, collection, old_rkey = _validate_uri(uri)
+    if not isinstance(new_value, dict):
+        raise ValueError("new_value must be dict")
+
+    # Get old record to retrieve CID (needed to generate new one)
+    # In practice, caller would provide new CID from generate_cid()
+    # For now, we'll mark as linked but note caller responsibility
+    old_record = await get_record(table, uri)
+    if not old_record:
+        raise ValueError(f"Record not found: {uri}")
+
+    # Generate new rkey (caller would do this with generate_rkey())
+    # For now, we'll use a simple approach: just append a version marker
+    # In practice, this should come from caller or use generate_rkey()
+    from atproto.tid import generate_rkey
+    new_rkey = generate_rkey()
+
+    # Generate new CID (caller would do this with generate_cid())
+    # For now, we'll import and use it
+    from atproto.cid import generate_cid
+    new_cid = generate_cid(new_value)
+
+    # Build new record with link to old
+    new_uri = f"at://{user_did}/{collection}/{new_rkey}"
+    timestamp = now_iso()
+
+    new_record = {
+        "PK": f"USER#{user_did}",
+        "SK": f"RECORD#{collection}#{new_rkey}",
+        "uri": new_uri,
+        "cid": new_cid,
+        "record_type": collection,
+        "rkey": new_rkey,
+        "user_did": user_did,
+        "value": new_value,
+        "linked_record": uri,  # Link to old version
+        "created_at": timestamp,
+        "indexed_at": timestamp,
+        "updated_at": timestamp
+    }
+
+    # Store new record
+    await table.put_item(Item=new_record)
+
+    return new_record
+
+
+async def delete_record(table, uri: str) -> Dict:
+    """
+    Soft delete an AT Protocol record (mark as deleted, don't remove).
+
+    REQUIREMENT: [ ] `delete_record(uri)` - Soft delete (mark as deleted)
+    ACCEPTANCE CRITERIA: [ ] Deletes are soft (record still exists, marked deleted)
+
+    Args:
+        table: DynamoDB table resource
+        uri: AT URI of record to delete
+
+    Returns:
+        dict: Updated record with deleted_at timestamp
+
+    Raises:
+        ValueError: If URI is invalid or record not found
+    """
+    # Parse URI
+    user_did, collection, rkey = _validate_uri(uri)
+
+    # Get record first to verify it exists
+    record = await get_record(table, uri)
+    if not record:
+        raise ValueError(f"Record not found: {uri}")
+
+    # Mark as deleted (soft delete)
+    timestamp = now_iso()
+
+    response = await table.update_item(
+        Key={
+            "PK": f"USER#{user_did}",
+            "SK": f"RECORD#{collection}#{rkey}"
+        },
+        UpdateExpression="SET deleted_at = :deleted_at, updated_at = :updated_at",
+        ExpressionAttributeValues={
+            ":deleted_at": timestamp,
+            ":updated_at": timestamp
+        },
+        ReturnValues="ALL_NEW"
+    )
+
+    return response.get("Attributes", {})
