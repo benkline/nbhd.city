@@ -143,22 +143,24 @@ Phase 2 focuses on two major features:
 #### ATP-FOUND-002: CID Generation Utilities
 - **Description:** Implement Content Identifier (CID) generation for AT Protocol records
 - **Requirements:**
-  - [ ] Install dag-cbor library for CBOR encoding
-  - [ ] Install multihash library for hashing
-  - [ ] Implement CID v1 generation (SHA-256 + base32)
-  - [ ] Create `generate_cid(record_value)` function
-  - [ ] Ensure immutability (same content → same CID)
-  - [ ] Add validation for CID format
-  - [ ] Create utility file: `/api/atproto/cid.py`
+  - [x] Install dag-cbor library for CBOR encoding
+  - [x] Install multihash library for hashing (not needed - using Python hashlib)
+  - [x] Implement CID v1 generation (SHA-256 + base32)
+  - [x] Create `generate_cid(record_value)` function
+  - [x] Ensure immutability (same content → same CID)
+  - [x] Add validation for CID format
+  - [x] Create utility file: `/api/atproto/cid.py`
 - **Acceptance Criteria:**
-  - [ ] CID generation produces valid CIDv1 strings
-  - [ ] Same record value always produces same CID
-  - [ ] Different record values produce different CIDs
-  - [ ] CIDs are base32 encoded (e.g., "bafyreib2rxk3rh6kzwq...")
-  - [ ] Unit tests cover edge cases
+  - [x] CID generation produces valid CIDv1 strings
+  - [x] Same record value always produces same CID
+  - [x] Different record values produce different CIDs
+  - [x] CIDs are base32 encoded (e.g., "bafyreib2rxk3rh6kzwq...")
+  - [x] Unit tests cover edge cases
 - **Type:** Backend
 - **Estimate:** S
 - **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
+- **Status:** COMPLETED
+- **Tests:** `api/tests/unit/test_cid_generation.py` (14 tests passing)
 
 #### ATP-FOUND-003: Record Key (rkey) Generation
 - **Description:** Implement TID (Timestamp Identifier) format for record keys
