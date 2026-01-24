@@ -291,3 +291,336 @@ async def delete_site(
 
     # Delete site
     del SITES_STORE[site_id]
+
+
+# SSG-011: Content Records API
+
+@router.post("/{site_id}/content", status_code=status.HTTP_201_CREATED)
+async def create_content(
+    site_id: str,
+    content_data: dict,
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    Create blog post/page as AT Protocol record.
+
+    REQUIREMENT: [ ] `POST /api/sites/{id}/content` - Create blog post/page
+    ACCEPTANCE: [ ] Content stored in DynamoDB with AT Protocol schema
+    """
+    # Verify site exists and user owns it
+    if site_id not in SITES_STORE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Site '{site_id}' not found"
+        )
+
+    site = SITES_STORE[site_id]
+    if site.get("user_id") != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to create content for this site"
+        )
+
+    # Generate CID and rkey for AT Protocol record
+    try:
+        from atproto.cid import generate_cid
+        from atproto.tid import generate_rkey
+        from dynamodb_repository import create_record
+        from dynamodb_client import get_dynamodb_table
+    except ImportError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"AT Protocol utilities not available: {str(e)}"
+        )
+
+    # Prepare content value with site_id
+    content_value = {
+        "$type": "app.nbhd.blog.post",
+        **content_data,
+        "site_id": site_id
+    }
+
+    # Generate CID and rkey
+    cid = generate_cid(content_value)
+    rkey = generate_rkey()
+
+    # Store in DynamoDB
+    try:
+        table = await get_dynamodb_table()
+        record = await create_record(
+            table,
+            user_did=user_id,
+            collection="app.nbhd.blog.post",
+            value=content_value,
+            cid=cid,
+            rkey=rkey
+        )
+
+        return {
+            "data": {
+                "uri": record["uri"],
+                "cid": record["cid"],
+                "rkey": record["rkey"],
+                "value": record["value"]
+            },
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create content: {str(e)}"
+        )
+
+
+@router.get("/{site_id}/content")
+async def list_content(
+    site_id: str,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    List all content for a site with pagination.
+
+    REQUIREMENT: [ ] `GET /api/sites/{id}/content` - List all content
+    ACCEPTANCE: [ ] Query by site_id works, Pagination implemented
+    """
+    # Verify site exists and user owns it
+    if site_id not in SITES_STORE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Site '{site_id}' not found"
+        )
+
+    site = SITES_STORE[site_id]
+    if site.get("user_id") != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to read content for this site"
+        )
+
+    # Query records for user, filter by site_id
+    try:
+        from dynamodb_repository import query_records
+        from dynamodb_client import get_dynamodb_table
+
+        table = await get_dynamodb_table()
+        records = await query_records(
+            table,
+            user_did=user_id,
+            collection="app.nbhd.blog.post"
+        )
+
+        # Filter by site_id
+        filtered_records = [
+            r for r in records
+            if r.get("value", {}).get("site_id") == site_id
+        ]
+
+        # Apply pagination
+        paginated_records = filtered_records[skip : skip + limit]
+
+        return {
+            "data": paginated_records,
+            "meta": {
+                "skip": skip,
+                "limit": limit,
+                "total": len(filtered_records),
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list content: {str(e)}"
+        )
+
+
+@router.get("/{site_id}/content/{rkey}")
+async def get_content(
+    site_id: str,
+    rkey: str,
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    Get specific content by rkey.
+
+    REQUIREMENT: [ ] `GET /api/sites/{id}/content/{rkey}` - Get specific content
+    """
+    # Verify site exists and user owns it
+    if site_id not in SITES_STORE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Site '{site_id}' not found"
+        )
+
+    site = SITES_STORE[site_id]
+    if site.get("user_id") != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to read content for this site"
+        )
+
+    # Get record by URI
+    try:
+        from dynamodb_repository import get_record
+        from dynamodb_client import get_dynamodb_table
+
+        uri = f"at://{user_id}/app.nbhd.blog.post/{rkey}"
+        table = await get_dynamodb_table()
+        record = await get_record(table, uri)
+
+        if not record:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Content '{rkey}' not found"
+            )
+
+        # Verify it belongs to this site
+        if record.get("value", {}).get("site_id") != site_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Content does not belong to this site"
+            )
+
+        return {
+            "data": record,
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get content: {str(e)}"
+        )
+
+
+@router.put("/{site_id}/content/{rkey}")
+async def update_content(
+    site_id: str,
+    rkey: str,
+    content_data: dict,
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    Update content (creates new version, preserves history).
+
+    REQUIREMENT: [ ] `PUT /api/sites/{id}/content/{rkey}` - Update content
+    """
+    # Verify site exists and user owns it
+    if site_id not in SITES_STORE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Site '{site_id}' not found"
+        )
+
+    site = SITES_STORE[site_id]
+    if site.get("user_id") != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to update content for this site"
+        )
+
+    # Get old record
+    try:
+        from dynamodb_repository import get_record, update_record
+        from dynamodb_client import get_dynamodb_table
+
+        uri = f"at://{user_id}/app.nbhd.blog.post/{rkey}"
+        table = await get_dynamodb_table()
+        old_record = await get_record(table, uri)
+
+        if not old_record:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Content '{rkey}' not found"
+            )
+
+        # Verify it belongs to this site
+        if old_record.get("value", {}).get("site_id") != site_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Content does not belong to this site"
+            )
+
+        # Update record (creates new version)
+        new_record = await update_record(table, uri, content_data)
+
+        return {
+            "data": new_record,
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "linked_record": new_record.get("linked_record")
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update content: {str(e)}"
+        )
+
+
+@router.delete("/{site_id}/content/{rkey}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_content(
+    site_id: str,
+    rkey: str,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Delete content (soft delete - marks as deleted).
+
+    REQUIREMENT: [ ] `DELETE /api/sites/{id}/content/{rkey}` - Delete content
+    """
+    # Verify site exists and user owns it
+    if site_id not in SITES_STORE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Site '{site_id}' not found"
+        )
+
+    site = SITES_STORE[site_id]
+    if site.get("user_id") != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to delete content for this site"
+        )
+
+    # Delete record
+    try:
+        from dynamodb_repository import get_record, delete_record
+        from dynamodb_client import get_dynamodb_table
+
+        uri = f"at://{user_id}/app.nbhd.blog.post/{rkey}"
+        table = await get_dynamodb_table()
+
+        # Verify record exists and belongs to site
+        record = await get_record(table, uri)
+        if not record:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Content '{rkey}' not found"
+            )
+
+        if record.get("value", {}).get("site_id") != site_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Content does not belong to this site"
+            )
+
+        # Delete record (soft delete)
+        await delete_record(table, uri)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete content: {str(e)}"
+        )

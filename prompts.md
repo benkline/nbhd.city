@@ -22,8 +22,10 @@ CONTEXT & PLANNING (Phase 2)
 - Identify any existing code patterns to follow
 
 TDD SETUP (Phase 3)
+- Branch off of develop: git checkout develop && git pull
 - Create feature branch: git checkout -b feature/TICKET-ID
   Example: git checkout -b feature/SSG-005
+- Set up test venv environment: `source ~/.venvs/nbhd/bin/activate` 
 - Create/open test file in appropriate location (from planning docs)
 - Write test code for EACH acceptance criterion (check the [ ] items)
 - Run test command from TESTING.md - tests should FAIL initially
