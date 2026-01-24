@@ -1,7 +1,12 @@
 # nbhd.city
 
-A collaborative community platform built on modern, serverless architecture: a React frontend for the UI, FastAPI backend for APIs, DynamoDB for storage, and AWS Lambda. Nbhds are on the AT Protocol serving as the Personal Data Server for its nbrs. Collaborate to create static sites using pre-built templates and uploaded 11ty templates. Nbhds utilize a plug-in system to add features for additional collaboration methods.
+Nbhds are the content management system for a collection of websites their nbrs collaborate on together, and also utilize a plug-in system to add features for additional methods of collaboration. 
 
+This collaborative community platform is built on modern, serverless architecture: a React frontend for the UI, FastAPI backend its APIs, nosql documentdb for storage, and lambda serverless compute. Nbhds are on the AT Protocol serving as the Personal Data Server for their nbrs, and allow their nbhrs to collaborate on the content of websites built using the static site builder - 11ty. 
+
+AT Bsky integrations... 
+
+Fork it! Run your own! 
 ---
 
 ## Local Development Setup

@@ -116,6 +116,63 @@ All entities (users, neighborhoods, sites, memberships) in one table using compo
 }
 ```
 
+### AT Protocol Record (Phase 2 - ATP-FOUND-001)
+
+AT Protocol records store content as immutable, federated data in DynamoDB.
+
+**Key Format:**
+- `PK = USER#{did}` - User's DID
+- `SK = RECORD#{record_type}#{rkey}` - Record with type and key
+
+**Example: Blog Post Record**
+```json
+{
+  "PK": "USER#did:plc:abc123",
+  "SK": "RECORD#app.nbhd.blog.post#3jzfcijpj2z2a",
+  "uri": "at://did:plc:abc123/app.nbhd.blog.post/3jzfcijpj2z2a",
+  "cid": "bafyreib2rxk3rh6kzwq4xvzfsndj6kyh3ydcq7i6tb6y446qgrq6in7sq",
+  "record_type": "app.nbhd.blog.post",
+  "rkey": "3jzfcijpj2z2a",
+  "user_did": "did:plc:abc123",
+  "record_type_created": "app.nbhd.blog.post#2026-01-21T00:00:00Z",
+  "value": {
+    "$type": "app.nbhd.blog.post",
+    "title": "My First Post",
+    "content": "# Hello World\n\n...",
+    "frontmatter": {
+      "date": "2026-01-21T00:00:00Z",
+      "tags": ["tech", "blog"],
+      "excerpt": "A brief summary",
+      "author": "Alice"
+    },
+    "site_id": "site-uuid-123",
+    "slug": "my-first-post",
+    "status": "published",
+    "createdAt": "2026-01-21T00:00:00Z",
+    "updatedAt": "2026-01-21T00:00:00Z"
+  },
+  "linked_record": null,
+  "bluesky_post_uri": "at://did:plc:abc123/app.bsky.feed.post/xyz789abc",
+  "created_at": "2026-01-21T00:00:00Z",
+  "indexed_at": "2026-01-21T00:00:00Z",
+  "updated_at": "2026-01-21T00:00:00Z"
+}
+```
+
+**Supported Record Types:**
+- `app.nbhd.blog.post` - Blog posts (full content)
+- `app.bsky.feed.post` - BlueSky posts (summaries)
+- `app.bsky.actor.profile` - User profiles (future)
+
+**Fields:**
+- `uri` - AT Protocol URI (at://did/collection/rkey)
+- `cid` - Content Identifier (immutable hash)
+- `record_type` - Collection type (e.g., app.nbhd.blog.post)
+- `rkey` - Record key (TID format, sorts chronologically)
+- `value` - Actual record content (collection-specific)
+- `linked_record` - URI of linked record (e.g., linked blog post)
+- `created_at` / `indexed_at` / `updated_at` - Timestamps
+
 ---
 
 ## Global Secondary Indexes (GSIs)
@@ -151,6 +208,34 @@ SK: created_at
 ```
 **Use case:** Get build history for a site
 **Example query:** Last 10 builds for "alice-blog"
+
+### GSI7: AT Protocol Records by Collection Type (Phase 2)
+```
+PK: user_did
+SK: record_type_created
+```
+**Use case:** Query all records of a specific type for a user
+**Example query:** Get all blog posts created by a user, sorted by date
+
+**Format:**
+- PK = user_did (DID of record owner)
+- SK = record_type_created = "{record_type}#{created_at}"
+
+Example: `app.nbhd.blog.post#2026-01-21T00:00:00Z`
+
+This enables efficient queries like:
+```python
+# Get all blog posts for a user
+response = dynamodb.query(
+  IndexName='GSI7',
+  KeyConditionExpression='user_did = :did AND begins_with(record_type_created, :type)',
+  ExpressionAttributeValues={
+    ':did': 'did:plc:abc123',
+    ':type': 'app.nbhd.blog.post'
+  },
+  ScanIndexForward=False  # Newest first
+)
+```
 
 ---
 
@@ -297,7 +382,70 @@ Example:
 
 ---
 
+## Migration from Site Records to AT Protocol Records
+
+**Phase 2 adds AT Protocol records without removing legacy site records.**
+
+### Backward Compatibility
+
+Existing site records use: `SK = SITE#{site_id}`
+New AT Protocol records use: `SK = RECORD#{type}#{rkey}`
+
+Both coexist under the same `PK = USER#{did}`:
+
+```python
+# Legacy site (unchanged)
+{
+  "PK": "USER#did:plc:abc123",
+  "SK": "SITE#site-001",
+  "title": "My Blog",
+  ...
+}
+
+# New AT Protocol record
+{
+  "PK": "USER#did:plc:abc123",
+  "SK": "RECORD#app.nbhd.blog.post#3jzfcijpj2z2a",
+  "uri": "at://did:plc:abc123/app.nbhd.blog.post/3jzfcijpj2z2a",
+  ...
+}
+```
+
+### Migration Path (Future)
+
+When content management moves to AT Protocol records:
+
+1. **Phase 2a:** Sites and records coexist
+2. **Phase 2c:** New content stored as AT Protocol records
+3. **Phase 3:** Migration Lambda converts legacy sites to records
+4. **Post-Phase 3:** Legacy SITE records archived/deleted
+
+### Attribute-Based Versioning
+
+If existing items need new fields:
+
+```python
+# Old format
+{
+  "PK": "USER#did:plc:abc123",
+  "SK": "PROFILE",
+  "avatar_url": "https://..."
+}
+
+# New format (both versions supported)
+{
+  "PK": "USER#did:plc:abc123",
+  "SK": "PROFILE",
+  "avatar_url": "https://...",      # Keep for backward compatibility
+  "user_did": "did:plc:abc123",     # New field for GSI7
+  "record_type_created": "..."      # New field for GSI7
+}
+```
+
+---
+
 ## See Also
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - System overview
 - [API.md](./API.md) - How data is accessed via API
+- [CONTENT_RECORDS.md](./CONTENT_RECORDS.md) - AT Protocol record details
