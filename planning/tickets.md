@@ -165,21 +165,23 @@ Phase 2 focuses on two major features:
 #### ATP-FOUND-003: Record Key (rkey) Generation
 - **Description:** Implement TID (Timestamp Identifier) format for record keys
 - **Requirements:**
-  - [ ] Create `generate_rkey()` function
-  - [ ] Use TID format: timestamp (microseconds) + random bits
-  - [ ] Base32 encoding for human-readable keys
-  - [ ] Ensure chronological sorting (newer records sort later)
-  - [ ] Ensure global uniqueness (no collisions)
-  - [ ] Create utility file: `/api/atproto/tid.py`
+  - [x] Create `generate_rkey()` function
+  - [x] Use TID format: timestamp (microseconds) + random bits
+  - [x] Base32 encoding for human-readable keys
+  - [x] Ensure chronological sorting (newer records sort later)
+  - [x] Ensure global uniqueness (no collisions)
+  - [x] Create utility file: `/api/atproto/tid.py`
 - **Acceptance Criteria:**
-  - [ ] rkeys sort chronologically
-  - [ ] No collisions in 10,000+ generations
-  - [ ] rkeys are URL-safe (base32 encoded)
-  - [ ] Format matches AT Protocol spec
-  - [ ] Example: "3jzfcijpj2z2a"
+  - [x] rkeys sort chronologically
+  - [x] No collisions in 10,000+ generations
+  - [x] rkeys are URL-safe (base32 encoded)
+  - [x] Format matches AT Protocol spec
+  - [x] Example: "3jzfcijpj2z2a"
 - **Type:** Backend
 - **Estimate:** S
 - **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
+- **Status:** COMPLETED
+- **Tests:** `api/tests/unit/test_rkey_generation.py` (23 tests passing)
 
 #### ATP-FOUND-004: Basic Record CRUD Operations
 - **Description:** Implement core CRUD operations for AT Protocol records in DynamoDB
