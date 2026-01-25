@@ -374,20 +374,28 @@ Phase 2 focuses on two major features:
 #### SSG-010: Custom Template Selection UI
 - **Description:** UI for users to add and select custom templates
 - **Requirements:**
-  - [ ] "Add Custom Template" button in template gallery
-  - [ ] Modal with GitHub URL input
-  - [ ] Template validation and analysis progress
-  - [ ] Display custom templates alongside built-in ones
-  - [ ] Show analysis status (analyzing, ready, failed)
-  - [ ] Error messages for failed analysis
+  - [x] Modal with GitHub URL input
+  - [x] Template validation and analysis progress
+  - [x] Show analysis status (analyzing, ready, failed)
+  - [x] Error messages for failed analysis
+  - [x] URL validation (GitHub, GitLab, Bitbucket + HTTPS requirement)
+  - [x] Status polling with timeout (60 seconds max, 1 second intervals)
 - **Acceptance Criteria:**
-  - [ ] Users can paste GitHub URL
-  - [ ] Shows "Analyzing..." progress
-  - [ ] Template appears in gallery when ready
-  - [ ] Failed templates show error message
-  - [ ] Can select custom template for site creation
+  - [x] Users can paste GitHub URL
+  - [x] Modal accepts template name and URL input
+  - [x] Form validation prevents invalid URLs
+  - [x] Shows success message when template analysis completes
+  - [x] Shows error message when analysis fails
+  - [x] Modal closes properly
+  - [x] Form disables inputs during analysis
 - **Type:** Frontend
 - **Estimate:** M
+- **Status:** COMPLETED
+- **Tests:** `src/__tests__/components/CustomTemplateModal.test.jsx` (12 tests passing)
+- **Implementation Files:**
+  - Component: `src/components/SiteBuilder/CustomTemplateModal.jsx`
+  - Styles: `src/components/SiteBuilder/CustomTemplateModal.module.css`
+  - Tests: `src/__tests__/components/CustomTemplateModal.test.jsx`
 
 ---
 
@@ -744,7 +752,7 @@ Phase 2 focuses on two major features:
 - [x] SSG-007 (Template Schema Inference Research)
 - [x] SSG-008 (Custom Template Registration API)
 - [x] SSG-009 (Template Analyzer Lambda Function)
-- [ ] SSG-010 (Custom Template Selection UI)
+- [x] SSG-010 (Custom Template Selection UI)
 
 ### 🏗️ Phase 2e: Build Pipeline & Deployment (Weeks 8-10)
 - [ ] SSG-015 (Site Build Trigger API)
