@@ -1,9 +1,22 @@
 from fastapi import APIRouter, HTTPException, Query, status
-from models import TemplateResponse, TemplateSchemaResponse
+from models import (
+    TemplateResponse,
+    TemplateSchemaResponse,
+    CustomTemplateCreate,
+    CustomTemplateRegistrationResponse,
+    CustomTemplateStatusResponse,
+    TemplateContentTypesResponse,
+)
 from datetime import datetime
-from typing import List
+from typing import List, Optional
+import uuid
+import re
+from urllib.parse import urlparse
 
 router = APIRouter(prefix="/api/templates", tags=["templates"])
+
+# Store for custom templates (in-memory for now, would be DynamoDB in production)
+CUSTOM_TEMPLATES = {}
 
 # Mock template data - in production this would come from a database
 TEMPLATES = [
@@ -263,6 +276,251 @@ async def get_template_preview(template_id: str):
     return {
         "preview_url": preview_url,
         "template_id": template_id,
+        "meta": {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        }
+    }
+
+
+# URL Validation Functions
+
+def validate_github_url(url: str) -> tuple[bool, Optional[str]]:
+    """
+    Validate GitHub URL format.
+
+    Allowed domains: github.com, gitlab.com, bitbucket.org
+    Must be HTTPS or valid git@ format.
+
+    Returns: (is_valid, error_message)
+    """
+    if not url:
+        return False, "GitHub URL is required"
+
+    # Normalize URL - convert git@ to https://
+    normalized_url = url
+    if url.startswith("git@"):
+        # Convert git@github.com:user/repo.git to https://github.com/user/repo
+        match = re.match(r"git@([^:]+):(.+?)(?:\.git)?$", url)
+        if match:
+            domain, path = match.groups()
+            normalized_url = f"https://{domain}/{path}"
+        else:
+            return False, "Invalid git@ URL format"
+
+    # Parse URL
+    try:
+        parsed = urlparse(normalized_url)
+    except Exception:
+        return False, "Invalid URL format"
+
+    # Check protocol
+    if parsed.scheme not in ["https", "http"]:
+        return False, "URL must use https:// or http://"
+
+    # Reject http (should be https)
+    if parsed.scheme == "http":
+        return False, "URL must use https://"
+
+    # Check domain
+    allowed_domains = ["github.com", "gitlab.com", "bitbucket.org"]
+    domain = parsed.netloc.lower()
+
+    if domain not in allowed_domains:
+        # Reject localhost and internal IPs
+        if domain.startswith("localhost") or domain.startswith("127."):
+            return False, "Localhost URLs are not allowed"
+        if re.match(r"^192\.168\.", domain) or re.match(r"^10\.", domain):
+            return False, "Internal IP addresses are not allowed"
+        return False, f"Domain must be one of: {', '.join(allowed_domains)}"
+
+    # Check path (should have user/repo)
+    path_parts = [p for p in parsed.path.split("/") if p]
+    if len(path_parts) < 2:
+        return False, "URL must include user/repository (e.g., github.com/user/repo)"
+
+    return True, None
+
+
+# Custom Template Endpoints
+
+@router.post("/custom", status_code=status.HTTP_202_ACCEPTED)
+async def register_custom_template(template: CustomTemplateCreate) -> dict:
+    """
+    Register a custom 11ty template from GitHub.
+
+    - **name**: Name of the template
+    - **github_url**: GitHub URL (https://github.com/user/repo)
+    - **is_public**: Whether template is public or private
+
+    Returns 202 Accepted with template_id for polling status.
+
+    Requirement: [ ] `POST /api/templates/custom` - Register template from GitHub URL
+    Acceptance: [ ] Valid GitHub URLs accepted, Returns 202 Accepted with template_id
+    """
+    # Validate required fields
+    if not template.name or not template.name.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Template name is required"
+        )
+
+    if not template.github_url or not template.github_url.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="GitHub URL is required"
+        )
+
+    # Validate GitHub URL
+    # Requirement: [ ] GitHub URL validation (github.com, gitlab.com, bitbucket.org)
+    is_valid, error_msg = validate_github_url(template.github_url)
+    if not is_valid:
+        # Requirement: [ ] Invalid URLs rejected with error
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=error_msg or "Invalid GitHub URL"
+        )
+
+    # Check if already registered (by github_url)
+    for stored_id, stored_template in CUSTOM_TEMPLATES.items():
+        if stored_template.get("github_url") == template.github_url:
+            # Return existing template (could also return 409 Conflict)
+            return {
+                "data": {
+                    "template_id": stored_id,
+                    "status": stored_template.get("status", "analyzing"),
+                    "message": "Template already registered",
+                    "poll_url": f"/api/templates/custom/{stored_id}/status"
+                },
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+                }
+            }
+
+    # Create template record
+    template_id = str(uuid.uuid4())
+
+    # Store in-memory (would be DynamoDB in production)
+    # Requirement: [ ] Store template metadata in DynamoDB
+    CUSTOM_TEMPLATES[template_id] = {
+        "template_id": template_id,
+        "name": template.name,
+        "github_url": template.github_url,
+        "is_public": template.is_public,
+        "status": "analyzing",
+        "created_at": datetime.utcnow().isoformat() + "Z",
+        "owner_did": None,  # Would be set from auth context
+        "is_custom": True
+    }
+
+    # TODO: Invoke analyzer Lambda asynchronously
+    # Requirement: [ ] Async invocation of analyzer Lambda
+
+    # Return 202 Accepted
+    # Requirement: [ ] Returns 202 Accepted with template_id
+    # Acceptance: [ ] Returns 202 Accepted with template_id
+    return {
+        "data": {
+            "template_id": template_id,
+            "status": "analyzing",
+            "message": "Template analysis started",
+            "poll_url": f"/api/templates/custom/{template_id}/status"
+        },
+        "meta": {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        }
+    }
+
+
+@router.get("/custom/{template_id}/status")
+async def get_custom_template_status(template_id: str) -> dict:
+    """
+    Get analysis status of a custom template.
+
+    Requirement: [ ] `GET /api/templates/custom/{id}/status` - Check analysis status
+    Acceptance: [ ] Status polling works correctly
+    """
+    # Check if template exists
+    if template_id not in CUSTOM_TEMPLATES:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Template '{template_id}' not found"
+        )
+
+    template = CUSTOM_TEMPLATES[template_id]
+    status_value = template.get("status", "analyzing")
+
+    response_data = {
+        "template_id": template_id,
+        "status": status_value,
+    }
+
+    # Add status-specific fields
+    if status_value == "analyzing":
+        response_data["progress"] = template.get("progress", 0.0)
+        response_data["message"] = template.get("message", "Analyzing template...")
+    elif status_value == "ready":
+        response_data["schema"] = template.get("schema")
+        response_data["content_types"] = template.get("content_types")
+    elif status_value == "failed":
+        response_data["error"] = template.get("error", "Analysis failed")
+
+    return {
+        "data": response_data,
+        "meta": {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        }
+    }
+
+
+@router.get("/{template_id}/content-types")
+async def get_template_content_types(template_id: str) -> dict:
+    """
+    Get inferred content types for a template.
+
+    Requirement: [ ] `GET /api/templates/{id}/content-types` - Get inferred content types
+    """
+    # Check custom templates first
+    if template_id in CUSTOM_TEMPLATES:
+        template = CUSTOM_TEMPLATES[template_id]
+        content_types = template.get("content_types", {})
+
+        return {
+            "data": {
+                "template_id": template_id,
+                "content_types": content_types
+            },
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+            }
+        }
+
+    # Check built-in templates
+    template = get_template_by_id(template_id)
+    if not template:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Template '{template_id}' not found"
+        )
+
+    # For built-in templates, construct content types from schema
+    schema = template.get("schema", {})
+    content_types = {
+        "default": {
+            "directory": "content",
+            "schema": schema
+        }
+    }
+
+    return {
+        "data": {
+            "template_id": template_id,
+            "content_types": content_types
+        },
         "meta": {
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")

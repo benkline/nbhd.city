@@ -328,21 +328,23 @@ Phase 2 focuses on two major features:
 #### SSG-008: Custom Template Registration API
 - **Description:** API endpoints for registering custom 11ty templates from GitHub
 - **Requirements:**
-  - [ ] `POST /api/templates/custom` - Register template from GitHub URL
-  - [ ] `GET /api/templates/custom/{id}/status` - Check analysis status
-  - [ ] `GET /api/templates/{id}/content-types` - Get inferred content types
-  - [ ] GitHub URL validation (github.com, gitlab.com, bitbucket.org)
-  - [ ] Store template metadata in DynamoDB
+  - [x] `POST /api/templates/custom` - Register template from GitHub URL
+  - [x] `GET /api/templates/custom/{id}/status` - Check analysis status
+  - [x] `GET /api/templates/{id}/content-types` - Get inferred content types
+  - [x] GitHub URL validation (github.com, gitlab.com, bitbucket.org)
+  - [x] Store template metadata in DynamoDB
   - [ ] Async invocation of analyzer Lambda
 - **Acceptance Criteria:**
-  - [ ] Valid GitHub URLs accepted
-  - [ ] Invalid URLs rejected with error
-  - [ ] Returns 202 Accepted with template_id
-  - [ ] Status polling works correctly
-  - [ ] Template record created in DynamoDB
+  - [x] Valid GitHub URLs accepted
+  - [x] Invalid URLs rejected with error
+  - [x] Returns 202 Accepted with template_id
+  - [x] Status polling works correctly
+  - [x] Template record created in DynamoDB
 - **Type:** Backend
 - **Estimate:** M
 - **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
+- **Status:** MOSTLY COMPLETE (Lambda invocation in SSG-009)
+- **Tests:** `api/tests/integration/test_custom_templates.py` (29 tests passing)
 
 #### SSG-009: Template Analyzer Lambda Function
 - **Description:** Lambda function to clone, validate, and analyze 11ty templates
