@@ -177,3 +177,64 @@ class SiteResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# Custom Template Models
+
+class CustomTemplateCreate(BaseModel):
+    """Schema for registering a custom template."""
+
+    name: str
+    github_url: str
+    is_public: bool = False
+
+    class Config:
+        from_attributes = True
+
+
+class CustomTemplateRegistrationResponse(BaseModel):
+    """Schema for custom template registration response (202 Accepted)."""
+
+    template_id: str
+    status: str = "analyzing"
+    message: str = "Template analysis started"
+    poll_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class CustomTemplateStatusResponse(BaseModel):
+    """Schema for custom template status response."""
+
+    template_id: str
+    status: str  # analyzing, ready, failed
+    progress: Optional[float] = None
+    message: Optional[str] = None
+    error: Optional[str] = None
+    schema: Optional[Dict] = None
+    content_types: Optional[Dict] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ContentTypeResponse(BaseModel):
+    """Schema for content type information."""
+
+    directory: str
+    schema: Dict
+    example_fields: Optional[Dict] = None
+
+    class Config:
+        from_attributes = True
+
+
+class TemplateContentTypesResponse(BaseModel):
+    """Schema for template content types response."""
+
+    template_id: str
+    content_types: Dict[str, ContentTypeResponse]
+
+    class Config:
+        from_attributes = True
