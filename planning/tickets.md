@@ -311,19 +311,21 @@ Phase 2 focuses on two major features:
 #### SSG-007: Template Schema Inference Research
 - **Description:** Research and design frontmatter scanning and JSON schema inference
 - **Requirements:**
-  - [ ] Study 5+ popular 11ty starter templates
-  - [ ] Document common frontmatter patterns (title, date, tags, etc.)
-  - [ ] Design algorithm for type inference (string, date, array, boolean)
-  - [ ] Define required field detection logic (>80% occurrence)
-  - [ ] Create spec document for template analyzer
+  - [x] Study 5+ popular 11ty starter templates
+  - [x] Document common frontmatter patterns (title, date, tags, etc.)
+  - [x] Design algorithm for type inference (string, date, array, boolean)
+  - [x] Define required field detection logic (>80% occurrence)
+  - [x] Create spec document for template analyzer
 - **Acceptance Criteria:**
-  - [ ] Clear algorithm for scanning .md files
-  - [ ] Type inference rules documented
-  - [ ] Edge cases identified and handled
-  - [ ] Spec approved and ready for implementation
+  - [x] Clear algorithm for scanning .md files
+  - [x] Type inference rules documented
+  - [x] Edge cases identified and handled
+  - [x] Spec approved and ready for implementation
 - **Type:** Research
 - **Estimate:** S
-- **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
+- **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md), [SSG-007-RESEARCH.md](./SSG-007-RESEARCH.md)
+- **Status:** COMPLETED
+- **Tests:** `api/tests/unit/test_template_schema_inference.py` (26 tests passing)
 
 #### SSG-008: Custom Template Registration API
 - **Description:** API endpoints for registering custom 11ty templates from GitHub
@@ -735,7 +737,7 @@ Phase 2 focuses on two major features:
 - [ ] SSG-014 (Smart Content Prefilling)
 
 ### 📐 Phase 2d: Template Analysis System (Weeks 7-8) **← Can run parallel with 2c**
-- [ ] SSG-007 (Template Schema Inference Research)
+- [x] SSG-007 (Template Schema Inference Research)
 - [ ] SSG-008 (Custom Template Registration API)
 - [ ] SSG-009 (Template Analyzer Lambda Function)
 - [ ] SSG-010 (Custom Template Selection UI)
