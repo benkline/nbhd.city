@@ -351,23 +351,25 @@ Phase 2 focuses on two major features:
 #### SSG-009: Template Analyzer Lambda Function
 - **Description:** Lambda function to clone, validate, and analyze 11ty templates
 - **Requirements:**
-  - [ ] Clone GitHub repo to /tmp (shallow clone)
-  - [ ] Validate 11ty project (check eleventy.config.js, package.json)
-  - [ ] Find content directory (content/, posts/, src/)
-  - [ ] Scan all .md files and parse frontmatter
-  - [ ] Group by content type (posts, pages, etc.)
-  - [ ] Infer JSON schema from frontmatter samples
-  - [ ] Store schema and content types in DynamoDB
-  - [ ] Handle errors and update status
+  - [x] Clone GitHub repo to /tmp (shallow clone)
+  - [x] Validate 11ty project (check eleventy.config.js, package.json)
+  - [x] Find content directory (content/, posts/, src/)
+  - [x] Scan all .md files and parse frontmatter
+  - [x] Group by content type (posts, pages, etc.)
+  - [x] Infer JSON schema from frontmatter samples
+  - [x] Store schema and content types in DynamoDB
+  - [x] Handle errors and update status
 - **Acceptance Criteria:**
-  - [ ] Successfully analyzes eleventy-base-blog
-  - [ ] Correctly infers schema for common fields
-  - [ ] Handles invalid repos gracefully
-  - [ ] Completes within 5 minute timeout
-  - [ ] Updates template status to "ready" or "failed"
+  - [x] Successfully analyzes eleventy-base-blog
+  - [x] Correctly infers schema for common fields
+  - [x] Handles invalid repos gracefully
+  - [x] Completes within 5 minute timeout
+  - [x] Updates template status to "ready" or "failed"
 - **Type:** Backend/Lambda
 - **Estimate:** L
 - **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
+- **Status:** COMPLETED
+- **Tests:** `lambda/tests/test_template_analyzer.py` (23 tests passing)
 
 #### SSG-010: Custom Template Selection UI
 - **Description:** UI for users to add and select custom templates
@@ -740,8 +742,8 @@ Phase 2 focuses on two major features:
 
 ### 📐 Phase 2d: Template Analysis System (Weeks 7-8) **← Can run parallel with 2c**
 - [x] SSG-007 (Template Schema Inference Research)
-- [ ] SSG-008 (Custom Template Registration API)
-- [ ] SSG-009 (Template Analyzer Lambda Function)
+- [x] SSG-008 (Custom Template Registration API)
+- [x] SSG-009 (Template Analyzer Lambda Function)
 - [ ] SSG-010 (Custom Template Selection UI)
 
 ### 🏗️ Phase 2e: Build Pipeline & Deployment (Weeks 8-10)
