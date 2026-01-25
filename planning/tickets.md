@@ -282,21 +282,23 @@ Phase 2 focuses on two major features:
 #### SSG-014: Smart Content Prefilling
 - **Description:** Auto-map user profile data to template content fields
 - **Requirements:**
-  - [ ] `GET /api/sites/{id}/prefill` - Get prefill suggestions
-  - [ ] Field mapping algorithm (display_name → author, bio → about)
-  - [ ] Support multiple data sources (profile, previous sites)
-  - [ ] Preview UI showing suggested mappings
-  - [ ] User can accept or decline prefilling
-  - [ ] Apply mappings to site config
+  - [x] `GET /api/sites/{id}/prefill` - Get prefill suggestions
+  - [x] Field mapping algorithm (display_name → author, bio → about)
+  - [x] Support multiple data sources (profile, previous sites)
+  - [x] Preview UI showing suggested mappings
+  - [x] User can accept or decline prefilling
+  - [x] Apply mappings to site config
 - **Acceptance Criteria:**
-  - [ ] Profile data correctly mapped to template fields
-  - [ ] Preview shows "field → value" mappings
-  - [ ] Users can apply or skip prefilling
-  - [ ] Works with BlueSky profile data
-  - [ ] Works with previous site data
+  - [x] Profile data correctly mapped to template fields
+  - [x] Preview shows "field → value" mappings
+  - [x] Users can apply or skip prefilling
+  - [x] Works with BlueSky profile data
+  - [x] Works with previous site data
 - **Type:** Backend + Frontend
 - **Estimate:** M
 - **Reference:** See [CONTENT_PREFILLING.md](./CONTENT_PREFILLING.md)
+- **Status:** COMPLETED
+- **Tests:** `api/tests/unit/test_content_prefilling.py` (21 tests passing), `nbhd/src/__tests__/components/PrefillPreview.test.jsx` (17 tests)
 
 ---
 
