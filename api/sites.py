@@ -624,3 +624,74 @@ async def delete_content(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete content: {str(e)}"
         )
+
+
+@router.get("/{site_id}/prefill")
+async def get_prefill_suggestions(
+    site_id: str,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Get prefill suggestions for site configuration.
+
+    Returns prefill suggestions based on:
+    - User's BlueSky profile data (display_name, bio, avatar, etc.)
+    - Configuration from user's previous sites
+    - Field mappings to template schema
+
+    Response:
+    {
+      "suggestions": [
+        {
+          "field": "author",
+          "value": "Alice",
+          "source": "profile",
+          "confidence": 1.0
+        },
+        ...
+      ],
+      "template_id": "template-uuid-123",
+      "template_name": "Blog Template"
+    }
+    """
+    # [ ] `GET /api/sites/{id}/prefill` - Get prefill suggestions
+    try:
+        from content_prefilling import ContentPrefiller
+
+        # Verify site exists and belongs to user
+        if site_id not in SITES_STORE:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        site = SITES_STORE[site_id]
+
+        # Verify ownership
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this site"
+            )
+
+        # [ ] Get prefill suggestions
+        prefiller = ContentPrefiller()
+        suggestions = await prefiller.get_prefill_suggestions(user_id, site_id)
+
+        # Get template info
+        template = _get_template_schema(site.get("template", ""))
+        template_name = site.get("template", "Unknown")
+
+        return {
+            "suggestions": suggestions,
+            "template_id": site.get("template"),
+            "template_name": template_name
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get prefill suggestions: {str(e)}"
+        )
