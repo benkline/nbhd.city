@@ -572,16 +572,19 @@ Phase 2 focuses on two major features:
 #### ATP-004: DID to BlueSky Handle Mapping
 - **Description:** Link member DIDs to BlueSky handles
 - **Requirements:**
-  - [ ] Member DIDs linked to BlueSky DIDs
-  - [ ] Verify BlueSky ownership (using OAuth)
-  - [ ] Store mapping in DynamoDB
-  - [ ] Support profile sync from BlueSky
+  - [x] Member DIDs linked to BlueSky DIDs
+  - [x] Verify BlueSky ownership (using OAuth)
+  - [x] Store mapping in DynamoDB
+  - [x] Support profile sync from BlueSky
 - **Acceptance Criteria:**
-  - [ ] Member DID maps to BlueSky DID
-  - [ ] Profile data syncs from BlueSky
+  - [x] Member DID maps to BlueSky DID
+  - [x] Profile data syncs from BlueSky
   - [ ] Verification is cryptographic
 - **Type:** Backend
 - **Estimate:** M
+- **Status:** MOSTLY COMPLETE
+- **Tests:** All integration tests passing (77/77)
+- **Note:** Cryptographic verification in ATP-005
 
 ### Repository & Data Storage
 
