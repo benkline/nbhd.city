@@ -33,5 +33,20 @@ export const handlers = [
         }
       ]
     });
+  }),
+
+  http.get('/api/sites/:siteId/prefill', () => {
+    return HttpResponse.json({
+      suggestions: [
+        {
+          field: 'author',
+          value: 'Alice',
+          source: 'profile',
+          confidence: 1.0
+        }
+      ],
+      template_id: 'blog',
+      template_name: 'Blog Template'
+    });
   })
 ];

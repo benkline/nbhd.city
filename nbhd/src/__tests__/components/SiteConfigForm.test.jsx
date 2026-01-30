@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { SiteConfigForm } from '../../components/SiteBuilder/SiteConfigForm';
 
@@ -126,10 +126,11 @@ describe('SiteConfigForm', () => {
     );
 
     const titleInput = screen.getByLabelText(/Site Title/);
-    fireEvent.change(titleInput, { target: { value: 'My Blog' } });
-
-    // Advance timers 30 seconds
-    vi.advanceTimersByTime(30000);
+    act(() => {
+      fireEvent.change(titleInput, { target: { value: 'My Blog' } });
+      // Advance timers 30 seconds
+      vi.advanceTimersByTime(30000);
+    });
 
     const saved = localStorage.getItem(`site-draft-${siteId}`);
     expect(saved).toBeTruthy();
@@ -152,10 +153,11 @@ describe('SiteConfigForm', () => {
     );
 
     const titleInput = screen.getByLabelText(/Site Title/);
-    fireEvent.change(titleInput, { target: { value: 'New Blog' } });
-
-    // Auto-save happens after 30 seconds
-    vi.advanceTimersByTime(30000);
+    act(() => {
+      fireEvent.change(titleInput, { target: { value: 'New Blog' } });
+      // Auto-save happens after 30 seconds
+      vi.advanceTimersByTime(30000);
+    });
 
     expect(mockOnSave).toHaveBeenCalledWith(expect.objectContaining({
       title: 'New Blog'
@@ -260,11 +262,15 @@ describe('SiteConfigForm', () => {
     const titleInput = screen.getByLabelText(/Site Title/);
     const authorInput = screen.getByLabelText(/Author Name/);
 
-    fireEvent.change(titleInput, { target: { value: 'My Blog' } });
-    fireEvent.change(authorInput, { target: { value: 'John Doe' } });
+    act(() => {
+      fireEvent.change(titleInput, { target: { value: 'My Blog' } });
+      fireEvent.change(authorInput, { target: { value: 'John Doe' } });
+    });
 
     const deployButton = screen.getByRole('button', { name: /deploy/i });
-    fireEvent.click(deployButton);
+    act(() => {
+      fireEvent.click(deployButton);
+    });
 
     expect(mockOnDeploy).toHaveBeenCalledWith(expect.objectContaining({
       title: 'My Blog',

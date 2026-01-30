@@ -217,23 +217,25 @@ Phase 2 focuses on two major features:
 #### SSG-011: Content Records API
 - **Description:** API for creating and managing content as AT Protocol records
 - **Requirements:**
-  - [ ] `POST /api/sites/{id}/content` - Create blog post/page
-  - [ ] `GET /api/sites/{id}/content` - List all content
-  - [ ] `GET /api/sites/{id}/content/{rkey}` - Get specific content
-  - [ ] `PUT /api/sites/{id}/content/{rkey}` - Update content
-  - [ ] `DELETE /api/sites/{id}/content/{rkey}` - Delete content
-  - [ ] Store as AT Protocol records (app.nbhd.blog.post)
-  - [ ] Use CID generation from ATP-FOUND-002
-  - [ ] Use rkey generation from ATP-FOUND-003
-  - [ ] Use record CRUD from ATP-FOUND-004
+  - [x] `POST /api/sites/{id}/content` - Create blog post/page
+  - [x] `GET /api/sites/{id}/content` - List all content
+  - [x] `GET /api/sites/{id}/content/{rkey}` - Get specific content
+  - [x] `PUT /api/sites/{id}/content/{rkey}` - Update content
+  - [x] `DELETE /api/sites/{id}/content/{rkey}` - Delete content
+  - [x] Store as AT Protocol records (app.nbhd.blog.post)
+  - [x] Use CID generation from ATP-FOUND-002
+  - [x] Use rkey generation from ATP-FOUND-003
+  - [x] Use record CRUD from ATP-FOUND-004
 - **Acceptance Criteria:**
-  - [ ] Content stored in DynamoDB with AT Protocol schema
-  - [ ] CID generation works correctly
-  - [ ] Record URIs follow at:// format
-  - [ ] Query by site_id works
-  - [ ] Pagination implemented
+  - [x] Content stored in DynamoDB with AT Protocol schema
+  - [x] CID generation works correctly
+  - [x] Record URIs follow at:// format
+  - [x] Query by site_id works
+  - [x] Pagination implemented
 - **Type:** Backend
 - **Estimate:** M
+- **Status:** COMPLETED
+- **Tests:** `api/tests/integration/test_content_records_api.py` (12 tests passing)
 - **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
 
 #### SSG-012: Content Editor UI Component
