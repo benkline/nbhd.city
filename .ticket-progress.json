@@ -1,0 +1,165 @@
+{
+  "workflow_version": "1.0",
+  "current_ticket": "SSG-011",
+  "current_branch": "feature/SSG-010",
+  "session_started": "2026-01-29T20:40:00Z",
+  "session_notes": "Completed SSG-011: Content Records API - verified all 5 CRUD endpoints and 12 integration tests passing. AT Protocol records with CID/rkey generation working. All acceptance criteria met.",
+  "tickets": {
+    "SSG-008": {
+      "status": "completed",
+      "branch": "feature/SSG-008",
+      "completed_date": "2026-01-24",
+      "summary": "Custom Template Registration API - FastAPI endpoint for registering custom templates with async Lambda analysis",
+      "tests_passing": true,
+      "github_issue": null,
+      "commits": [
+        "feat(SSG-008): Implement Custom Template Registration API"
+      ],
+      "work_log": [
+        "2026-01-24: Implemented POST /api/templates/register endpoint",
+        "2026-01-24: Added async Lambda invocation for template analysis",
+        "2026-01-24: All integration tests passing"
+      ]
+    },
+    "SSG-009": {
+      "status": "completed",
+      "branch": "feature/SSG-009",
+      "completed_date": "2026-01-24",
+      "summary": "Template Analyzer Lambda Function - AWS Lambda extracts schema and content types from custom templates",
+      "tests_passing": true,
+      "github_issue": null,
+      "commits": [
+        "feat(SSG-009): Implement Template Analyzer Lambda Function"
+      ],
+      "work_log": [
+        "2026-01-24: Created template_analyzer Lambda function",
+        "2026-01-24: Extracts schema.json and content types",
+        "2026-01-24: All integration tests passing"
+      ]
+    },
+    "SSG-010": {
+      "status": "completed",
+      "branch": "feature/SSG-010",
+      "completed_date": "2026-01-29",
+      "summary": "Custom Template Selection UI - Template gallery with schema inspection and prefill suggestions",
+      "tests_passing": true,
+      "github_issue": null,
+      "commits": [
+        "feat(SSG-010): Implement Custom Template Selection UI"
+      ],
+      "work_log": [
+        "2026-01-24: Created TemplateGallery.jsx component",
+        "2026-01-24: Implemented CustomTemplateModal for registration",
+        "2026-01-24: Implemented PrefillPreview component",
+        "2026-01-29: Fixed test selector ambiguity - all 91 frontend tests passing",
+        "2026-01-29: Fixed missing dependencies (marked, dompurify)",
+        "2026-01-29: Added act() wrappers for async tests",
+        "2026-01-29: All integration tests still passing (76 + 1 skipped)"
+      ]
+    },
+    "SSG-011": {
+      "status": "completed",
+      "branch": "feature/SSG-010",
+      "completed_date": "2026-01-29",
+      "summary": "Content Records API - CRUD endpoints for blog posts/pages as AT Protocol records",
+      "tests_passing": true,
+      "github_issue": null,
+      "commits": [
+        "feat(SSG-011): Implement Content Records API"
+      ],
+      "work_log": [
+        "2026-01-29: Verified POST /api/sites/{id}/content endpoint implementation",
+        "2026-01-29: Verified GET /api/sites/{id}/content endpoint with pagination",
+        "2026-01-29: Verified GET /api/sites/{id}/content/{rkey} endpoint",
+        "2026-01-29: Verified PUT /api/sites/{id}/content/{rkey} endpoint",
+        "2026-01-29: Verified DELETE /api/sites/{id}/content/{rkey} endpoint",
+        "2026-01-29: All 12 integration tests passing",
+        "2026-01-29: All acceptance criteria met - AT Protocol schema, CID/rkey generation, URI format, pagination"
+      ]
+    },
+    "SSG-012": {
+      "status": "completed",
+      "branch": "feature/SSG-012",
+      "completed_date": "2026-01-29",
+      "summary": "Content Editor Enhancement - Markdown editor with live preview, frontmatter form, auto-save drafts",
+      "tests_passing": true,
+      "dependencies": ["SSG-010"],
+      "work_log": [
+        "2026-01-29: Created ContentEditor.jsx with marked + DOMPurify",
+        "2026-01-29: Mocked marked/dompurify in tests",
+        "2026-01-29: Fixed act() warnings in test suite",
+        "2026-01-29: All 91 frontend tests passing"
+      ]
+    },
+    "SSG-014": {
+      "status": "completed",
+      "branch": "feature/SSG-014",
+      "completed_date": "2026-01-29",
+      "summary": "Content Prefilling & Suggestions - PrefillPreview component with BlueSky profile integration",
+      "tests_passing": true,
+      "dependencies": ["SSG-010"],
+      "work_log": [
+        "2026-01-29: Created PrefillPreview.jsx component",
+        "2026-01-29: Fixed test query selectors (using getByRole for specificity)",
+        "2026-01-29: Added MSW handler for /api/sites/{siteId}/prefill",
+        "2026-01-29: All 91 frontend tests passing"
+      ]
+    }
+  },
+  "latest_session_fixes": {
+    "date": "2026-01-29T20:40:00Z",
+    "summary": "Fixed all frontend and backend test failures",
+    "issues_fixed": [
+      {
+        "issue": "Missing marked and dompurify packages",
+        "severity": "critical",
+        "fix": "npm install - added 3 packages to node_modules and package-lock.json",
+        "impact": "Unblocked ContentEditor.test.jsx which was failing to import"
+      },
+      {
+        "issue": "Ambiguous test selectors in PrefillPreview.test.jsx",
+        "severity": "high",
+        "fix": "Replaced /prefill/i, /profile/i, /apply/i with getByRole() and exact text matches",
+        "count": 5,
+        "tests_fixed": [
+          "renders prefill preview component",
+          "shows source badge for each suggestion",
+          "has Apply button",
+          "calls onApply when Apply button clicked",
+          "passes config object to onApply"
+        ]
+      },
+      {
+        "issue": "React act() warnings in state updates",
+        "severity": "medium",
+        "fix": "Wrapped fireEvent and timer operations in act() calls",
+        "files_fixed": ["SiteConfigForm.test.jsx", "TemplateGallery.test.jsx", "ContentEditor.test.jsx"]
+      },
+      {
+        "issue": "Missing MSW handler for prefill endpoint",
+        "severity": "medium",
+        "fix": "Added handler to handlers.js for /api/sites/{siteId}/prefill",
+        "impact": "Allows tests to make proper mocked API calls"
+      },
+      {
+        "issue": "ContentEditor tests timing out on async operations",
+        "severity": "high",
+        "fix": "Mocked marked/dompurify, used act() with fake timers, replaced userEvent with fireEvent",
+        "result": "Improved from 16 failures to 0 failures"
+      }
+    ],
+    "test_results_before": {
+      "frontend": "2 failed, 55 passed",
+      "backend": "76 passed, 1 skipped"
+    },
+    "test_results_after": {
+      "frontend": "0 failed, 91 passed",
+      "backend": "76 passed, 1 skipped"
+    }
+  },
+  "previous_session_summary": {
+    "date": "2026-01-24T21:10:00Z",
+    "ticket": "SSG-010",
+    "work_done": "Implemented Custom Template Selection UI with TemplateGallery, CustomTemplateModal, and PrefillPreview components"
+  }
+}
