@@ -519,17 +519,19 @@ Phase 2 focuses on two major features:
 #### ATP-001: AT Protocol PDS Research & Design
 - **Description:** Deep dive into AT Protocol and design nbhd as PDS
 - **Requirements:**
-  - [ ] Study AT Protocol documentation
-  - [ ] Understand PDS (Personal Data Server) spec
-  - [ ] Design: How do nbhd members register DIDs?
-  - [ ] Plan: How is neighborhood data federated?
-  - [ ] Create ADR (Architecture Decision Record)
+  - [x] Study AT Protocol documentation
+  - [x] Understand PDS (Personal Data Server) spec
+  - [x] Design: How do nbhd members register DIDs?
+  - [x] Plan: How is neighborhood data federated?
+  - [x] Create ADR (Architecture Decision Record)
 - **Acceptance Criteria:**
-  - [ ] Clear understanding of PDS requirements
-  - [ ] Design document for AT Protocol integration
-  - [ ] Decision record on implementation approach
+  - [x] Clear understanding of PDS requirements
+  - [x] Design document for AT Protocol integration
+  - [x] Decision record on implementation approach
 - **Type:** Research
 - **Estimate:** L
+- **Status:** COMPLETED
+- **Documentation:** See [ADR-001-ATPROTOCOL-PDS.md](./ADR-001-ATPROTOCOL-PDS.md)
 
 #### ATP-002: BlueSky Integration Review
 - **Description:** Review current BlueSky OAuth and plan AT Protocol sync
