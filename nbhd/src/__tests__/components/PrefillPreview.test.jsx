@@ -52,7 +52,7 @@ describe('PrefillPreview Component', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText(/prefill/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /prefill/i })).toBeInTheDocument();
       });
     });
 
@@ -207,8 +207,8 @@ describe('PrefillPreview Component', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText(/profile/i)).toBeInTheDocument();
-        expect(screen.getByText(/previous/i)).toBeInTheDocument();
+        expect(screen.getByText('👤 Profile')).toBeInTheDocument();
+        expect(screen.getByText('📄 Previous Site')).toBeInTheDocument();
       });
     });
   });
@@ -242,7 +242,7 @@ describe('PrefillPreview Component', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText(/apply/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /apply prefill/i })).toBeInTheDocument();
       });
     });
 
@@ -305,7 +305,7 @@ describe('PrefillPreview Component', () => {
       );
 
       await waitFor(() => {
-        fireEvent.click(screen.getByText(/apply/i));
+        fireEvent.click(screen.getByRole('button', { name: /apply prefill/i }));
       });
 
       expect(onApply).toHaveBeenCalled();
@@ -345,7 +345,7 @@ describe('PrefillPreview Component', () => {
       );
 
       await waitFor(() => {
-        fireEvent.click(screen.getByText(/apply/i));
+        fireEvent.click(screen.getByRole('button', { name: /apply prefill/i }));
       });
 
       expect(onApply).toHaveBeenCalledWith(
