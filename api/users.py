@@ -214,3 +214,144 @@ async def list_users(limit: int = 100, last_key: str = None):
             )
             for user in users
         ]
+
+
+# ATP-003: DID Registration for Members
+
+
+@router.post("/me/did", status_code=201)
+async def register_did(user_id: str = Depends(verify_token)):
+    """
+    Register a DID (Decentralized Identifier) for the current user.
+
+    REQUIREMENT: [ ] Generate unique DID for each member
+    ACCEPTANCE: [ ] Each member gets unique DID on signup
+
+    Returns 201 Created with DID information.
+    Returns 409 Conflict if user already has a DID.
+    """
+    from atproto.did import generate_keypair, generate_did, format_did_document
+    from datetime import datetime
+    import json
+
+    async with get_table() as table:
+        # Get current user profile
+        profile = await get_user_profile(table, user_id)
+
+        if not profile:
+            raise HTTPException(
+                status_code=404,
+                detail="User profile not found. Please complete onboarding first."
+            )
+
+        # Check if user already has a DID
+        if profile.get("did"):
+            raise HTTPException(
+                status_code=409,
+                detail="User already has a registered DID"
+            )
+
+        # Generate DID and keypair
+        try:
+            did = generate_did()
+            public_key_pem, private_key_pem = generate_keypair()
+
+            # Create DID document
+            did_document = format_did_document(
+                did,
+                public_key_pem,
+                service_endpoint="https://api.nbhd.city"
+            )
+
+            # Store DID in user profile
+            profile["did"] = did
+            profile["public_key"] = public_key_pem.decode('utf-8')
+            # NOTE: Private key should be stored in AWS Secrets Manager in production
+            # For now, we return it once to user for storage
+            profile["updated_at"] = datetime.utcnow().isoformat() + "Z"
+
+            # Update user profile
+            await update_user_profile(table, user_id, {
+                "did": did,
+                "public_key": public_key_pem.decode('utf-8'),
+                "updated_at": profile["updated_at"]
+            })
+
+            return {
+                "data": {
+                    "did": did,
+                    "public_key": public_key_pem.decode('utf-8'),
+                    "private_key": private_key_pem.decode('utf-8'),  # Return once for user to save
+                    "did_document": did_document,
+                },
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "message": "DID registered successfully. Save your private key in a secure location."
+                }
+            }
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to generate DID: {str(e)}"
+            )
+
+
+@router.get("/me/did")
+async def get_my_did(user_id: str = Depends(verify_token)):
+    """
+    Get current user's DID information.
+
+    REQUIREMENT: [ ] Store DID in user profile
+    ACCEPTANCE: [ ] DID stored and retrievable
+
+    Returns DID, public key, and DID document (not private key).
+    """
+    from datetime import datetime
+
+    async with get_table() as table:
+        profile = await get_user_profile(table, user_id)
+
+        if not profile:
+            raise HTTPException(
+                status_code=404,
+                detail="User profile not found"
+            )
+
+        if not profile.get("did"):
+            raise HTTPException(
+                status_code=404,
+                detail="User has not registered a DID yet. Call POST /api/users/me/did to register."
+            )
+
+        # Build DID document (public information)
+        did_document = {
+            "@context": ["https://www.w3.org/ns/did/v1"],
+            "id": profile["did"],
+            "publicKey": [
+                {
+                    "id": f"{profile['did']}#key-0",
+                    "type": "RsaVerificationKey2018",
+                    "controller": profile["did"],
+                    "publicKeyPem": profile.get("public_key"),
+                }
+            ],
+            "service": [
+                {
+                    "id": f"{profile['did']}#atproto_pds",
+                    "type": "AtprotoPersonalDataServer",
+                    "serviceEndpoint": "https://api.nbhd.city",
+                }
+            ]
+        }
+
+        return {
+            "data": {
+                "did": profile["did"],
+                "public_key": profile.get("public_key"),
+                "did_document": did_document,
+            },
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        }
