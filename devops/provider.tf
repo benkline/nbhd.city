@@ -29,3 +29,13 @@ provider "aws" {
     tags = var.tags
   }
 }
+
+# us-east-1 provider alias required for Lambda@Edge and ACM certificates for CloudFront
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = var.tags
+  }
+}

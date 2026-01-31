@@ -54,6 +54,12 @@ resource "aws_dynamodb_table" "nbhd_city" {
     type = "S"
   }
 
+  # GSI8: Subdomain lookup for static site routing
+  attribute {
+    name = "subdomain"
+    type = "S"
+  }
+
   # Global Secondary Index 1
   global_secondary_index {
     name            = "GSI1"
@@ -84,6 +90,15 @@ resource "aws_dynamodb_table" "nbhd_city" {
     name            = "GSI7"
     hash_key        = "user_did"
     range_key       = "record_type_created"
+    projection_type = "ALL"
+  }
+
+  # Global Secondary Index 8: Subdomain lookup for static site routing
+  # Enables Lambda@Edge to map subdomains to sites
+  global_secondary_index {
+    name            = "GSI8"
+    hash_key        = "subdomain"
+    range_key       = "SK"
     projection_type = "ALL"
   }
 

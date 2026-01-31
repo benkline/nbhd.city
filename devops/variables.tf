@@ -159,3 +159,25 @@ variable "acm_certificate_arn" {
   type        = string
   default     = ""
 }
+
+variable "sites_domain" {
+  description = "Domain for static sites (e.g., 'nbhd.city'). Must be configurable for different deployments."
+  type        = string
+  default     = "nbhd.city"
+}
+
+variable "create_hosted_zone" {
+  description = "Whether to create Route53 hosted zone (set to false if zone already exists in another AWS account)"
+  type        = bool
+  default     = true
+}
+
+variable "tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
+  default = {
+    Project     = "nbhd-city"
+    Environment = "production"
+    ManagedBy   = "Terraform"
+  }
+}
