@@ -408,22 +408,24 @@ Phase 2 focuses on two major features:
 #### SSG-015: Site Build Trigger API
 - **Description:** Endpoint to initiate Lambda build process
 - **Requirements:**
-  - [ ] `POST /api/sites/{id}/build` - Trigger build
-  - [ ] `GET /api/sites/{id}/builds/{job_id}` - Get build status
-  - [ ] `GET /api/sites/{id}/builds` - List build history
-  - [ ] Returns build status/job ID immediately (202 Accepted)
-  - [ ] Validates user owns the site
-  - [ ] Create build job record in DynamoDB
-  - [ ] Invoke build Lambda asynchronously
-  - [ ] Store build history (timestamp, status, log URL)
+  - [x] `POST /api/sites/{id}/build` - Trigger build
+  - [x] `GET /api/sites/{id}/builds/{job_id}` - Get build status
+  - [x] `GET /api/sites/{id}/builds` - List build history
+  - [x] Returns build status/job ID immediately (202 Accepted)
+  - [x] Validates user owns the site
+  - [x] Create build job record in DynamoDB
+  - [x] Invoke build Lambda asynchronously
+  - [x] Store build history (timestamp, status, log URL)
 - **Acceptance Criteria:**
-  - [ ] Returns 202 Accepted with job ID
-  - [ ] Build job created in DynamoDB
-  - [ ] Lambda invoked successfully
-  - [ ] Status polling works
-  - [ ] Proper error handling for invalid sites
+  - [x] Returns 202 Accepted with job ID
+  - [x] Build job created in DynamoDB
+  - [x] Lambda invoked successfully
+  - [x] Status polling works
+  - [x] Proper error handling for invalid sites
 - **Type:** Backend
 - **Estimate:** M
+- **Status:** COMPLETED
+- **Tests:** `api/tests/integration/test_build_jobs_api.py` (11 tests passing)
 
 #### SSG-016: 11ty Lambda Build Function
 - **Description:** Lambda function to build static sites from templates and content

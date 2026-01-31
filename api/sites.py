@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query, Depends, status
-from models import TemplateResponse, SiteCreate, SiteUpdate, SiteResponse
+from models import TemplateResponse, SiteCreate, SiteUpdate, SiteResponse, BuildJobCreate, BuildJobResponse
 from auth import get_current_user
 from fastapi.responses import Response
 from datetime import datetime
@@ -694,4 +694,225 @@ async def get_prefill_suggestions(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get prefill suggestions: {str(e)}"
+        )
+
+
+# Build Job Endpoints
+
+@router.post("/{site_id}/build", status_code=status.HTTP_202_ACCEPTED)
+async def trigger_build(
+    site_id: str,
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    Trigger a build for a site.
+
+    Returns 202 Accepted with job_id and polling URL.
+    The actual build happens asynchronously via Lambda.
+
+    REQUIREMENT: [ ] `POST /api/sites/{id}/build` - Trigger build
+    REQUIREMENT: [ ] Validates user owns the site
+    REQUIREMENT: [ ] Create build job record in DynamoDB
+    REQUIREMENT: [ ] Invoke build Lambda asynchronously
+    """
+    try:
+        from dynamodb_client import get_dynamodb_table
+        from dynamodb_repository import create_build_job, invoke_lambda_async
+
+        # Verify site exists and belongs to user
+        if site_id not in SITES_STORE:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        site = SITES_STORE[site_id]
+
+        # Verify ownership
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this site"
+            )
+
+        # Create build job in DynamoDB
+        table = await get_dynamodb_table()
+        build_job = await create_build_job(
+            table=table,
+            site_id=site_id,
+            user_did=user_id,
+            trigger="manual"
+        )
+
+        # Invoke Lambda asynchronously
+        try:
+            invoke_lambda_async(
+                job_id=build_job["job_id"],
+                site_id=site_id,
+                user_did=user_id
+            )
+        except Exception as e:
+            # Log error but don't fail the request - job is queued
+            print(f"Warning: Failed to invoke Lambda: {str(e)}")
+
+        return {
+            "data": {
+                "job_id": build_job["job_id"],
+                "status": build_job["status"],
+                "site_id": site_id,
+                "started_at": build_job["started_at"],
+                "poll_url": f"/api/sites/{site_id}/builds/{build_job['job_id']}"
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to trigger build: {str(e)}"
+        )
+
+
+@router.get("/{site_id}/builds/{job_id}")
+async def get_build_status(
+    site_id: str,
+    job_id: str,
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    Get status of a specific build job.
+
+    REQUIREMENT: [ ] `GET /api/sites/{id}/builds/{job_id}` - Get build status
+    ACCEPTANCE CRITERIA: [ ] Status polling works
+    """
+    try:
+        from dynamodb_client import get_dynamodb_table
+        from dynamodb_repository import get_build_job
+
+        # Verify site exists and belongs to user
+        if site_id not in SITES_STORE:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        site = SITES_STORE[site_id]
+
+        # Verify ownership
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this site"
+            )
+
+        # Get build job from DynamoDB
+        table = await get_dynamodb_table()
+        build_job = await get_build_job(table, site_id, job_id)
+
+        if not build_job:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Build job '{job_id}' not found"
+            )
+
+        # Verify build job belongs to this site
+        if build_job.get("site_id") != site_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Build job does not belong to this site"
+            )
+
+        return {
+            "data": {
+                "job_id": build_job["job_id"],
+                "site_id": build_job["site_id"],
+                "status": build_job["status"],
+                "started_at": build_job["started_at"],
+                "completed_at": build_job.get("completed_at"),
+                "duration_seconds": build_job.get("duration_seconds"),
+                "output_url": build_job.get("output_url"),
+                "error": build_job.get("error"),
+                "error_stage": build_job.get("error_stage"),
+                "trigger": build_job.get("trigger", "manual"),
+                "content_count": build_job.get("content_count")
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get build status: {str(e)}"
+        )
+
+
+@router.get("/{site_id}/builds")
+async def list_builds(
+    site_id: str,
+    user_id: str = Depends(get_current_user),
+    limit: int = Query(100, ge=1, le=1000)
+) -> dict:
+    """
+    List all build jobs for a site.
+
+    ACCEPTANCE CRITERIA: [ ] Status polling works (list builds)
+    """
+    try:
+        from dynamodb_client import get_dynamodb_table
+        from dynamodb_repository import list_build_jobs_for_site
+
+        # Verify site exists and belongs to user
+        if site_id not in SITES_STORE:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        site = SITES_STORE[site_id]
+
+        # Verify ownership
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this site"
+            )
+
+        # Get build jobs from DynamoDB
+        table = await get_dynamodb_table()
+        builds, next_key = await list_build_jobs_for_site(
+            table=table,
+            site_id=site_id,
+            limit=limit
+        )
+
+        return {
+            "data": [
+                {
+                    "job_id": build["job_id"],
+                    "site_id": build["site_id"],
+                    "status": build["status"],
+                    "started_at": build["started_at"],
+                    "completed_at": build.get("completed_at"),
+                    "duration_seconds": build.get("duration_seconds"),
+                    "output_url": build.get("output_url"),
+                    "error": build.get("error"),
+                    "error_stage": build.get("error_stage"),
+                    "trigger": build.get("trigger", "manual"),
+                    "content_count": build.get("content_count")
+                }
+                for build in builds
+            ],
+            "pagination": {
+                "next_key": next_key
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list builds: {str(e)}"
         )
