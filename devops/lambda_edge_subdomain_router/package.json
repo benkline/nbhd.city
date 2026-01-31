@@ -1,0 +1,13 @@
+{
+  "name": "nbhd-city-subdomain-router",
+  "version": "1.0.0",
+  "description": "Lambda@Edge function for subdomain routing to S3-hosted static sites",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.500.0",
+    "@aws-sdk/util-dynamodb": "^3.500.0"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}

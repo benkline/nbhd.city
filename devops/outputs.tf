@@ -48,6 +48,45 @@ output "cloudwatch_log_group_api_gateway" {
   value       = aws_cloudwatch_log_group.api_gateway.name
 }
 
+output "sites_bucket_name" {
+  description = "Name of the S3 bucket for static sites"
+  value       = aws_s3_bucket.sites.bucket
+}
+
+output "sites_bucket_arn" {
+  description = "ARN of the S3 bucket for static sites"
+  value       = aws_s3_bucket.sites.arn
+}
+
+output "sites_cloudfront_domain_name" {
+  description = "CloudFront domain name for sites distribution (for CNAME configuration)"
+  value       = aws_cloudfront_distribution.sites.domain_name
+}
+
+output "sites_cloudfront_distribution_id" {
+  description = "ID of the CloudFront distribution for sites"
+  value       = aws_cloudfront_distribution.sites.id
+}
+
+output "route53_zone_id" {
+  description = "Route53 hosted zone ID for sites domain"
+  value       = local.route53_zone_id
+}
+
+output "route53_name_servers" {
+  description = "Route53 name servers (configure at domain registrar for delegation)"
+  value = var.create_hosted_zone ? (
+    aws_route53_zone.sites[0].name_servers
+    ) : (
+    data.aws_route53_zone.sites[0].name_servers
+  )
+}
+
+output "sites_domain" {
+  description = "Domain used for static sites routing"
+  value       = var.sites_domain
+}
+
 output "deployment_summary" {
   description = "Deployment summary"
   value = {
@@ -56,5 +95,8 @@ output "deployment_summary" {
     api_url           = aws_api_gateway_stage.api.invoke_url
     dynamodb_table    = aws_dynamodb_table.nbhd_city.name
     lambda_function   = aws_lambda_function.api.function_name
+    sites_domain      = var.sites_domain
+    sites_bucket      = aws_s3_bucket.sites.bucket
+    sites_cloudfront  = aws_cloudfront_distribution.sites.domain_name
   }
 }
