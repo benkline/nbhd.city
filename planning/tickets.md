@@ -623,6 +623,324 @@ Phase 2 focuses on two major features:
 
 ---
 
+## Phase 2g: Nbhd CMS & Admin Features 📝
+
+**Depends on:** Phase 2c (Content Management - SSG-011) and Phase 2e (Build Pipeline - SSG-015, SSG-016)
+
+**Purpose:** Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol data, and owners can configure welcome pages, announcements, and manage all AT Protocol content.
+
+### Backend Foundation
+
+#### NBHD-001: Nbhd DID & Data Model Enhancement
+- **Description:** Add DID generation and site type distinction to data model
+- **Requirements:**
+  - [ ] Add `nbhd_did` field to neighborhood records in DynamoDB
+  - [ ] Add `site_type` field to sites ("personal" | "project")
+  - [ ] Update `create_neighborhood()` in dynamodb_repository to generate DIDs
+  - [ ] Create migration script for existing neighborhoods without DIDs
+  - [ ] Update models in `api/models.py` with new fields and validation
+  - [ ] Ensure backward compatibility (make nbhd_did optional, generate on first access)
+- **Acceptance Criteria:**
+  - [ ] New neighborhoods automatically get a DID on creation
+  - [ ] Existing neighborhoods can be migrated with script
+  - [ ] Sites can be created with site_type="personal" or "project"
+  - [ ] Project sites require nbhd_id selection
+  - [ ] DID format is consistent and valid
+- **Type:** Backend
+- **Estimate:** M
+- **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - Data Model section and [SITE-TYPES.md](./SITE-TYPES.md) - Data Model section
+- **Files:**
+  - `api/dynamodb_repository.py` - Add DID generation
+  - `api/models.py` - Update schemas
+  - `api/migrations/add_nbhd_did.py` (new) - Migration script
+  - `api/tests/test_nbhd_data_model.py` (new) - New tests
+
+#### NBHD-002: Nbhd Content API
+- **Description:** Create API router for neighborhood-owned AT Protocol content
+- **Requirements:**
+  - [ ] Create `api/nbhd_content.py` router (new file)
+  - [ ] Implement `require_nbhd_admin()` middleware that checks user created/owns nbhd
+  - [ ] `POST /api/nbhds/{id}/content/welcome` - Create/update welcome content (admin only)
+  - [ ] `GET /api/nbhds/{id}/content/welcome` - Get welcome content (public)
+  - [ ] `POST /api/nbhds/{id}/content/announcements` - Create announcement (admin only)
+  - [ ] `GET /api/nbhds/{id}/content/announcements` - List announcements (paginated)
+  - [ ] `DELETE /api/nbhds/{id}/content/announcements/{rkey}` - Delete announcement (admin only)
+  - [ ] `GET /api/nbhds/{id}/content/cms` - CMS view with all content (admin only)
+  - [ ] Store content as AT Protocol records with CID/rkey generation
+  - [ ] Register router in `api/main.py`
+- **Acceptance Criteria:**
+  - [ ] Welcome content endpoints work (create, retrieve, delete)
+  - [ ] Announcements CRUD works with pagination
+  - [ ] Non-admin users get 403 on POST/DELETE endpoints
+  - [ ] Content stored as AT Protocol records (app.nbhd.welcome, app.nbhd.announcement)
+  - [ ] CMS endpoint returns aggregated view of all content
+  - [ ] Proper error handling (404 for missing nbhd, 403 for auth)
+- **Type:** Backend
+- **Estimate:** M
+- **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - API Routes, Admin Access Control, and AT Protocol Records sections
+- **Files:**
+  - `api/nbhd_content.py` (new) - Main router
+  - `api/main.py` - Register router
+  - `api/tests/integration/test_nbhd_content_api.py` (new)
+
+### Frontend - Core CMS Features
+
+#### NBHD-003: Welcome Page UI
+- **Description:** Create public-facing welcome page for neighborhoods with setup instructions
+- **Requirements:**
+  - [ ] Create `WelcomePage.jsx` component that shows markdown welcome content
+  - [ ] Create `DefaultWelcomeInstructions.jsx` component showing setup instructions when no content exists
+  - [ ] Install markdown rendering library (or create `MarkdownRenderer.jsx`)
+  - [ ] Add route `/nbhds/:id/welcome` to `App.jsx`
+  - [ ] Create `nbhdContentService.js` with API client functions
+  - [ ] Link from NeighborhoodDetail page
+  - [ ] Mobile-responsive layout
+  - [ ] Handle loading and error states
+- **Acceptance Criteria:**
+  - [ ] Unauthenticated users can view welcome page
+  - [ ] With no content, shows setup instructions
+  - [ ] With content, shows rendered markdown
+  - [ ] Markdown renders correctly (headers, links, code blocks)
+  - [ ] Mobile layout works
+  - [ ] Loading state displays while fetching
+- **Type:** Frontend
+- **Estimate:** S
+- **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - Welcome Page Behavior section
+- **Files:**
+  - `nbhd/src/pages/WelcomePage.jsx` (new)
+  - `nbhd/src/components/DefaultWelcomeInstructions.jsx` (new)
+  - `nbhd/src/components/MarkdownRenderer.jsx` (new, or use library)
+  - `nbhd/src/services/nbhdContentService.js` (new)
+  - `nbhd/src/App.jsx` - Add route
+
+#### NBHD-004: Admin Page UI
+- **Description:** Create admin interface for neighborhood owners to configure welcome page, announcements, and settings
+- **Requirements:**
+  - [ ] Create `AdminPage.jsx` with tab navigation (Welcome, Announcements, Settings, Sites)
+  - [ ] Create `WelcomeContentEditor.jsx` that wraps ContentEditor component for welcome content
+  - [ ] Create `AnnouncementManager.jsx` to create, list, and delete announcements
+  - [ ] Create `NbhdSettingsForm.jsx` for metadata configuration
+  - [ ] Create `SitesTab.jsx` to list and manage sites for this nbhd
+  - [ ] Add admin route `/nbhds/:id/admin` to `App.jsx`
+  - [ ] Add access check (redirect non-owners to public page)
+  - [ ] Add "Admin" button to NeighborhoodDetail (visible only to owner)
+  - [ ] Tab navigation with visual indicators for unsaved changes
+  - [ ] Save functionality with success/error messages
+- **Acceptance Criteria:**
+  - [ ] Owners can access admin page (non-owners redirected)
+  - [ ] Welcome tab allows editing markdown content
+  - [ ] Announcements tab supports create/list/delete
+  - [ ] Settings tab allows configuring nbhd metadata
+  - [ ] Sites tab shows project sites linked to nbhd
+  - [ ] All changes save to backend
+  - [ ] Error messages display on failures
+  - [ ] Unsaved changes indicator shown
+- **Type:** Frontend
+- **Estimate:** L
+- **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - Frontend Component Architecture section
+- **Files:**
+  - `nbhd/src/pages/AdminPage.jsx` (new)
+  - `nbhd/src/components/WelcomeContentEditor.jsx` (new)
+  - `nbhd/src/components/AnnouncementManager.jsx` (new)
+  - `nbhd/src/components/NbhdSettingsForm.jsx` (new)
+  - `nbhd/src/components/SitesTab.jsx` (new)
+  - `nbhd/src/App.jsx` - Add route and admin button
+  - `nbhd/src/components/NeighborhoodDetail.jsx` - Add admin button
+
+#### NBHD-005: CMS View for AT Protocol Data
+- **Description:** Create CMS view showing all AT Protocol records for the neighborhood
+- **Requirements:**
+  - [ ] Create `CMSView.jsx` page (admin only)
+  - [ ] Create `ContentRecordsList.jsx` component for displaying records
+  - [ ] Create `ATProtocolInspector.jsx` component showing CID, rkey, URI details
+  - [ ] Display: welcome content, announcements, member sites, blog posts
+  - [ ] Add filters: record type (welcome, announcement, blog), date range, author
+  - [ ] Add search by content text
+  - [ ] Show record metadata: CID, created_at, modified_at
+  - [ ] Add route `/nbhds/:id/cms` to `App.jsx`
+  - [ ] Link from AdminPage
+  - [ ] Pagination for large record lists
+- **Acceptance Criteria:**
+  - [ ] Only admins can view CMS page (403 for non-admins)
+  - [ ] All AT Protocol records displayed with metadata
+  - [ ] Filters work correctly
+  - [ ] Search functionality works
+  - [ ] CID/rkey/URI information shown for each record
+  - [ ] Pagination works with large datasets
+  - [ ] Mobile responsive layout
+- **Type:** Frontend
+- **Estimate:** M
+- **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - CMS View Response Format section
+- **Files:**
+  - `nbhd/src/pages/CMSView.jsx` (new)
+  - `nbhd/src/components/ContentRecordsList.jsx` (new)
+  - `nbhd/src/components/ATProtocolInspector.jsx` (new)
+  - `nbhd/src/App.jsx` - Add route
+
+### Frontend - Site Management Enhancement
+
+#### SITES-001: Site Type Distinction
+- **Description:** Add support for filtering sites by type (personal vs project)
+- **Requirements:**
+  - [ ] Update `SiteManagementDashboard.jsx` to accept `site_type` filter prop
+  - [ ] Update site creation flow to include site type selector
+  - [ ] Update backend `sites.py` `GET /api/sites` to support `?site_type=personal|project` query param
+  - [ ] Validate project sites require nbhd_id selection
+  - [ ] Update site creation form to show/hide nbhd selector based on type
+  - [ ] Add site type badges to site list
+  - [ ] Update `SiteConfigForm.jsx` to include site type in form
+- **Acceptance Criteria:**
+  - [ ] Filter parameter works on GET /api/sites
+  - [ ] Site creation saves site_type correctly
+  - [ ] Personal sites don't require nbhd
+  - [ ] Project sites require nbhd selection
+  - [ ] Badges display correct site type
+  - [ ] Form validates based on site type
+- **Type:** Frontend + Backend
+- **Estimate:** S
+- **Reference:** See [SITE-TYPES.md](./SITE-TYPES.md) - Data Model, API Endpoints, and Validation Rules sections
+- **Files:**
+  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Add filter
+  - `nbhd/src/components/SiteBuilder/SiteConfigForm.jsx` - Add type selector
+  - `api/sites.py` - Add site_type filtering
+  - `api/models.py` - Update site schema
+
+#### SITES-002: Personal Sites Page
+- **Description:** Create dedicated page for viewing and managing personal sites
+- **Requirements:**
+  - [ ] Create `PersonalSites.jsx` page
+  - [ ] Fetch `GET /api/sites?site_type=personal`
+  - [ ] Reuse `SiteManagementDashboard` with site_type="personal" filter
+  - [ ] Add create button with site type pre-selected
+  - [ ] Add route `/sites/personal` to `App.jsx`
+  - [ ] Link from user dashboard
+  - [ ] Show helpful text explaining personal sites
+- **Acceptance Criteria:**
+  - [ ] Page loads and displays user's personal sites
+  - [ ] Can create new personal site from this page
+  - [ ] Can edit/delete existing personal sites
+  - [ ] No nbhd selection shown on create
+  - [ ] Mobile responsive
+- **Type:** Frontend
+- **Estimate:** S
+- **Reference:** See [SITE-TYPES.md](./SITE-TYPES.md) - UI Patterns and Personal Sites Page sections
+- **Files:**
+  - `nbhd/src/pages/PersonalSites.jsx` (new)
+  - `nbhd/src/App.jsx` - Add route and link
+
+#### SITES-003: Project Sites Page
+- **Description:** Create dedicated page for viewing and managing project sites
+- **Requirements:**
+  - [ ] Create `ProjectSites.jsx` page
+  - [ ] Create `ProjectSiteSelector.jsx` component for choosing/filtering by nbhd
+  - [ ] Fetch `GET /api/sites?site_type=project`
+  - [ ] Allow filtering by nbhd
+  - [ ] Reuse `SiteManagementDashboard` with site_type="project" filter
+  - [ ] Add create button with site type pre-selected
+  - [ ] Add route `/sites/projects` to `App.jsx`
+  - [ ] Link from user dashboard and neighborhood pages
+  - [ ] Show helpful text explaining project sites
+- **Acceptance Criteria:**
+  - [ ] Page loads and displays user's project sites
+  - [ ] Can filter by neighborhood
+  - [ ] Can create new project site (requires nbhd selection)
+  - [ ] Can edit/delete existing project sites
+  - [ ] Mobile responsive
+- **Type:** Frontend
+- **Estimate:** S
+- **Reference:** See [SITE-TYPES.md](./SITE-TYPES.md) - UI Patterns and Project Sites Page sections
+- **Files:**
+  - `nbhd/src/pages/ProjectSites.jsx` (new)
+  - `nbhd/src/components/ProjectSiteSelector.jsx` (new)
+  - `nbhd/src/App.jsx` - Add route and link
+
+---
+
+## Phase 2h: Build Pipeline UI Completion 🚀
+
+**Depends on:** Phase 2e (Build Pipeline - SSG-015, SSG-016)
+
+**Note:** These tickets complete the build pipeline UI for the existing SSG-015 and SSG-016 backend implementations. The backend is complete but lacks frontend UI to trigger and monitor builds.
+
+#### BUILD-001: Site Build Trigger UI
+- **Description:** Add "Deploy Site" button to trigger site builds
+- **Requirements:**
+  - [ ] Add "Deploy Site" button to `SiteManagementDashboard.jsx`
+  - [ ] Call `POST /api/sites/{id}/build` (endpoint exists from SSG-015)
+  - [ ] Show loading state during build initialization
+  - [ ] Display job_id after successful trigger
+  - [ ] Show error message on failures
+  - [ ] Disable button while build is in progress
+  - [ ] Confirm dialog asking to rebuild
+- **Acceptance Criteria:**
+  - [ ] Button visible in dashboard for each site
+  - [ ] Clicking triggers build (202 Accepted received)
+  - [ ] Loading state displays during request
+  - [ ] Success message shows with job_id
+  - [ ] Error messages clear and helpful
+  - [ ] Can't trigger multiple builds simultaneously
+- **Type:** Frontend
+- **Estimate:** S
+- **Reference:** See [BUILD-PIPELINE-UI.md](./BUILD-PIPELINE-UI.md) - BUILD-001 section and Component Specifications
+- **Files:**
+  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Add button and handler
+  - `nbhd/src/components/SiteBuilder/BuildTriggerButton.jsx` (new, optional)
+
+#### BUILD-002: Build Status Poller
+- **Description:** Component to poll and display build status and logs
+- **Requirements:**
+  - [ ] Create `BuildStatusPoller.jsx` component
+  - [ ] Poll `GET /api/sites/{id}/builds/{job_id}` every 5 seconds
+  - [ ] Display progress: pending → running → completed/failed
+  - [ ] Show build logs (tail last 50 lines)
+  - [ ] Show error messages on failure
+  - [ ] Auto-refresh until completion or timeout
+  - [ ] Manual refresh button
+  - [ ] Stop polling once build completes
+  - [ ] Handle network errors gracefully
+- **Acceptance Criteria:**
+  - [ ] Status updates every 5 seconds while building
+  - [ ] Shows correct status text (pending, running, completed, failed)
+  - [ ] Logs display and update as build progresses
+  - [ ] Stops polling once build completes
+  - [ ] Error messages display on build failure
+  - [ ] Network errors handled without crashing
+  - [ ] Can manually refresh status
+- **Type:** Frontend
+- **Estimate:** M
+- **Reference:** See [BUILD-PIPELINE-UI.md](./BUILD-PIPELINE-UI.md) - BUILD-002 section, Status Lifecycle, and Component Specifications
+- **Files:**
+  - `nbhd/src/components/SiteBuilder/BuildStatusPoller.jsx` (new)
+  - `nbhd/src/hooks/useBuildPoller.js` (new, optional - custom hook)
+
+#### BUILD-003: Build History Dashboard
+- **Description:** Component to display past builds and their status
+- **Requirements:**
+  - [ ] Create `BuildHistory.jsx` component
+  - [ ] Fetch `GET /api/sites/{id}/builds` (endpoint exists from SSG-015)
+  - [ ] Display table: Status, Started, Duration, Actions
+  - [ ] Show build status with color coding (success=green, failed=red, pending=yellow)
+  - [ ] Link to logs for each build
+  - [ ] Pagination for large build histories
+  - [ ] Sort by date (newest first)
+  - [ ] Add to `SiteManagementDashboard` or separate page
+  - [ ] Show last successful/failed build info
+- **Acceptance Criteria:**
+  - [ ] Table displays all builds with correct info
+  - [ ] Status colors are visible and correct
+  - [ ] Pagination works with >10 builds
+  - [ ] Sorting by date works
+  - [ ] Log links are clickable
+  - [ ] Mobile responsive layout
+- **Type:** Frontend
+- **Estimate:** M
+- **Reference:** See [BUILD-PIPELINE-UI.md](./BUILD-PIPELINE-UI.md) - BUILD-003 section and Component Specifications
+- **Files:**
+  - `nbhd/src/components/SiteBuilder/BuildHistory.jsx` (new)
+  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Add build history section
+
+---
+
 ## Phase 3: AT Protocol Federation & Full PDS 🌐
 
 **NOTE:** The foundation (ATP-FOUND tickets) has already been completed in Phase 2b. These tickets implement the full federated PDS features.
@@ -887,10 +1205,34 @@ Phase 2 focuses on two major features:
 - [ ] SSG-017 (Subdomain Routing Setup)
 - [ ] SSG-018 (Site Export to ZIP)
 
-### 🎨 Phase 2f: Polish & Optional Features (Week 11)
+### 📝 Phase 2g: Nbhd CMS & Admin Features (Weeks 11-13)
+**Depends on:** Phase 2c (Content Management) and Phase 2e (Build Pipeline)
+
+Backend Foundation:
+- [ ] NBHD-001 (Nbhd DID & Data Model Enhancement)
+- [ ] NBHD-002 (Nbhd Content API)
+
+Frontend - Core CMS:
+- [ ] NBHD-003 (Welcome Page UI)
+- [ ] NBHD-004 (Admin Page UI)
+- [ ] NBHD-005 (CMS View for AT Protocol Data)
+
+Frontend - Site Management:
+- [ ] SITES-001 (Site Type Distinction)
+- [ ] SITES-002 (Personal Sites Page)
+- [ ] SITES-003 (Project Sites Page)
+
+### 🚀 Phase 2h: Build Pipeline UI Completion (Weeks 13-14)
+**Depends on:** Phase 2e (Build Pipeline - SSG-015, SSG-016)
+
+- [ ] BUILD-001 (Site Build Trigger UI)
+- [ ] BUILD-002 (Build Status Poller)
+- [ ] BUILD-003 (Build History Dashboard)
+
+### 🎨 Phase 2i: Polish & Optional Features (Week 15)
 - [ ] SSG-003 (WASM Preview - Optional, nice to have)
 
-### 🌐 Phase 3: AT Protocol Federation (Weeks 12+)
+### 🌐 Phase 3: AT Protocol Federation (Weeks 16+)
 Full PDS features (foundation already built in Phase 2b):
 - [ ] ATP-001 (AT Protocol PDS Research & Design)
 - [ ] ATP-002 (BlueSky Integration Review)
