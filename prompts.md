@@ -8,20 +8,24 @@ Complete guide with battle-tested prompt templates for using Ralph Wiggum in Cla
 
 ```bash
 Follow these phases and complete these steps to add a new feature to the project:
-"TICKET ASSIGNMENT & DISCOVERY (Phase 1)
+"
+CLEAR CONTEXT (Phase 1)
+- Create a subagent to clear the context window to conduct the following steps with
+
+TICKET ASSIGNMENT & DISCOVERY (Phase 2)
 - Read planning/tickets.md
 - Identify first incomplete ticket (first unchecked [ ] in priority order) - this is your currently assigned ticket
 - Read full ticket requirements and acceptance criteria
 - Identify all [ ] checkboxes that need completion
 
-CONTEXT & PLANNING (Phase 2)
+CONTEXT & PLANNING (Phase 3)
 - Read Phase Overview for the currently assigned ticket in tickets.md to find 'Relevant Documentation' section
 - Read those specific planning docs (ARCHITECTURE.md, API.md, FRONTEND.md, etc.)
 - Note: programming language, test framework, test command, project structure
 - Note: file locations where changes will be made
 - Identify any existing code patterns to follow
 
-TDD SETUP (Phase 3)
+TDD SETUP (Phase 4)
 - Branch off of develop: git checkout develop && git pull
 - Create feature branch: git checkout -b feature/TICKET-ID
   Example: git checkout -b feature/SSG-005
@@ -30,7 +34,7 @@ TDD SETUP (Phase 3)
 - Write test code for EACH acceptance criterion (check the [ ] items)
 - Run test command from TESTING.md - tests should FAIL initially
 
-IMPLEMENTATION (Phase 4)
+IMPLEMENTATION (Phase 5)
 - Read existing code in relevant files
 - Implement minimal code to pass tests
 - Follow patterns and conventions from planning docs
@@ -40,7 +44,7 @@ IMPLEMENTATION (Phase 4)
   * Mark the corresponding [ ] as [x] in planning/tickets.md for this ticket
   * Do NOT commit yet - just update the file to track progress
 
-TEST & ITERATE (Phase 5)
+TEST & ITERATE (Phase 6)
 LOOP until ALL tests pass:
   1. Run: npm test (frontend) or pytest api/tests (backend)
   2. Read error messages carefully
@@ -51,7 +55,31 @@ LOOP until ALL tests pass:
      - Do not commit yet, just track progress
   6. If ALL tests passing, break loop
 
-COMPLETION & HANDOFF (Phase 6)
+FOLLOW-UP TERRAFORM/INFRASTRUCTURE TICKET creation (Phase 7)
+- IF ticket creates new Lambda functions, S3 buckets, CloudFront distributions, or other AWS resources:
+  * Check planning/tickets.md - is there already a TICKET-ID-INFRA ticket?
+  * IF NOT, create new ticket using format: TICKET-ID-INFRA with -INFRA suffix
+  * Review code implementation to identify infrastructure needed:
+    - Lambda functions → needs packaging, IAM role, CloudWatch logs
+    - S3 operations → needs bucket creation, policy configuration, versioning
+    - CloudFront → needs distribution setup, cache behaviors, origins
+    - DynamoDB → needs table configuration, GSI setup, permissions
+    - API Gateway → needs routes, Lambda permissions
+  * Copy infrastructure ticket template from similar completed -INFRA tickets (e.g., SSG-009-INFRA, SSG-016-INFRA)
+  * Update template with:
+    - Description of AWS resources to create
+    - Detailed Requirements section with all [ ] checkboxes for Terraform/IaC
+    - Acceptance Criteria section (resources deployed, functional testing)
+    - Implementation Files listing new/modified .tf files needed
+    - Estimate: typically S/M depending on complexity
+    - Add "Depends On: TICKET-ID (code implementation)" reference
+  * Insert ticket in appropriate section of planning/tickets.md (Phase 2e for build pipeline)
+  * DO NOT implement infrastructure in this phase - just create the ticket for future infrastructure work
+  * Commit infrastructure ticket to same feature branch: git add planning/tickets.md && git commit
+- IF ticket is purely code/frontend with no infrastructure requirements:
+  * Skip Phase 7 - proceed directly to Phase 8 (Completion & Handoff)
+
+COMPLETION & HANDOFF (Phase 8)
 - UPDATE BOTH TRACKING LOCATIONS:
   * In planning/tickets.md: Verify ALL [ ] items for this ticket are marked [x]
   * In GitHub issue (#NN): Use 'gh issue view <issue> --web' to verify and update
@@ -85,7 +113,7 @@ CRITICAL RULES (from AGENTS.md)
 OUTPUT
 Success: <promise>DONE</promise> (ticket complete, tested, committed, pushed)
 Blocked: <promise>BLOCKED</promise> (document blocker, update ticket, push progress)
-" --max-iterations 5
+" 
 ```
 
 ## Best Practices

@@ -487,6 +487,117 @@ Phase 2 focuses on two major features:
 - **Type:** Backend
 - **Estimate:** S
 
+## Phase 2e: Infrastructure & Deployment 🚀
+
+**Note:** These infrastructure tickets support the build pipeline. They provision AWS resources needed for SSG-009, SSG-015, and SSG-016.
+
+#### SSG-009-INFRA: Deploy Template Analyzer Lambda
+- **Description:** Terraform infrastructure to deploy the Template Analyzer Lambda function
+- **Depends On:** SSG-009 (code implementation)
+- **Requirements:**
+  - [ ] Package Lambda function code from `lambda/template_analyzer/`
+  - [ ] Create CloudWatch Log Group for template analyzer Lambda
+  - [ ] Create IAM role for template analyzer execution
+  - [ ] Create IAM policy allowing Lambda to:
+    - [ ] Write logs to CloudWatch
+    - [ ] Query and update DynamoDB (DescribeTable, UpdateItem, PutItem)
+    - [ ] (Optional) Clone from GitHub (may not need IAM - public repos)
+  - [ ] Deploy Lambda function with:
+    - [ ] Runtime: Python 3.11 or 3.12
+    - [ ] Timeout: 300 seconds (5 minutes)
+    - [ ] Memory: 512 MB minimum
+    - [ ] Environment variables: DYNAMODB_TABLE_NAME, AWS_REGION
+  - [ ] Add Terraform code to `devops/` directory
+  - [ ] Document deployment steps in DEPLOYMENT_CHECKLIST.md
+- **Acceptance Criteria:**
+  - [ ] Lambda function successfully deployed to AWS
+  - [ ] Function can be invoked from API Gateway (SSG-008)
+  - [ ] CloudWatch logs show successful executions
+  - [ ] Can clone and analyze test template repositories
+  - [ ] Updates template status in DynamoDB correctly
+  - [ ] Handles timeouts gracefully
+- **Type:** Infrastructure/Terraform
+- **Estimate:** S
+- **Implementation Files:**
+  - Terraform: `devops/template_analyzer_lambda.tf` (new)
+  - Terraform: `devops/template_analyzer_iam.tf` (new)
+
+#### SSG-016-INFRA: Deploy 11ty Site Builder Lambda
+- **Description:** Terraform infrastructure to deploy the 11ty Site Builder Lambda function and supporting AWS resources
+- **Depends On:** SSG-016 (code implementation)
+- **Requirements:**
+  - [ ] Package Lambda function code from `lambda/site_builder/`
+  - [ ] Create S3 bucket for built sites (e.g., `{project}-sites-{environment}`)
+  - [ ] Configure S3 bucket:
+    - [ ] Enable public read access (site files are public static content)
+    - [ ] Configure bucket policy for CloudFront access
+    - [ ] Enable versioning for rollback capability
+    - [ ] Set lifecycle rules for old builds (optional)
+  - [ ] Create CloudFront distribution:
+    - [ ] Origin: S3 bucket with path pattern `/{site_id}/*`
+    - [ ] Behaviors: Cache control settings (short TTL for index.html, long TTL for assets)
+    - [ ] Origin path: `/` (root of bucket)
+    - [ ] Default root object: `index.html`
+    - [ ] Compress static assets (gzip)
+    - [ ] HTTPS only
+  - [ ] Create CloudWatch Log Group for site builder Lambda
+  - [ ] Create IAM role for site builder execution
+  - [ ] Create IAM policies allowing Lambda to:
+    - [ ] Write logs to CloudWatch
+    - [ ] Query and update DynamoDB (GetItem, PutItem, UpdateItem, Query)
+    - [ ] Read/write to S3 bucket (GetObject, PutObject, ListBucket)
+    - [ ] Invoke CloudFront invalidations (CreateInvalidation)
+  - [ ] Deploy Lambda function with:
+    - [ ] Runtime: Python 3.11 or 3.12
+    - [ ] Timeout: 300 seconds (5 minutes)
+    - [ ] Memory: 1024 MB (needs npm install + 11ty build)
+    - [ ] Environment variables: DYNAMODB_TABLE_NAME, S3_BUCKET, CLOUDFRONT_DISTRIBUTION_ID, AWS_REGION
+    - [ ] Ephemeral storage: 4096 MB (for npm modules and build output)
+  - [ ] Create API Lambda permission to invoke site builder Lambda (for SSG-015)
+  - [ ] Add Terraform code to `devops/` directory
+  - [ ] Document deployment steps in DEPLOYMENT_CHECKLIST.md
+  - [ ] Document subdomain routing prerequisites (Route53 setup in SSG-017)
+- **Acceptance Criteria:**
+  - [ ] Lambda function successfully deployed to AWS
+  - [ ] Function can be invoked from API (via SSG-015 endpoints)
+  - [ ] CloudWatch logs show successful builds
+  - [ ] Built sites successfully uploaded to S3
+  - [ ] CloudFront serves sites via `//{site_id}.nbhd.city` (after SSG-017 DNS setup)
+  - [ ] Cache invalidation works (CloudFront shows latest content)
+  - [ ] Failed builds update DynamoDB status correctly
+  - [ ] Environment variables are properly configured
+- **Type:** Infrastructure/Terraform
+- **Estimate:** M
+- **Implementation Files:**
+  - Terraform: `devops/site_builder_lambda.tf` (new)
+  - Terraform: `devops/site_builder_iam.tf` (new)
+  - Terraform: `devops/site_builder_s3.tf` (new)
+  - Terraform: `devops/site_builder_cloudfront.tf` (new)
+
+#### SSG-015-INFRA: Configure API Lambda Permissions for Build Invocation
+- **Description:** Update IAM policies to allow API Lambda to invoke site builder and template analyzer Lambdas
+- **Depends On:** SSG-009-INFRA, SSG-016-INFRA (must be deployed first)
+- **Requirements:**
+  - [ ] Add IAM policy allowing API Lambda to:
+    - [ ] Invoke site builder Lambda asynchronously (InvokeFunction with InvocationType=Event)
+    - [ ] Invoke template analyzer Lambda asynchronously (InvokeFunction with InvocationType=Event)
+  - [ ] Create Lambda permissions:
+    - [ ] Allow API Lambda to invoke site builder Lambda
+    - [ ] Allow API Lambda to invoke template analyzer Lambda
+  - [ ] Update existing `devops/iam.tf` with new policies
+  - [ ] No new Lambda function needed (existing API Lambda)
+- **Acceptance Criteria:**
+  - [ ] API endpoints in SSG-015 successfully invoke site builder Lambda
+  - [ ] API endpoints in SSG-008 successfully invoke template analyzer Lambda
+  - [ ] Invocations are asynchronous (202 Accepted response)
+  - [ ] CloudWatch logs show successful Lambda invocations
+  - [ ] Build job status updates work correctly
+- **Type:** Infrastructure/Terraform
+- **Estimate:** XS
+- **Implementation Files:**
+  - Terraform: Update `devops/iam.tf`
+  - Terraform: Update `devops/lambda.tf` (add permissions)
+
 ---
 
 ## Phase 2f: Polish & Optional Features 🎨
