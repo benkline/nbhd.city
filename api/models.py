@@ -238,3 +238,44 @@ class TemplateContentTypesResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# Build Job Models
+
+class BuildJobCreate(BaseModel):
+    """Schema for creating a build job."""
+
+    site_id: str
+    trigger: str = "manual"  # manual, content_update, config_update
+
+    class Config:
+        from_attributes = True
+
+
+class BuildJobResponse(BaseModel):
+    """Schema for build job responses."""
+
+    job_id: str
+    site_id: str
+    user_did: str
+    status: str  # pending, running, completed, failed
+    started_at: str
+    completed_at: Optional[str] = None
+    duration_seconds: Optional[int] = None
+    output_url: Optional[str] = None
+    error: Optional[str] = None
+    error_stage: Optional[str] = None
+    trigger: str = "manual"
+    content_count: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
+class BuildJobListResponse(BaseModel):
+    """Schema for listing build jobs."""
+
+    builds: List[BuildJobResponse]
+
+    class Config:
+        from_attributes = True

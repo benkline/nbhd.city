@@ -751,3 +751,180 @@ async def delete_record(table, uri: str) -> Dict:
     )
 
     return response.get("Attributes", {})
+
+
+# Build Job Operations
+
+async def create_build_job(
+    table,
+    site_id: str,
+    user_did: str,
+    trigger: str = "manual"
+) -> Dict:
+    """
+    Create a new build job in DynamoDB.
+
+    REQUIREMENT: [ ] Create build job record in DynamoDB
+    ACCEPTANCE CRITERIA: [ ] Build job created in DynamoDB
+
+    Args:
+        table: DynamoDB table resource
+        site_id: Site UUID
+        user_did: User's DID who owns the site
+        trigger: Build trigger type (manual, content_update, config_update)
+
+    Returns:
+        dict: Created build job item
+    """
+    job_id = generate_id()
+    timestamp = now_iso()
+
+    item = {
+        "PK": f"SITE#{site_id}",
+        "SK": f"BUILD#{job_id}",
+        "job_id": job_id,
+        "site_id": site_id,
+        "user_did": user_did,
+        "status": "pending",
+        "started_at": timestamp,
+        "completed_at": None,
+        "duration_seconds": None,
+        "output_url": None,
+        "error": None,
+        "error_stage": None,
+        "trigger": trigger,
+        "content_count": None,
+        "entity_type": "build_job"
+    }
+
+    await table.put_item(Item=item)
+    return item
+
+
+async def get_build_job(table, site_id: str, job_id: str) -> Optional[Dict]:
+    """
+    Get a build job by ID.
+
+    Args:
+        table: DynamoDB table resource
+        site_id: Site UUID (needed for PK)
+        job_id: Build job UUID
+
+    Returns:
+        dict or None: Build job item if found
+    """
+    response = await table.get_item(
+        Key={"PK": f"SITE#{site_id}", "SK": f"BUILD#{job_id}"}
+    )
+    return response.get("Item")
+
+
+async def list_build_jobs_for_site(
+    table,
+    site_id: str,
+    limit: int = 100,
+    last_key: Optional[dict] = None
+) -> Tuple[List[dict], Optional[dict]]:
+    """
+    List all build jobs for a site, paginated and sorted by creation date (newest first).
+
+    Args:
+        table: DynamoDB table resource
+        site_id: Site UUID to list builds for
+        limit: Maximum number of items to return
+        last_key: Last evaluated key from previous query (for pagination)
+
+    Returns:
+        tuple: (list of build job items, next pagination key or None)
+    """
+    # Query by site PK, filtered to BUILD# items
+    params = {
+        "KeyConditionExpression": Key("PK").eq(f"SITE#{site_id}") & Key("SK").begins_with("BUILD#"),
+        "ScanIndexForward": False,  # Descending order (newest first)
+        "Limit": limit
+    }
+
+    if last_key:
+        params["ExclusiveStartKey"] = last_key
+
+    response = await table.query(**params)
+    return response.get("Items", []), response.get("LastEvaluatedKey")
+
+
+async def update_build_job(
+    table,
+    site_id: str,
+    job_id: str,
+    updates: Dict
+) -> Dict:
+    """
+    Update a build job with new status and metadata.
+
+    Args:
+        table: DynamoDB table resource
+        site_id: Site UUID (needed for PK)
+        job_id: Build job UUID
+        updates: Dict of fields to update
+
+    Returns:
+        dict: Updated build job item
+    """
+    # Build update expression
+    update_parts = []
+    values = {}
+
+    for key, value in updates.items():
+        update_parts.append(f"{key} = :{key}")
+        values[f":{key}"] = value
+
+    update_expr = "SET " + ", ".join(update_parts)
+
+    response = await table.update_item(
+        Key={"PK": f"SITE#{site_id}", "SK": f"BUILD#{job_id}"},
+        UpdateExpression=update_expr,
+        ExpressionAttributeValues=values,
+        ReturnValues="ALL_NEW"
+    )
+
+    return response.get("Attributes", {})
+
+
+def invoke_lambda_async(job_id: str, site_id: str, user_did: str) -> str:
+    """
+    Invoke the site builder Lambda function asynchronously.
+
+    REQUIREMENT: [ ] Invoke build Lambda asynchronously
+    ACCEPTANCE CRITERIA: [ ] Lambda invoked successfully
+
+    Args:
+        job_id: Build job UUID
+        site_id: Site UUID to build
+        user_did: User's DID
+
+    Returns:
+        str: Lambda invocation request ID
+
+    Raises:
+        Exception: If Lambda invocation fails
+    """
+    import boto3
+    import os
+
+    lambda_client = boto3.client(
+        'lambda',
+        region_name=os.getenv('AWS_REGION', 'us-east-1')
+    )
+
+    try:
+        response = lambda_client.invoke(
+            FunctionName='nbhd-city-site-builder',  # Lambda function name
+            InvocationType='Event',  # Async invocation
+            Payload={
+                'job_id': job_id,
+                'site_id': site_id,
+                'user_did': user_did
+            }
+        )
+        return response.get('RequestId', job_id)
+    except Exception as e:
+        raise Exception(f"Failed to invoke Lambda: {str(e)}")
