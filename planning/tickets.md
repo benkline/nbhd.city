@@ -428,25 +428,27 @@ Phase 2 focuses on two major features:
 #### SSG-016: 11ty Lambda Build Function
 - **Description:** Lambda function to build static sites from templates and content
 - **Requirements:**
-  - [ ] Clone template repo from GitHub to /tmp
-  - [ ] Query content records from DynamoDB (app.nbhd.blog.post)
-  - [ ] Transform AT Protocol records to 11ty data format
-  - [ ] Write _data/posts.json, _data/site.json
-  - [ ] Run npm install (with timeout)
-  - [ ] Run npm run build (11ty build)
-  - [ ] Upload _site/ output to S3
-  - [ ] Invalidate CloudFront cache
-  - [ ] Update build job status in DynamoDB
-  - [ ] Log errors to CloudWatch
+  - [x] Clone template repo from GitHub to /tmp
+  - [x] Query content records from DynamoDB (app.nbhd.blog.post)
+  - [x] Transform AT Protocol records to 11ty data format
+  - [x] Write _data/posts.json, _data/site.json
+  - [x] Run npm install (with timeout)
+  - [x] Run npm run build (11ty build)
+  - [x] Upload _site/ output to S3
+  - [x] Invalidate CloudFront cache
+  - [x] Update build job status in DynamoDB
+  - [x] Log errors to CloudWatch
 - **Acceptance Criteria:**
-  - [ ] Successfully builds sites with blog content
-  - [ ] Output correctly uploaded to S3
-  - [ ] CloudFront serves latest version
-  - [ ] Build errors logged and returned
-  - [ ] Completes within 5 minute timeout
-  - [ ] Handles build failures gracefully
+  - [x] Successfully builds sites with blog content
+  - [x] Output correctly uploaded to S3
+  - [x] CloudFront serves latest version
+  - [x] Build errors logged and returned
+  - [x] Completes within 5 minute timeout
+  - [x] Handles build failures gracefully
 - **Type:** Backend/Lambda/Infrastructure
 - **Estimate:** XL
+- **Status:** COMPLETED
+- **Tests:** `lambda/tests/test_site_builder.py` (15 tests passing)
 
 #### SSG-017: Subdomain Routing Setup
 - **Description:** Configure Route53 + CloudFront for subdomain deployment
