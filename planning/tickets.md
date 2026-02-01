@@ -1,18 +1,22 @@
 # nbhd.city Development Tickets
 
 **Last Updated:** 2026-01-21
-**Phase:** 2 (Static Sites + AT Protocol PDS)
+**Phases:** 1-6 (Static Sites + AT Protocol PDS + Nbhd CMS)
 **Priority:** High
 
 ---
 
-## Phase 2 Overview
+## Phase Overview
 
-Phase 2 focuses on two major features:
-1. **Static Site Generation** - Members can create beautiful static sites using 11ty templates
-2. **AT Protocol PDS** - Each nbhd becomes a full Personal Data Server on the AT Protocol network
+The development roadmap is organized into 6 phases:
+1. **Phase 1** - MVP Foundation (Template System & Site Configuration)
+2. **Phase 2** - Build Pipeline & Deployment (11ty Build, S3, CloudFront, Subdomains)
+3. **Phase 3** - AT Protocol Foundation (DIDs, Records, Content Management)
+4. **Phase 4** - Nbhd CMS & Admin Features (Neighborhood Management, Content Editing)
+5. **Phase 5** - Build Pipeline UI Completion (Trigger UI, Status Monitoring)
+6. **Phase 6** - AT Protocol Federation & Full PDS (Federation, Data Sync, Portability)
 
-### Relevant Documentation for Phase 2
+### Relevant Documentation
 
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System design and tech stack
 - **[DATABASE.md](./DATABASE.md)** - DynamoDB schema for static sites and PDS data
@@ -25,7 +29,7 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2a: MVP Foundation ✅ COMPLETE
+## Phase 1: MVP Foundation ✅ COMPLETE
 
 ### Frontend: Template System & UI
 
@@ -114,7 +118,7 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2b: AT Protocol Foundation 🔧
+## Phase 3: AT Protocol Foundation 🔧
 
 **Critical:** This foundation must be built before content management. The build pipeline depends on content being stored as AT Protocol records.
 
@@ -208,9 +212,9 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2c: Content Management ✍️
+## Phase 3a: Content Management ✍️
 
-**Depends on:** Phase 2b (AT Protocol Foundation)
+**Depends on:** Phase 3 (AT Protocol Foundation)
 
 ### Content Records & Editor
 
@@ -304,9 +308,9 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2d: Template Analysis System 📐
+## Phase 1a: Template Analysis System 📐
 
-**Can run in parallel with Phase 2c**
+**Can run in parallel with Phase 3a (Content Management)**
 
 ### Template Analysis System
 
@@ -401,9 +405,9 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2e: Build Pipeline & Deployment 🏗️
+## Phase 2: Build Pipeline & Deployment 🏗️
 
-**Depends on:** Phase 2c (Content Management - SSG-011)
+**Depends on:** Phase 3a (Content Management - SSG-011)
 
 #### SSG-015: Site Build Trigger API
 - **Description:** Endpoint to initiate Lambda build process
@@ -492,7 +496,7 @@ Phase 2 focuses on two major features:
 - **Type:** Backend
 - **Estimate:** S
 
-## Phase 2e: Infrastructure & Deployment 🚀
+### Phase 2 Infrastructure & Deployment 🚀
 
 **Note:** These infrastructure tickets support the build pipeline. They provision AWS resources needed for SSG-009, SSG-015, and SSG-016.
 
@@ -605,7 +609,7 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2f: Polish & Optional Features 🎨
+## Phase 2a: Polish & Optional Features 🎨
 
 ### Client-Side Preview
 
@@ -628,9 +632,9 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2g: Nbhd CMS & Admin Features 📝
+## Phase 4: Nbhd CMS & Admin Features 📝
 
-**Depends on:** Phase 2c (Content Management - SSG-011) and Phase 2e (Build Pipeline - SSG-015, SSG-016)
+**Depends on:** Phase 3a (Content Management - SSG-011) and Phase 2 (Build Pipeline - SSG-015, SSG-016)
 
 **Purpose:** Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol data, and owners can configure welcome pages, announcements, and manage all AT Protocol content.
 
@@ -861,9 +865,9 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2h: Build Pipeline UI Completion 🚀
+## Phase 5: Build Pipeline UI Completion 🚀
 
-**Depends on:** Phase 2e (Build Pipeline - SSG-015, SSG-016)
+**Depends on:** Phase 2 (Build Pipeline - SSG-015, SSG-016)
 
 **Note:** These tickets complete the build pipeline UI for the existing SSG-015 and SSG-016 backend implementations. The backend is complete but lacks frontend UI to trigger and monitor builds.
 
@@ -946,9 +950,9 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 3: AT Protocol Federation & Full PDS 🌐
+## Phase 6: AT Protocol Federation & Full PDS 🌐
 
-**NOTE:** The foundation (ATP-FOUND tickets) has already been completed in Phase 2b. These tickets implement the full federated PDS features.
+**NOTE:** The foundation (ATP-FOUND tickets) has already been completed in Phase 3. These tickets implement the full federated PDS features.
 
 ### AT Protocol PDS Tickets
 
@@ -1177,14 +1181,20 @@ Phase 2 focuses on two major features:
 
 **NOTE:** Tickets are now listed above in execution order. This section provides the week-by-week timeline.
 
-### ✅ Phase 2a: MVP Foundation (Weeks 1-4) - COMPLETE
+### ✅ Phase 1: MVP Foundation (Weeks 1-4) - COMPLETE
 - [x] SSG-001 (Template Gallery UI)
 - [x] SSG-002 (Site Configuration Form)
 - [x] SSG-004 (Site Management Dashboard)
 - [x] SSG-005 (Template Management API)
 - [x] SSG-006 (Site Configuration Storage API)
 
-### 🔧 Phase 2b: AT Protocol Foundation (Weeks 5-6) **← CRITICAL: DO THIS FIRST**
+### ✅ Phase 1a: Template Analysis System (Weeks 7-8) - COMPLETE
+- [x] SSG-007 (Template Schema Inference Research)
+- [x] SSG-008 (Custom Template Registration API)
+- [x] SSG-009 (Template Analyzer Lambda Function)
+- [x] SSG-010 (Custom Template Selection UI)
+
+### 🔧 Phase 3: AT Protocol Foundation (Weeks 5-6) **← CRITICAL: DO THIS FIRST**
 - [ ] ATP-FOUND-001 (AT Protocol Record Schema in DynamoDB)
 - [ ] ATP-FOUND-002 (CID Generation Utilities)
 - [ ] ATP-FOUND-003 (Record Key/rkey Generation)
@@ -1192,26 +1202,25 @@ Phase 2 focuses on two major features:
 
 **Why this comes first:** The entire build pipeline depends on content being stored as AT Protocol records. Build this foundation before creating content.
 
-### ✍️ Phase 2c: Content Management (Weeks 6-7)
+### ✍️ Phase 3a: Content Management (Weeks 6-7)
+**Depends on:** Phase 3
 - [ ] SSG-011 (Content Records API) ← Uses ATP-FOUND utilities
 - [ ] SSG-012 (Content Editor UI)
 - [ ] SSG-013 (Dual Record Creation - BlueSky Integration)
 - [ ] SSG-014 (Smart Content Prefilling)
 
-### 📐 Phase 2d: Template Analysis System (Weeks 7-8) **← Can run parallel with 2c**
-- [x] SSG-007 (Template Schema Inference Research)
-- [x] SSG-008 (Custom Template Registration API)
-- [x] SSG-009 (Template Analyzer Lambda Function)
-- [x] SSG-010 (Custom Template Selection UI)
-
-### 🏗️ Phase 2e: Build Pipeline & Deployment (Weeks 8-10)
+### 🏗️ Phase 2: Build Pipeline & Deployment (Weeks 8-10)
+**Depends on:** Phase 3a
 - [ ] SSG-015 (Site Build Trigger API)
-- [ ] SSG-016 (11ty Lambda Build Function) ← Queries content from ATP-FOUND
+- [ ] SSG-016 (11ty Lambda Build Function) ← Queries content from Phase 3
 - [ ] SSG-017 (Subdomain Routing Setup)
 - [ ] SSG-018 (Site Export to ZIP)
 
-### 📝 Phase 2g: Nbhd CMS & Admin Features (Weeks 11-13)
-**Depends on:** Phase 2c (Content Management) and Phase 2e (Build Pipeline)
+### 🎨 Phase 2a: Polish & Optional Features (Week 15)
+- [ ] SSG-003 (WASM Preview - Optional, nice to have)
+
+### 📝 Phase 4: Nbhd CMS & Admin Features (Weeks 11-13)
+**Depends on:** Phase 3a (Content Management) and Phase 2 (Build Pipeline)
 
 Backend Foundation:
 - [ ] NBHD-001 (Nbhd DID & Data Model Enhancement)
@@ -1227,18 +1236,15 @@ Frontend - Site Management:
 - [ ] SITES-002 (Personal Sites Page)
 - [ ] SITES-003 (Project Sites Page)
 
-### 🚀 Phase 2h: Build Pipeline UI Completion (Weeks 13-14)
-**Depends on:** Phase 2e (Build Pipeline - SSG-015, SSG-016)
+### 🚀 Phase 5: Build Pipeline UI Completion (Weeks 13-14)
+**Depends on:** Phase 2 (Build Pipeline - SSG-015, SSG-016)
 
 - [ ] BUILD-001 (Site Build Trigger UI)
 - [ ] BUILD-002 (Build Status Poller)
 - [ ] BUILD-003 (Build History Dashboard)
 
-### 🎨 Phase 2i: Polish & Optional Features (Week 15)
-- [ ] SSG-003 (WASM Preview - Optional, nice to have)
-
-### 🌐 Phase 3: AT Protocol Federation (Weeks 16+)
-Full PDS features (foundation already built in Phase 2b):
+### 🌐 Phase 6: AT Protocol Federation (Weeks 16+)
+Full PDS features (foundation already built in Phase 3):
 - [ ] ATP-001 (AT Protocol PDS Research & Design)
 - [ ] ATP-002 (BlueSky Integration Review)
 - [ ] ATP-003 (DID Registration for Members)
@@ -1251,7 +1257,7 @@ Full PDS features (foundation already built in Phase 2b):
 - [ ] ATP-010 (Cross-PDS Neighborhood Lists)
 
 ### 📝 Ongoing (Throughout All Phases)
-- [ ] TEST-001 (Phase 2 Integration Tests)
+- [ ] TEST-001 (Integration Tests)
 - [ ] DOC-001 (Static Sites User Guide)
 - [ ] DOC-002 (AT Protocol PDS Architecture Document)
 
