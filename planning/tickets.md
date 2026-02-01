@@ -1,6 +1,6 @@
 # nbhd.city Development Tickets
 
-**Last Updated:** 2026-01-21
+**Last Updated:** 2026-02-01
 **Phase:** 2 (Static Sites + AT Protocol PDS)
 **Priority:** High
 
@@ -347,8 +347,9 @@ Phase 2 focuses on two major features:
 - **Type:** Backend
 - **Estimate:** M
 - **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
-- **Status:** MOSTLY COMPLETE (Lambda invocation in SSG-009)
+- **Status:** MOSTLY COMPLETE
 - **Tests:** `api/tests/integration/test_custom_templates.py` (29 tests passing)
+- **Blocker:** Lambda invocation not implemented (TODO at line 417 in api/templates.py) - see follow-up ticket SSG-008-FU-001
 
 #### SSG-009: Template Analyzer Lambda Function
 - **Description:** Lambda function to clone, validate, and analyze 11ty templates
@@ -990,7 +991,7 @@ Phase 2 focuses on two major features:
   - [x] Store DID in user profile (DynamoDB)
   - [x] DID format: `did:plc:{key}` or similar
   - [x] Create keypair for member account
-  - [ ] Store keys securely (AWS Secrets Manager or KMS)
+  - [x] Store keys securely (AWS Secrets Manager or KMS)
 - **Acceptance Criteria:**
   - [x] Each member gets unique DID on signup
   - [x] DID stored and retrievable
@@ -998,9 +999,9 @@ Phase 2 focuses on two major features:
   - [x] Can verify ownership of DID
 - **Type:** Backend
 - **Estimate:** M
-- **Status:** MOSTLY COMPLETE
+- **Status:** COMPLETED
 - **Tests:** All integration tests passing (77/77)
-- **Note:** Private keys returned once; full KMS integration in ATP-004
+- **Merged:** PR #71 to develop
 
 #### ATP-004: DID to BlueSky Handle Mapping
 - **Description:** Link member DIDs to BlueSky handles
@@ -1012,12 +1013,12 @@ Phase 2 focuses on two major features:
 - **Acceptance Criteria:**
   - [x] Member DID maps to BlueSky DID
   - [x] Profile data syncs from BlueSky
-  - [ ] Verification is cryptographic
+  - [x] Verification is cryptographic
 - **Type:** Backend
 - **Estimate:** M
-- **Status:** MOSTLY COMPLETE
+- **Status:** COMPLETED
 - **Tests:** All integration tests passing (77/77)
-- **Note:** Cryptographic verification in ATP-005
+- **Merged:** PR #72 to develop
 
 ### Repository & Data Storage
 
@@ -1267,6 +1268,33 @@ Full PDS features (foundation already built in Phase 2b):
 - `priority-high` - Must do
 - `priority-medium` - Should do
 - `priority-low` - Nice to have
+
+---
+
+## Follow-up Tickets (Incomplete Steps)
+
+#### SSG-008-FU-001: Implement Async Lambda Invocation for Template Analyzer
+- **Description:** Complete the Lambda invocation step for SSG-008 that was deferred
+- **Parent Ticket:** SSG-008 (Custom Template Registration API)
+- **Requirements:**
+  - [ ] Add boto3 Lambda client to api/templates.py
+  - [ ] Implement invoke_analyzer_lambda() function
+  - [ ] Call function from POST /api/templates/custom endpoint (currently line 417 TODO)
+  - [ ] Handle Lambda invocation errors gracefully
+  - [ ] Update template status based on Lambda response
+  - [ ] Add unit tests for Lambda invocation
+- **Acceptance Criteria:**
+  - [ ] When user registers template, Lambda is invoked asynchronously
+  - [ ] Template status updates from "analyzing" to "ready" or "failed"
+  - [ ] TODO at line 417 in api/templates.py is resolved
+  - [ ] Tests verify Lambda invocation is called with correct parameters
+  - [ ] Error handling prevents API from crashing if Lambda fails
+- **Type:** Backend
+- **Estimate:** M
+- **Status:** PENDING
+- **Priority:** HIGH (blocks SSG-008 from being truly complete)
+- **Reason Not Completed:** Lambda invocation is an AWS service call that requires IAM permissions and Lambda function to be deployed. The SSG-009 Lambda implementation is complete, but the API-side invocation code was left as TODO.
+- **Code Location:** `/api/templates.py` line 417-418 (TODO comment)
 
 ---
 

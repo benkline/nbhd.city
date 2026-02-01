@@ -1,15 +1,11 @@
 # prompts
 
-## Ralph Wiggum Prompt Template for Ticket-Based Development
-
-Complete guide with battle-tested prompt templates for using Ralph Wiggum in Claude Code.
-
 ### Quick Start: Complete a Single Ticket
 
 ```bash
 Follow these phases and complete these steps to add a new feature to the project:
-"
-CLEAR CONTEXT (Phase 1)
+
+"CLEAR CONTEXT (Phase 1)
 - Create a subagent to clear the context window to conduct the following steps with
 
 TICKET ASSIGNMENT & DISCOVERY (Phase 2)
