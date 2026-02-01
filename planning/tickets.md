@@ -530,7 +530,7 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Type:** Backend
 - **Estimate:** S
 
-### Phase 6 Infrastructure & Deployment 🚀
+### Infrastructure & Deployment
 
 **Note:** These infrastructure tickets support the build pipeline. They provision AWS resources needed for SSG-009, SSG-015, and SSG-016.
 
