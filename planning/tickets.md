@@ -455,20 +455,25 @@ Phase 2 focuses on two major features:
 #### SSG-017: Subdomain Routing Setup
 - **Description:** Configure Route53 + CloudFront for subdomain deployment
 - **Requirements:**
-  - [ ] Create wildcard DNS record (`*.nbhd.city`)
-  - [ ] Create CloudFront distribution for subdomains
-  - [ ] Map `{subdomain}.nbhd.city` → S3 bucket paths
-  - [ ] Configure origin routing based on subdomain
-  - [ ] SSL/TLS certificates for wildcard domain
-  - [ ] Terraform code for DNS infrastructure
+  - [x] Create wildcard DNS record (`*.nbhd.city`)
+  - [x] Create CloudFront distribution for subdomains
+  - [x] Map `{subdomain}.nbhd.city` → S3 bucket paths
+  - [x] Configure origin routing based on subdomain
+  - [x] SSL/TLS certificates for wildcard domain
+  - [x] Terraform code for DNS infrastructure
 - **Acceptance Criteria:**
-  - [ ] Wildcard DNS resolves correctly
-  - [ ] CloudFront serves correct S3 path per subdomain
-  - [ ] Multiple subdomains work independently
-  - [ ] HTTPS works for all subdomains
-  - [ ] 404 handling for non-existent subdomains
+  - [x] Wildcard DNS resolves correctly
+  - [x] CloudFront serves correct S3 path per subdomain
+  - [x] Multiple subdomains work independently
+  - [x] HTTPS works for all subdomains
+  - [x] 404 handling for non-existent subdomains
 - **Type:** Infrastructure
 - **Estimate:** L
+- **Status:** COMPLETED
+- **Merged:** 2026-01-31 via PR #77
+- **Commit:** 03eb1d6 (feat(SSG-017): Implement wildcard subdomain routing for static sites)
+- **Documentation:** SUBDOMAIN_ROUTING_SETUP.md, DEPLOYMENT_CHECKLIST.md, IMPLEMENTATION_INDEX.md
+- **Files Created:** 14 files (2,126 insertions)
 
 #### SSG-018: Site Export to ZIP
 - **Description:** Generate downloadable ZIP of built site files
