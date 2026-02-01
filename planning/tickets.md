@@ -1,18 +1,25 @@
 # nbhd.city Development Tickets
 
 **Last Updated:** 2026-02-01
-**Phase:** 2 (Static Sites + AT Protocol PDS)
+**Phases:** 1-9 (Sequential phases based on execution order and dependencies)
 **Priority:** High
 
 ---
 
-## Phase 2 Overview
+## Phase Overview
 
-Phase 2 focuses on two major features:
-1. **Static Site Generation** - Members can create beautiful static sites using 11ty templates
-2. **AT Protocol PDS** - Each nbhd becomes a full Personal Data Server on the AT Protocol network
+The development roadmap is organized into 9 sequential phases:
+1. **Phase 1** - MVP Foundation ✅ COMPLETE
+2. **Phase 2** - AT Protocol Foundation (ATP-FOUND-001 to 004) - foundational for everything
+3. **Phase 3** - Template System & Site Config APIs (SSG-001, 002, 004, 005, 006)
+4. **Phase 4** - Template Analysis System (SSG-007, 008, 009, 010)
+5. **Phase 5** - Content Management (SSG-011, 012, 013, 014)
+6. **Phase 6** - Build Pipeline & Deployment (SSG-015, 016, 017, 018 + infrastructure)
+7. **Phase 7** - Nbhd CMS & Admin Features (NBHD-001 through SITES-003)
+8. **Phase 8** - Build Pipeline UI Completion (BUILD-001, 002, 003)
+9. **Phase 9** - Full AT Protocol Federation (ATP-001 through ATP-010)
 
-### Relevant Documentation for Phase 2
+### Relevant Documentation
 
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System design and tech stack
 - **[DATABASE.md](./DATABASE.md)** - DynamoDB schema for static sites and PDS data
@@ -25,98 +32,26 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2a: MVP Foundation ✅ COMPLETE
+## Phase 1: MVP Foundation ✅ COMPLETE
 
-### Frontend: Template System & UI
+Core platform foundation - users can create neighborhoods and join BlueSky communities.
 
-#### SSG-001: Create Template Gallery UI Component
-- **Description:** Build a `TemplateGallery` component that displays available 11ty templates
-- **Requirements:**
-  - [x] Fetch templates from API (`GET /api/templates`)
-  - [x] Display template cards with preview images, name, description
-  - [x] "Select template" button to start site configuration
-  - [x] Show template tags (blog, project, newsletter, etc)
-- **Acceptance Criteria:**
-  - [x] Component renders templates from API
-  - [x] Clicking "Select" navigates to config form
-  - [x] Mobile-responsive grid layout
-  - [x] Error handling for API failures
-- **Type:** Feature
-- **Estimate:** M
+**Status:** Shipped and working
+**Completed Tickets:**
+- Blueprint/structure defined in PHASES.md
+- All foundational infrastructure in place
 
-#### SSG-002: Build Site Configuration Form
-- **Description:** Create dynamic form generator for template-specific config fields
-- **Requirements:**
-  - [x] Read `config.schema.json` from selected template
-  - [x] Generate form inputs based on schema (text, textarea, color picker, etc)
-  - [x] Real-time preview updates as user types
-  - [x] Save draft configurations locally (localStorage)
-  - [x] "Preview" and "Deploy" buttons
-- **Acceptance Criteria:**
-  - [x] Form renders all schema fields correctly
-  - [x] Draft auto-saves every 30 seconds
-  - [x] Validation matches schema constraints
-  - [x] Form persists across page refreshes
-- **Type:** Feature
-- **Estimate:** M
-
-
-#### SSG-004: Site Management Dashboard
-- **Description:** Build dashboard to view/manage user's static sites
-- **Requirements:**
-  - [x] List all user's sites with status (draft, building, published)
-  - [x] Show site URL and deployment status
-  - [x] "Edit" button to re-configure
-  - [x] "Delete" button with confirmation
-  - [x] "View Live" link to published site
-- **Acceptance Criteria:**
-  - [x] Displays all user sites from API
-  - [x] Can edit existing sites
-  - [x] Delete removes site from dashboard
-  - [x] Links work correctly
-- **Type:** Feature
-- **Estimate:** M
-
-### Backend: API Endpoints
-
-#### SSG-005: Template Management API
-- **Description:** Implement API endpoints for template discovery and metadata
-- **Requirements:**
-  - [x] `GET /api/templates` - List all available templates
-  - [x] `GET /api/templates/{id}` - Get single template metadata
-  - [x] `GET /api/templates/{id}/schema` - Get config schema
-  - [x] `GET /api/templates/{id}/preview` - Get preview image URL
-  - [x] Each template includes: name, description, author, version, tags
-- **Acceptance Criteria:**
-  - [x] All endpoints return correct JSON structure
-  - [x] Pagination for large template lists
-  - [x] Proper error handling (404 for missing templates)
-  - [x] Schema validation works
-- **Type:** Backend
-- **Estimate:** S
-
-#### SSG-006: Site Configuration Storage API
-- **Description:** Implement endpoints to save and retrieve site configurations
-- **Requirements:**
-  - [x] `POST /api/sites` - Create new site from template + config
-  - [x] `GET /api/sites/{id}` - Retrieve site config
-  - [x] `PUT /api/sites/{id}` - Update site config
-  - [x] `GET /api/sites` - List user's sites
-  - [x] `DELETE /api/sites/{id}` - Delete site
-  - [x] Store config JSON in DynamoDB
-- **Acceptance Criteria:**
-  - [x] Configs persist to DynamoDB
-  - [x] Config validation against schema
-  - [x] User can only access their own sites
-  - [x] Returns proper error codes (400, 401, 404)
-- **Type:** Backend
-- **Estimate:** M
+See PHASES.md for detailed Phase 1 description.
 
 ---
 
-## Phase 2b: AT Protocol Foundation 🔧
+## Phase 2: AT Protocol Foundation 🔧
 
-**Critical:** This foundation must be built before content management. The build pipeline depends on content being stored as AT Protocol records.
+**Status:** In Progress
+**Timeline:** Weeks 5-6
+**Critical Path:** Must complete before Phase 3+
+
+Foundation layer for AT Protocol record storage and management. This is the critical dependency for all subsequent content-based phases.
 
 ### Core AT Protocol Infrastructure
 
@@ -208,9 +143,207 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2c: Content Management ✍️
+## Phase 3: Template System & Site Config APIs 📋
 
-**Depends on:** Phase 2b (AT Protocol Foundation)
+**Status:** Pending
+**Timeline:** Weeks 6-7
+**Depends On:** Phase 2 (AT Protocol Foundation)
+
+API layer for template discovery, management, and site configuration.
+
+### Frontend: Template System & UI
+
+#### SSG-001: Create Template Gallery UI Component
+- **Description:** Build a `TemplateGallery` component that displays available 11ty templates
+- **Requirements:**
+  - [x] Fetch templates from API (`GET /api/templates`)
+  - [x] Display template cards with preview images, name, description
+  - [x] "Select template" button to start site configuration
+  - [x] Show template tags (blog, project, newsletter, etc)
+- **Acceptance Criteria:**
+  - [x] Component renders templates from API
+  - [x] Clicking "Select" navigates to config form
+  - [x] Mobile-responsive grid layout
+  - [x] Error handling for API failures
+- **Type:** Feature
+- **Estimate:** M
+
+#### SSG-002: Build Site Configuration Form
+- **Description:** Create dynamic form generator for template-specific config fields
+- **Requirements:**
+  - [x] Read `config.schema.json` from selected template
+  - [x] Generate form inputs based on schema (text, textarea, color picker, etc)
+  - [x] Real-time preview updates as user types
+  - [x] Save draft configurations locally (localStorage)
+  - [x] "Preview" and "Deploy" buttons
+- **Acceptance Criteria:**
+  - [x] Form renders all schema fields correctly
+  - [x] Draft auto-saves every 30 seconds
+  - [x] Validation matches schema constraints
+  - [x] Form persists across page refreshes
+- **Type:** Feature
+- **Estimate:** M
+
+#### SSG-004: Site Management Dashboard
+- **Description:** Build dashboard to view/manage user's static sites
+- **Requirements:**
+  - [x] List all user's sites with status (draft, building, published)
+  - [x] Show site URL and deployment status
+  - [x] "Edit" button to re-configure
+  - [x] "Delete" button with confirmation
+  - [x] "View Live" link to published site
+- **Acceptance Criteria:**
+  - [x] Displays all user sites from API
+  - [x] Can edit existing sites
+  - [x] Delete removes site from dashboard
+  - [x] Links work correctly
+- **Type:** Feature
+- **Estimate:** M
+
+### Backend: API Endpoints
+
+#### SSG-005: Template Management API
+- **Description:** Implement API endpoints for template discovery and metadata
+- **Requirements:**
+  - [x] `GET /api/templates` - List all available templates
+  - [x] `GET /api/templates/{id}` - Get single template metadata
+  - [x] `GET /api/templates/{id}/schema` - Get config schema
+  - [x] `GET /api/templates/{id}/preview` - Get preview image URL
+  - [x] Each template includes: name, description, author, version, tags
+- **Acceptance Criteria:**
+  - [x] All endpoints return correct JSON structure
+  - [x] Pagination for large template lists
+  - [x] Proper error handling (404 for missing templates)
+  - [x] Schema validation works
+- **Type:** Backend
+- **Estimate:** S
+
+#### SSG-006: Site Configuration Storage API
+- **Description:** Implement endpoints to save and retrieve site configurations
+- **Requirements:**
+  - [x] `POST /api/sites` - Create new site from template + config
+  - [x] `GET /api/sites/{id}` - Retrieve site config
+  - [x] `PUT /api/sites/{id}` - Update site config
+  - [x] `GET /api/sites` - List user's sites
+  - [x] `DELETE /api/sites/{id}` - Delete site
+  - [x] Store config JSON in DynamoDB
+- **Acceptance Criteria:**
+  - [x] Configs persist to DynamoDB
+  - [x] Config validation against schema
+  - [x] User can only access their own sites
+  - [x] Returns proper error codes (400, 401, 404)
+- **Type:** Backend
+- **Estimate:** M
+
+---
+
+## Phase 4: Template Analysis System 📐
+
+**Status:** Pending
+**Timeline:** Weeks 7-8
+**Depends On:** Phase 3 (Template System APIs)
+**Can Run In Parallel With:** Phase 5 (Content Management)
+
+Research and implementation of automated template analysis.
+
+#### SSG-007: Template Schema Inference Research
+- **Description:** Research and design frontmatter scanning and JSON schema inference
+- **Requirements:**
+  - [x] Study 5+ popular 11ty starter templates
+  - [x] Document common frontmatter patterns (title, date, tags, etc.)
+  - [x] Design algorithm for type inference (string, date, array, boolean)
+  - [x] Define required field detection logic (>80% occurrence)
+  - [x] Create spec document for template analyzer
+- **Acceptance Criteria:**
+  - [x] Clear algorithm for scanning .md files
+  - [x] Type inference rules documented
+  - [x] Edge cases identified and handled
+  - [x] Spec approved and ready for implementation
+- **Type:** Research
+- **Estimate:** S
+- **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md), [SSG-007-RESEARCH.md](./SSG-007-RESEARCH.md)
+- **Status:** COMPLETED
+- **Tests:** `api/tests/unit/test_template_schema_inference.py` (26 tests passing)
+
+#### SSG-008: Custom Template Registration API
+- **Description:** API endpoints for registering custom 11ty templates from GitHub
+- **Requirements:**
+  - [x] `POST /api/templates/custom` - Register template from GitHub URL
+  - [x] `GET /api/templates/custom/{id}/status` - Check analysis status
+  - [x] `GET /api/templates/{id}/content-types` - Get inferred content types
+  - [x] GitHub URL validation (github.com, gitlab.com, bitbucket.org)
+  - [x] Store template metadata in DynamoDB
+  - [ ] Async invocation of analyzer Lambda
+- **Acceptance Criteria:**
+  - [x] Valid GitHub URLs accepted
+  - [x] Invalid URLs rejected with error
+  - [x] Returns 202 Accepted with template_id
+  - [x] Status polling works correctly
+  - [x] Template record created in DynamoDB
+- **Type:** Backend
+- **Estimate:** M
+- **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
+- **Status:** MOSTLY COMPLETE (Lambda invocation in SSG-009)
+- **Tests:** `api/tests/integration/test_custom_templates.py` (29 tests passing)
+
+#### SSG-009: Template Analyzer Lambda Function
+- **Description:** Lambda function to clone, validate, and analyze 11ty templates
+- **Requirements:**
+  - [x] Clone GitHub repo to /tmp (shallow clone)
+  - [x] Validate 11ty project (check eleventy.config.js, package.json)
+  - [x] Find content directory (content/, posts/, src/)
+  - [x] Scan all .md files and parse frontmatter
+  - [x] Group by content type (posts, pages, etc.)
+  - [x] Infer JSON schema from frontmatter samples
+  - [x] Store schema and content types in DynamoDB
+  - [x] Handle errors and update status
+- **Acceptance Criteria:**
+  - [x] Successfully analyzes eleventy-base-blog
+  - [x] Correctly infers schema for common fields
+  - [x] Handles invalid repos gracefully
+  - [x] Completes within 5 minute timeout
+  - [x] Updates template status to "ready" or "failed"
+- **Type:** Backend/Lambda
+- **Estimate:** L
+- **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
+- **Status:** COMPLETED
+- **Tests:** `lambda/tests/test_template_analyzer.py` (23 tests passing)
+
+#### SSG-010: Custom Template Selection UI
+- **Description:** UI for users to add and select custom templates
+- **Requirements:**
+  - [x] Modal with GitHub URL input
+  - [x] Template validation and analysis progress
+  - [x] Show analysis status (analyzing, ready, failed)
+  - [x] Error messages for failed analysis
+  - [x] URL validation (GitHub, GitLab, Bitbucket + HTTPS requirement)
+  - [x] Status polling with timeout (60 seconds max, 1 second intervals)
+- **Acceptance Criteria:**
+  - [x] Users can paste GitHub URL
+  - [x] Modal accepts template name and URL input
+  - [x] Form validation prevents invalid URLs
+  - [x] Shows success message when template analysis completes
+  - [x] Shows error message when analysis fails
+  - [x] Modal closes properly
+  - [x] Form disables inputs during analysis
+- **Type:** Frontend
+- **Estimate:** M
+- **Status:** COMPLETED
+- **Tests:** `src/__tests__/components/CustomTemplateModal.test.jsx` (12 tests passing)
+- **Implementation Files:**
+  - Component: `src/components/SiteBuilder/CustomTemplateModal.jsx`
+  - Styles: `src/components/SiteBuilder/CustomTemplateModal.module.css`
+  - Tests: `src/__tests__/components/CustomTemplateModal.test.jsx`
+
+---
+
+## Phase 5: Content Management ✍️
+
+**Status:** Pending
+**Timeline:** Weeks 8-9
+**Depends On:** Phase 2 (AT Protocol Foundation) and Phase 3 (Template APIs)
+
+Content creation and management layer. Users can create, edit, and publish content stored as AT Protocol records.
 
 ### Content Records & Editor
 
@@ -304,107 +437,11 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2d: Template Analysis System 📐
+## Phase 6: Build Pipeline & Deployment 🏗️
 
-**Can run in parallel with Phase 2c**
-
-### Template Analysis System
-
-#### SSG-007: Template Schema Inference Research
-- **Description:** Research and design frontmatter scanning and JSON schema inference
-- **Requirements:**
-  - [x] Study 5+ popular 11ty starter templates
-  - [x] Document common frontmatter patterns (title, date, tags, etc.)
-  - [x] Design algorithm for type inference (string, date, array, boolean)
-  - [x] Define required field detection logic (>80% occurrence)
-  - [x] Create spec document for template analyzer
-- **Acceptance Criteria:**
-  - [x] Clear algorithm for scanning .md files
-  - [x] Type inference rules documented
-  - [x] Edge cases identified and handled
-  - [x] Spec approved and ready for implementation
-- **Type:** Research
-- **Estimate:** S
-- **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md), [SSG-007-RESEARCH.md](./SSG-007-RESEARCH.md)
-- **Status:** COMPLETED
-- **Tests:** `api/tests/unit/test_template_schema_inference.py` (26 tests passing)
-
-#### SSG-008: Custom Template Registration API
-- **Description:** API endpoints for registering custom 11ty templates from GitHub
-- **Requirements:**
-  - [x] `POST /api/templates/custom` - Register template from GitHub URL
-  - [x] `GET /api/templates/custom/{id}/status` - Check analysis status
-  - [x] `GET /api/templates/{id}/content-types` - Get inferred content types
-  - [x] GitHub URL validation (github.com, gitlab.com, bitbucket.org)
-  - [x] Store template metadata in DynamoDB
-  - [ ] Async invocation of analyzer Lambda
-- **Acceptance Criteria:**
-  - [x] Valid GitHub URLs accepted
-  - [x] Invalid URLs rejected with error
-  - [x] Returns 202 Accepted with template_id
-  - [x] Status polling works correctly
-  - [x] Template record created in DynamoDB
-- **Type:** Backend
-- **Estimate:** M
-- **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
-- **Status:** MOSTLY COMPLETE
-- **Tests:** `api/tests/integration/test_custom_templates.py` (29 tests passing)
-- **Blocker:** Lambda invocation not implemented (TODO at line 417 in api/templates.py) - see follow-up ticket SSG-008-FU-001
-
-#### SSG-009: Template Analyzer Lambda Function
-- **Description:** Lambda function to clone, validate, and analyze 11ty templates
-- **Requirements:**
-  - [x] Clone GitHub repo to /tmp (shallow clone)
-  - [x] Validate 11ty project (check eleventy.config.js, package.json)
-  - [x] Find content directory (content/, posts/, src/)
-  - [x] Scan all .md files and parse frontmatter
-  - [x] Group by content type (posts, pages, etc.)
-  - [x] Infer JSON schema from frontmatter samples
-  - [x] Store schema and content types in DynamoDB
-  - [x] Handle errors and update status
-- **Acceptance Criteria:**
-  - [x] Successfully analyzes eleventy-base-blog
-  - [x] Correctly infers schema for common fields
-  - [x] Handles invalid repos gracefully
-  - [x] Completes within 5 minute timeout
-  - [x] Updates template status to "ready" or "failed"
-- **Type:** Backend/Lambda
-- **Estimate:** L
-- **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
-- **Status:** COMPLETED
-- **Tests:** `lambda/tests/test_template_analyzer.py` (23 tests passing)
-
-#### SSG-010: Custom Template Selection UI
-- **Description:** UI for users to add and select custom templates
-- **Requirements:**
-  - [x] Modal with GitHub URL input
-  - [x] Template validation and analysis progress
-  - [x] Show analysis status (analyzing, ready, failed)
-  - [x] Error messages for failed analysis
-  - [x] URL validation (GitHub, GitLab, Bitbucket + HTTPS requirement)
-  - [x] Status polling with timeout (60 seconds max, 1 second intervals)
-- **Acceptance Criteria:**
-  - [x] Users can paste GitHub URL
-  - [x] Modal accepts template name and URL input
-  - [x] Form validation prevents invalid URLs
-  - [x] Shows success message when template analysis completes
-  - [x] Shows error message when analysis fails
-  - [x] Modal closes properly
-  - [x] Form disables inputs during analysis
-- **Type:** Frontend
-- **Estimate:** M
-- **Status:** COMPLETED
-- **Tests:** `src/__tests__/components/CustomTemplateModal.test.jsx` (12 tests passing)
-- **Implementation Files:**
-  - Component: `src/components/SiteBuilder/CustomTemplateModal.jsx`
-  - Styles: `src/components/SiteBuilder/CustomTemplateModal.module.css`
-  - Tests: `src/__tests__/components/CustomTemplateModal.test.jsx`
-
----
-
-## Phase 2e: Build Pipeline & Deployment 🏗️
-
-**Depends on:** Phase 2c (Content Management - SSG-011)
+**Status:** Pending
+**Timeline:** Weeks 10-12
+**Depends On:** Phase 5 (Content Management - content must exist before building)
 
 #### SSG-015: Site Build Trigger API
 - **Description:** Endpoint to initiate Lambda build process
@@ -456,20 +493,25 @@ Phase 2 focuses on two major features:
 #### SSG-017: Subdomain Routing Setup
 - **Description:** Configure Route53 + CloudFront for subdomain deployment
 - **Requirements:**
-  - [ ] Create wildcard DNS record (`*.nbhd.city`)
-  - [ ] Create CloudFront distribution for subdomains
-  - [ ] Map `{subdomain}.nbhd.city` → S3 bucket paths
-  - [ ] Configure origin routing based on subdomain
-  - [ ] SSL/TLS certificates for wildcard domain
-  - [ ] Terraform code for DNS infrastructure
+  - [x] Create wildcard DNS record (`*.nbhd.city`)
+  - [x] Create CloudFront distribution for subdomains
+  - [x] Map `{subdomain}.nbhd.city` → S3 bucket paths
+  - [x] Configure origin routing based on subdomain
+  - [x] SSL/TLS certificates for wildcard domain
+  - [x] Terraform code for DNS infrastructure
 - **Acceptance Criteria:**
-  - [ ] Wildcard DNS resolves correctly
-  - [ ] CloudFront serves correct S3 path per subdomain
-  - [ ] Multiple subdomains work independently
-  - [ ] HTTPS works for all subdomains
-  - [ ] 404 handling for non-existent subdomains
+  - [x] Wildcard DNS resolves correctly
+  - [x] CloudFront serves correct S3 path per subdomain
+  - [x] Multiple subdomains work independently
+  - [x] HTTPS works for all subdomains
+  - [x] 404 handling for non-existent subdomains
 - **Type:** Infrastructure
 - **Estimate:** L
+- **Status:** COMPLETED
+- **Merged:** 2026-01-31 via PR #77
+- **Commit:** 03eb1d6 (feat(SSG-017): Implement wildcard subdomain routing for static sites)
+- **Documentation:** SUBDOMAIN_ROUTING_SETUP.md, DEPLOYMENT_CHECKLIST.md, IMPLEMENTATION_INDEX.md
+- **Files Created:** 14 files (2,126 insertions)
 
 #### SSG-018: Site Export to ZIP
 - **Description:** Generate downloadable ZIP of built site files
@@ -488,7 +530,7 @@ Phase 2 focuses on two major features:
 - **Type:** Backend
 - **Estimate:** S
 
-## Phase 2e: Infrastructure & Deployment 🚀
+### Phase 6 Infrastructure & Deployment 🚀
 
 **Note:** These infrastructure tickets support the build pipeline. They provision AWS resources needed for SSG-009, SSG-015, and SSG-016.
 
@@ -601,34 +643,13 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2f: Polish & Optional Features 🎨
+## Phase 7: Nbhd CMS & Admin Features 📝
 
-### Client-Side Preview
+**Status:** Pending
+**Timeline:** Weeks 13-15
+**Depends On:** Phase 5 (Content Management) and Phase 6 (Build Pipeline)
 
-#### SSG-003: Integrate 11ty WASM for Client-Side Preview
-- **Description:** Implement Eleventy compiled to WebAssembly for instant in-browser previews
-- **Requirements:**
-  - [ ] Research/integrate 11ty WASM build
-  - [ ] Load WASM in browser when user edits config
-  - [ ] Render preview HTML without server calls
-  - [ ] Display preview in side panel or modal
-  - [ ] Handle WASM loading errors gracefully
-- **Acceptance Criteria:**
-  - [ ] Preview updates within 1 second of config change
-  - [ ] WASM successfully generates HTML output
-  - [ ] Works offline (no server required for preview)
-  - [ ] Graceful fallback if WASM unavailable
-- **Type:** Feature
-- **Estimate:** L (first time integrating WASM)
-- **Priority:** Optional - Nice to have but not critical for MVP
-
----
-
-## Phase 2g: Nbhd CMS & Admin Features 📝
-
-**Depends on:** Phase 2c (Content Management - SSG-011) and Phase 2e (Build Pipeline - SSG-015, SSG-016)
-
-**Purpose:** Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol data, and owners can configure welcome pages, announcements, and manage all AT Protocol content.
+Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol data, and owners can configure welcome pages, announcements, and manage all AT Protocol content.
 
 ### Backend Foundation
 
@@ -857,11 +878,13 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 2h: Build Pipeline UI Completion 🚀
+## Phase 8: Build Pipeline UI Completion 🚀
 
-**Depends on:** Phase 2e (Build Pipeline - SSG-015, SSG-016)
+**Status:** Pending
+**Timeline:** Weeks 15-16
+**Depends On:** Phase 6 (Build Pipeline - backend is complete, needs frontend UI)
 
-**Note:** These tickets complete the build pipeline UI for the existing SSG-015 and SSG-016 backend implementations. The backend is complete but lacks frontend UI to trigger and monitor builds.
+These tickets complete the build pipeline UI for the existing SSG-015 and SSG-016 backend implementations.
 
 #### BUILD-001: Site Build Trigger UI
 - **Description:** Add "Deploy Site" button to trigger site builds
@@ -942,9 +965,13 @@ Phase 2 focuses on two major features:
 
 ---
 
-## Phase 3: AT Protocol Federation & Full PDS 🌐
+## Phase 9: Full AT Protocol Federation 🌐
 
-**NOTE:** The foundation (ATP-FOUND tickets) has already been completed in Phase 2b. These tickets implement the full federated PDS features.
+**Status:** Pending
+**Timeline:** Weeks 17+
+**Depends On:** Phase 2 (AT Protocol Foundation is in place)
+
+Complete AT Protocol federation and Personal Data Server (PDS) implementation. The foundation (ATP-FOUND tickets) was completed in Phase 2. These tickets implement the full federated PDS features.
 
 ### AT Protocol PDS Tickets
 
@@ -991,7 +1018,7 @@ Phase 2 focuses on two major features:
   - [x] Store DID in user profile (DynamoDB)
   - [x] DID format: `did:plc:{key}` or similar
   - [x] Create keypair for member account
-  - [x] Store keys securely (AWS Secrets Manager or KMS)
+  - [ ] Store keys securely (AWS Secrets Manager or KMS)
 - **Acceptance Criteria:**
   - [x] Each member gets unique DID on signup
   - [x] DID stored and retrievable
@@ -999,9 +1026,9 @@ Phase 2 focuses on two major features:
   - [x] Can verify ownership of DID
 - **Type:** Backend
 - **Estimate:** M
-- **Status:** COMPLETED
+- **Status:** MOSTLY COMPLETE
 - **Tests:** All integration tests passing (77/77)
-- **Merged:** PR #71 to develop
+- **Note:** Private keys returned once; full KMS integration in ATP-004
 
 #### ATP-004: DID to BlueSky Handle Mapping
 - **Description:** Link member DIDs to BlueSky handles
@@ -1013,12 +1040,12 @@ Phase 2 focuses on two major features:
 - **Acceptance Criteria:**
   - [x] Member DID maps to BlueSky DID
   - [x] Profile data syncs from BlueSky
-  - [x] Verification is cryptographic
+  - [ ] Verification is cryptographic
 - **Type:** Backend
 - **Estimate:** M
-- **Status:** COMPLETED
+- **Status:** MOSTLY COMPLETE
 - **Tests:** All integration tests passing (77/77)
-- **Merged:** PR #72 to develop
+- **Note:** Cryptographic verification in ATP-005
 
 ### Repository & Data Storage
 
@@ -1171,43 +1198,59 @@ Phase 2 focuses on two major features:
 
 ## Priority Order & Timeline
 
-**NOTE:** Tickets are now listed above in execution order. This section provides the week-by-week timeline.
+**NOTE:** Tickets are organized above in 9-phase execution order. This section provides week-by-week and phase-by-phase timeline.
 
-### ✅ Phase 2a: MVP Foundation (Weeks 1-4) - COMPLETE
-- [x] SSG-001 (Template Gallery UI)
-- [x] SSG-002 (Site Configuration Form)
-- [x] SSG-004 (Site Management Dashboard)
-- [x] SSG-005 (Template Management API)
-- [x] SSG-006 (Site Configuration Storage API)
+### ✅ Phase 1: MVP Foundation (Weeks 1-4) - COMPLETE
+Core platform foundation
+- [x] BlueSky OAuth authentication
+- [x] User profiles with BlueSky sync
+- [x] Neighborhood creation and membership
+- [x] DynamoDB single-table design
+- [x] Terraform AWS deployment
+- [x] React frontend with basic pages
 
-### 🔧 Phase 2b: AT Protocol Foundation (Weeks 5-6) **← CRITICAL: DO THIS FIRST**
+### 🔧 Phase 2: AT Protocol Foundation (Weeks 5-6) **← CRITICAL: DO THIS FIRST**
+**Depends on:** Phase 1
 - [ ] ATP-FOUND-001 (AT Protocol Record Schema in DynamoDB)
 - [ ] ATP-FOUND-002 (CID Generation Utilities)
 - [ ] ATP-FOUND-003 (Record Key/rkey Generation)
 - [ ] ATP-FOUND-004 (Basic Record CRUD Operations)
 
-**Why this comes first:** The entire build pipeline depends on content being stored as AT Protocol records. Build this foundation before creating content.
+**Why Phase 2 is critical:** All subsequent phases depend on AT Protocol record storage. Build this foundation first.
 
-### ✍️ Phase 2c: Content Management (Weeks 6-7)
-- [ ] SSG-011 (Content Records API) ← Uses ATP-FOUND utilities
+### 📋 Phase 3: Template System & Site Config APIs (Weeks 6-7)
+**Depends on:** Phase 2 (AT Protocol Foundation)
+- [ ] SSG-001 (Template Gallery UI)
+- [ ] SSG-002 (Site Configuration Form)
+- [ ] SSG-004 (Site Management Dashboard)
+- [ ] SSG-005 (Template Management API)
+- [ ] SSG-006 (Site Configuration Storage API)
+
+### 📐 Phase 4: Template Analysis System (Weeks 7-8)
+**Depends on:** Phase 3 (Template APIs)
+**Can Run In Parallel With:** Phase 5 (Content Management)
+- [ ] SSG-007 (Template Schema Inference Research)
+- [ ] SSG-008 (Custom Template Registration API)
+- [ ] SSG-009 (Template Analyzer Lambda Function)
+- [ ] SSG-010 (Custom Template Selection UI)
+
+### ✍️ Phase 5: Content Management (Weeks 8-9)
+**Depends on:** Phase 2 (AT Protocol Foundation) and Phase 3 (Template APIs)
+- [ ] SSG-011 (Content Records API)
 - [ ] SSG-012 (Content Editor UI)
 - [ ] SSG-013 (Dual Record Creation - BlueSky Integration)
 - [ ] SSG-014 (Smart Content Prefilling)
 
-### 📐 Phase 2d: Template Analysis System (Weeks 7-8) **← Can run parallel with 2c**
-- [x] SSG-007 (Template Schema Inference Research)
-- [x] SSG-008 (Custom Template Registration API)
-- [x] SSG-009 (Template Analyzer Lambda Function)
-- [x] SSG-010 (Custom Template Selection UI)
-
-### 🏗️ Phase 2e: Build Pipeline & Deployment (Weeks 8-10)
+### 🏗️ Phase 6: Build Pipeline & Deployment (Weeks 10-12)
+**Depends on:** Phase 5 (Content Management - content must exist before building)
 - [ ] SSG-015 (Site Build Trigger API)
-- [ ] SSG-016 (11ty Lambda Build Function) ← Queries content from ATP-FOUND
+- [ ] SSG-016 (11ty Lambda Build Function)
 - [ ] SSG-017 (Subdomain Routing Setup)
 - [ ] SSG-018 (Site Export to ZIP)
+- Infrastructure: SSG-009-INFRA, SSG-016-INFRA, SSG-015-INFRA
 
-### 📝 Phase 2g: Nbhd CMS & Admin Features (Weeks 11-13)
-**Depends on:** Phase 2c (Content Management) and Phase 2e (Build Pipeline)
+### 📝 Phase 7: Nbhd CMS & Admin Features (Weeks 13-15)
+**Depends on:** Phase 5 (Content Management) and Phase 6 (Build Pipeline)
 
 Backend Foundation:
 - [ ] NBHD-001 (Nbhd DID & Data Model Enhancement)
@@ -1223,18 +1266,14 @@ Frontend - Site Management:
 - [ ] SITES-002 (Personal Sites Page)
 - [ ] SITES-003 (Project Sites Page)
 
-### 🚀 Phase 2h: Build Pipeline UI Completion (Weeks 13-14)
-**Depends on:** Phase 2e (Build Pipeline - SSG-015, SSG-016)
-
+### 🚀 Phase 8: Build Pipeline UI Completion (Weeks 15-16)
+**Depends on:** Phase 6 (Build Pipeline backend is complete)
 - [ ] BUILD-001 (Site Build Trigger UI)
 - [ ] BUILD-002 (Build Status Poller)
 - [ ] BUILD-003 (Build History Dashboard)
 
-### 🎨 Phase 2i: Polish & Optional Features (Week 15)
-- [ ] SSG-003 (WASM Preview - Optional, nice to have)
-
-### 🌐 Phase 3: AT Protocol Federation (Weeks 16+)
-Full PDS features (foundation already built in Phase 2b):
+### 🌐 Phase 9: Full AT Protocol Federation (Weeks 17+)
+**Depends on:** Phase 2 (AT Protocol Foundation is in place)
 - [ ] ATP-001 (AT Protocol PDS Research & Design)
 - [ ] ATP-002 (BlueSky Integration Review)
 - [ ] ATP-003 (DID Registration for Members)
@@ -1247,9 +1286,12 @@ Full PDS features (foundation already built in Phase 2b):
 - [ ] ATP-010 (Cross-PDS Neighborhood Lists)
 
 ### 📝 Ongoing (Throughout All Phases)
-- [ ] TEST-001 (Phase 2 Integration Tests)
+- [ ] TEST-001 (Integration Tests)
 - [ ] DOC-001 (Static Sites User Guide)
 - [ ] DOC-002 (AT Protocol PDS Architecture Document)
+
+### 🎨 Optional Features
+- [ ] SSG-003 (WASM Preview for client-side building - nice to have)
 
 ---
 
@@ -1268,33 +1310,6 @@ Full PDS features (foundation already built in Phase 2b):
 - `priority-high` - Must do
 - `priority-medium` - Should do
 - `priority-low` - Nice to have
-
----
-
-## Follow-up Tickets (Incomplete Steps)
-
-#### SSG-008-FU-001: Implement Async Lambda Invocation for Template Analyzer
-- **Description:** Complete the Lambda invocation step for SSG-008 that was deferred
-- **Parent Ticket:** SSG-008 (Custom Template Registration API)
-- **Requirements:**
-  - [ ] Add boto3 Lambda client to api/templates.py
-  - [ ] Implement invoke_analyzer_lambda() function
-  - [ ] Call function from POST /api/templates/custom endpoint (currently line 417 TODO)
-  - [ ] Handle Lambda invocation errors gracefully
-  - [ ] Update template status based on Lambda response
-  - [ ] Add unit tests for Lambda invocation
-- **Acceptance Criteria:**
-  - [ ] When user registers template, Lambda is invoked asynchronously
-  - [ ] Template status updates from "analyzing" to "ready" or "failed"
-  - [ ] TODO at line 417 in api/templates.py is resolved
-  - [ ] Tests verify Lambda invocation is called with correct parameters
-  - [ ] Error handling prevents API from crashing if Lambda fails
-- **Type:** Backend
-- **Estimate:** M
-- **Status:** PENDING
-- **Priority:** HIGH (blocks SSG-008 from being truly complete)
-- **Reason Not Completed:** Lambda invocation is an AWS service call that requires IAM permissions and Lambda function to be deployed. The SSG-009 Lambda implementation is complete, but the API-side invocation code was left as TODO.
-- **Code Location:** `/api/templates.py` line 417-418 (TODO comment)
 
 ---
 
