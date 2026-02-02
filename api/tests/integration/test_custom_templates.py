@@ -339,12 +339,33 @@ class TestAsyncLambdaInvocation:
 
     def test_async_lambda_invocation(self, client):
         """
-        [ ] Async invocation of analyzer Lambda
+        [x] Async invocation of analyzer Lambda
         Test that Lambda is invoked asynchronously
         """
-        # This would require mocking AWS Lambda
-        # Placeholder for implementation
-        pass
+        payload = {
+            "name": "Test Template",
+            "github_url": "https://github.com/user/test-template",
+            "is_public": True
+        }
+
+        with patch('templates.boto3.client') as mock_boto3_client:
+            mock_lambda_client = MagicMock()
+            mock_boto3_client.return_value = mock_lambda_client
+            mock_lambda_client.invoke.return_value = {'RequestId': 'test-request-id'}
+
+            response = client.post("/api/templates/custom", json=payload)
+
+            # Should return 202 Accepted
+            assert response.status_code == 202
+
+            # Verify Lambda was invoked
+            mock_lambda_client.invoke.assert_called_once()
+
+            # Verify the invoke call had the correct parameters
+            call_args = mock_lambda_client.invoke.call_args
+            assert call_args is not None
+            assert call_args.kwargs['InvocationType'] == 'Event'
+            assert 'Payload' in call_args.kwargs
 
     def test_template_status_changes_from_analyzing(self, client):
         """Test that template status updates as Lambda processes"""

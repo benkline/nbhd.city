@@ -273,7 +273,7 @@ Research and implementation of automated template analysis.
   - [x] `GET /api/templates/{id}/content-types` - Get inferred content types
   - [x] GitHub URL validation (github.com, gitlab.com, bitbucket.org)
   - [x] Store template metadata in DynamoDB
-  - [ ] Async invocation of analyzer Lambda
+  - [x] Async invocation of analyzer Lambda
 - **Acceptance Criteria:**
   - [x] Valid GitHub URLs accepted
   - [x] Invalid URLs rejected with error
@@ -283,8 +283,11 @@ Research and implementation of automated template analysis.
 - **Type:** Backend
 - **Estimate:** M
 - **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
-- **Status:** MOSTLY COMPLETE (Lambda invocation in SSG-009)
+- **Status:** COMPLETED
 - **Tests:** `api/tests/integration/test_custom_templates.py` (29 tests passing)
+- **Implementation Files:**
+  - `api/templates.py` - Added `invoke_template_analyzer_async()` function and integrated with `/api/templates/custom` endpoint
+  - `api/tests/integration/test_custom_templates.py` - Added test for async Lambda invocation
 
 #### SSG-009: Template Analyzer Lambda Function
 - **Description:** Lambda function to clone, validate, and analyze 11ty templates
@@ -529,8 +532,6 @@ Content creation and management layer. Users can create, edit, and publish conte
   - [ ] File structure is clear
 - **Type:** Backend
 - **Estimate:** S
-
-### Infrastructure & Deployment
 
 **Note:** These infrastructure tickets support the build pipeline. They provision AWS resources needed for SSG-009, SSG-015, and SSG-016.
 
