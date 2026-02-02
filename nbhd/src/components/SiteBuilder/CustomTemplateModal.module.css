@@ -75,6 +75,32 @@
   font-size: 14px;
 }
 
+.nameLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.nameLabel label {
+  margin: 0;
+  font-weight: 500;
+  color: #111;
+  font-size: 14px;
+}
+
+.autoExtracted {
+  display: inline-block;
+  background-color: #dbeafe;
+  color: #0369a1;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
 .formGroup input[type="text"] {
   width: 100%;
   padding: 10px 12px;

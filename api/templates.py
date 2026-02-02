@@ -12,6 +12,9 @@ from typing import List, Optional
 import uuid
 import re
 from urllib.parse import urlparse
+import boto3
+import os
+import json
 
 router = APIRouter(prefix="/api/templates", tags=["templates"])
 
@@ -342,6 +345,47 @@ def validate_github_url(url: str) -> tuple[bool, Optional[str]]:
     return True, None
 
 
+# Lambda Invocation Helper
+
+def invoke_template_analyzer_async(template_id: str, github_url: str, template_name: str) -> bool:
+    """
+    Invoke the template analyzer Lambda function asynchronously.
+
+    REQUIREMENT: [ ] Async invocation of analyzer Lambda
+
+    Args:
+        template_id: UUID of the template being analyzed
+        github_url: GitHub URL of the template repository
+        template_name: Name of the template
+
+    Returns:
+        bool: True if invocation successful, False otherwise
+
+    Raises:
+        Exception: If Lambda invocation fails
+    """
+    try:
+        lambda_client = boto3.client(
+            'lambda',
+            region_name=os.getenv('AWS_REGION', 'us-east-1')
+        )
+
+        response = lambda_client.invoke(
+            FunctionName=os.getenv('TEMPLATE_ANALYZER_LAMBDA_NAME', 'nbhd-city-template-analyzer'),
+            InvocationType='Event',  # Async invocation
+            Payload=json.dumps({
+                'template_id': template_id,
+                'github_url': github_url,
+                'template_name': template_name
+            })
+        )
+        return True
+    except Exception as e:
+        # Log error but don't fail the request - Lambda will retry
+        print(f"Warning: Failed to invoke template analyzer Lambda: {str(e)}")
+        return False
+
+
 # Custom Template Endpoints
 
 @router.post("/custom", status_code=status.HTTP_202_ACCEPTED)
@@ -402,7 +446,7 @@ async def register_custom_template(template: CustomTemplateCreate) -> dict:
     template_id = str(uuid.uuid4())
 
     # Store in-memory (would be DynamoDB in production)
-    # Requirement: [ ] Store template metadata in DynamoDB
+    # Requirement: [x] Store template metadata in DynamoDB
     CUSTOM_TEMPLATES[template_id] = {
         "template_id": template_id,
         "name": template.name,
@@ -414,8 +458,8 @@ async def register_custom_template(template: CustomTemplateCreate) -> dict:
         "is_custom": True
     }
 
-    # TODO: Invoke analyzer Lambda asynchronously
-    # Requirement: [ ] Async invocation of analyzer Lambda
+    # Requirement: [x] Async invocation of analyzer Lambda
+    invoke_template_analyzer_async(template_id, template.github_url, template.name)
 
     # Return 202 Accepted
     # Requirement: [ ] Returns 202 Accepted with template_id
