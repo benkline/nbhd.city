@@ -106,6 +106,10 @@ LOOP until ALL tests pass:
 - Test locally before committing
 - If test fails, DO NOT commit - fix and re-test
 - Mark ticket complete in tickets.md BEFORE committing
+- **CRITICAL**: ALWAYS create a pull request whenever you modify planning/tickets.md
+  * Use `gh pr create` with descriptive title and summary
+  * Include details of which tickets were updated and why
+  * This ensures all planning changes are tracked and reviewed
 
 ## Output
 Success: <promise>DONE</promise> (ticket complete, tested, committed, pushed)
