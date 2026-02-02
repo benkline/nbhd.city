@@ -1,6 +1,6 @@
 # nbhd.city Development Tickets
 
-**Last Updated:** 2026-02-01
+**Last Updated:** 2026-02-01 (SSG-018 Completed)
 **Phases:** 1-9 (Sequential phases based on execution order and dependencies)
 **Priority:** High
 
@@ -519,19 +519,34 @@ Content creation and management layer. Users can create, edit, and publish conte
 #### SSG-018: Site Export to ZIP
 - **Description:** Generate downloadable ZIP of built site files
 - **Requirements:**
-  - [ ] Endpoint: `GET /api/sites/{id}/export`
-  - [ ] Downloads all static files from S3 as ZIP
-  - [ ] Includes README with deployment instructions
-  - [ ] Users can self-host the generated site anywhere
-  - [ ] Include source content (markdown) as backup
+  - [x] Endpoint: `GET /api/sites/{id}/export`
+  - [x] Downloads all static files from S3 as ZIP
+  - [x] Includes README with deployment instructions
+  - [x] Users can self-host the generated site anywhere
+  - [x] Include source content (markdown) as backup
 - **Acceptance Criteria:**
-  - [ ] ZIP contains all necessary files
-  - [ ] ZIP is downloadable and extractable
-  - [ ] Can be deployed to any static host (Netlify, Vercel, etc.)
-  - [ ] README explains how to deploy
-  - [ ] File structure is clear
+  - [x] ZIP contains all necessary files
+  - [x] ZIP is downloadable and extractable
+  - [x] Can be deployed to any static host (Netlify, Vercel, etc.)
+  - [x] README explains how to deploy
+  - [x] File structure is clear
 - **Type:** Backend
 - **Estimate:** S
+- **Status:** COMPLETED
+- **Merged:** 2026-02-01 via PR #81
+- **Commit:** dccb6aa (feat(SSG-018): Implement site export to ZIP endpoint)
+- **Implementation Files:**
+  - `api/sites.py` - Main endpoint and 4 helper functions
+  - `api/tests/unit/test_site_export.py` - 6 unit tests
+  - `api/tests/integration/test_site_export.py` - 8 integration tests
+- **Key Features:**
+  - Async S3 file download with pagination (supports 1000+ files)
+  - DynamoDB content record backup (posts, pages)
+  - Multi-platform deployment instructions (Netlify, Vercel, GitHub Pages, AWS S3)
+  - ZIP_DEFLATED compression
+  - StreamingResponse for efficient download
+  - Full authorization checks (site ownership validation)
+  - Comprehensive error handling
 
 **Note:** These infrastructure tickets support the build pipeline. They provision AWS resources needed for SSG-009, SSG-015, and SSG-016.
 
@@ -1246,8 +1261,8 @@ Core platform foundation
 **Depends on:** Phase 5 (Content Management - content must exist before building)
 - [ ] SSG-015 (Site Build Trigger API)
 - [ ] SSG-016 (11ty Lambda Build Function)
-- [ ] SSG-017 (Subdomain Routing Setup)
-- [ ] SSG-018 (Site Export to ZIP)
+- [x] SSG-017 (Subdomain Routing Setup) - COMPLETED 2026-01-31
+- [x] SSG-018 (Site Export to ZIP) - COMPLETED 2026-02-01
 - Infrastructure: SSG-009-INFRA, SSG-016-INFRA, SSG-015-INFRA
 
 ### 📝 Phase 7: Nbhd CMS & Admin Features (Weeks 13-15)
