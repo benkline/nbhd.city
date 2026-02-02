@@ -18,10 +18,28 @@ export function CustomTemplateModal({ isOpen, onClose, onAdd }) {
   const [error, setError] = useState(null);
   const [status, setStatus] = useState(null);
   const [templateId, setTemplateId] = useState(null);
+  const [nameIsAutoExtracted, setNameIsAutoExtracted] = useState(false);
   const pollTimeoutRef = useRef(null);
   const closeTimeoutRef = useRef(null);
 
   if (!isOpen) return null;
+
+  const extractTemplateNameFromUrl = (url) => {
+    if (!url) return null;
+    try {
+      // Remove .git suffix if present
+      let cleanUrl = url.replace(/\.git$/, '');
+
+      // Extract the last path segment (repository name)
+      const match = cleanUrl.match(/\/([^/]+)$/);
+      if (match && match[1]) {
+        return match[1];
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
 
   const validateUrl = (url) => {
     if (!url) return 'GitHub URL is required';
@@ -41,6 +59,22 @@ export function CustomTemplateModal({ isOpen, onClose, onAdd }) {
       return null;
     } catch {
       return 'Invalid URL format';
+    }
+  };
+
+  const handleUrlChange = (e) => {
+    const url = e.target.value;
+    setGithubUrl(url);
+
+    // Auto-extract template name if URL is valid
+    const extractedName = extractTemplateNameFromUrl(url);
+    if (extractedName && !name) {
+      // Only set name if user hasn't manually entered one
+      setName(extractedName);
+      setNameIsAutoExtracted(true);
+    } else if (!extractedName) {
+      // Clear auto-extraction flag if URL becomes invalid
+      setNameIsAutoExtracted(false);
     }
   };
 
@@ -175,6 +209,12 @@ export function CustomTemplateModal({ isOpen, onClose, onAdd }) {
     };
   }, [templateId]);
 
+  const handleNameChange = (e) => {
+    setName(e.target.value);
+    // Once user manually edits the name, don't auto-extract anymore
+    setNameIsAutoExtracted(false);
+  };
+
   const handleClose = () => {
     // Clear any pending timeouts
     if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current);
@@ -188,6 +228,7 @@ export function CustomTemplateModal({ isOpen, onClose, onAdd }) {
     setStatus(null);
     setTemplateId(null);
     setIsAnalyzing(false);
+    setNameIsAutoExtracted(false);
     onClose();
   };
 
@@ -209,28 +250,36 @@ export function CustomTemplateModal({ isOpen, onClose, onAdd }) {
         {!isAnalyzing && status !== 'ready' && (
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formGroup}>
-              <label htmlFor="template-name">Template Name</label>
+              <label htmlFor="github-url">GitHub URL</label>
+              <input
+                id="github-url"
+                type="text"
+                placeholder="https://github.com/user/my-11ty-blog"
+                value={githubUrl}
+                onChange={handleUrlChange}
+                disabled={isAnalyzing}
+              />
+              <small>Enter the GitHub URL of your 11ty template repository</small>
+            </div>
+
+            <div className={styles.formGroup}>
+              <div className={styles.nameLabel}>
+                <label htmlFor="template-name">Template Name</label>
+                {nameIsAutoExtracted && (
+                  <span className={styles.autoExtracted}>auto-detected</span>
+                )}
+              </div>
               <input
                 id="template-name"
                 type="text"
                 placeholder="Template name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleNameChange}
                 disabled={isAnalyzing}
               />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="github-url">GitHub URL</label>
-              <input
-                id="github-url"
-                type="text"
-                placeholder="GitHub repository URL"
-                value={githubUrl}
-                onChange={(e) => setGithubUrl(e.target.value)}
-                disabled={isAnalyzing}
-              />
-              <small>Enter the GitHub URL of your 11ty template repository</small>
+              {nameIsAutoExtracted && (
+                <small>Name was extracted from the repository URL. You can edit it if needed.</small>
+              )}
             </div>
 
             <div className={styles.formGroup}>
