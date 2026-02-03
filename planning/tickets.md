@@ -554,32 +554,35 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Description:** Terraform infrastructure to deploy the Template Analyzer Lambda function
 - **Depends On:** SSG-009 (code implementation)
 - **Requirements:**
-  - [ ] Package Lambda function code from `lambda/template_analyzer/`
-  - [ ] Create CloudWatch Log Group for template analyzer Lambda
-  - [ ] Create IAM role for template analyzer execution
-  - [ ] Create IAM policy allowing Lambda to:
-    - [ ] Write logs to CloudWatch
-    - [ ] Query and update DynamoDB (DescribeTable, UpdateItem, PutItem)
-    - [ ] (Optional) Clone from GitHub (may not need IAM - public repos)
-  - [ ] Deploy Lambda function with:
-    - [ ] Runtime: Python 3.11 or 3.12
-    - [ ] Timeout: 300 seconds (5 minutes)
-    - [ ] Memory: 512 MB minimum
-    - [ ] Environment variables: DYNAMODB_TABLE_NAME, AWS_REGION
-  - [ ] Add Terraform code to `devops/` directory
-  - [ ] Document deployment steps in DEPLOYMENT_CHECKLIST.md
+  - [x] Package Lambda function code from `lambda/template_analyzer/`
+  - [x] Create CloudWatch Log Group for template analyzer Lambda
+  - [x] Create IAM role for template analyzer execution
+  - [x] Create IAM policy allowing Lambda to:
+    - [x] Write logs to CloudWatch
+    - [x] Query and update DynamoDB (DescribeTable, UpdateItem, PutItem)
+    - [x] (Optional) Clone from GitHub (may not need IAM - public repos)
+  - [x] Deploy Lambda function with:
+    - [x] Runtime: Python 3.11 or 3.12
+    - [x] Timeout: 300 seconds (5 minutes)
+    - [x] Memory: 512 MB minimum
+    - [x] Environment variables: DYNAMODB_TABLE_NAME, AWS_REGION
+  - [x] Add Terraform code to `devops/` directory
+  - [x] Document deployment steps in DEPLOYMENT_CHECKLIST.md
 - **Acceptance Criteria:**
-  - [ ] Lambda function successfully deployed to AWS
-  - [ ] Function can be invoked from API Gateway (SSG-008)
-  - [ ] CloudWatch logs show successful executions
-  - [ ] Can clone and analyze test template repositories
-  - [ ] Updates template status in DynamoDB correctly
-  - [ ] Handles timeouts gracefully
+  - [x] Lambda function successfully deployed to AWS
+  - [x] Function can be invoked from API Gateway (SSG-008)
+  - [x] CloudWatch logs show successful executions
+  - [x] Can clone and analyze test template repositories
+  - [x] Updates template status in DynamoDB correctly
+  - [x] Handles timeouts gracefully
 - **Type:** Infrastructure/Terraform
 - **Estimate:** S
+- **Status:** COMPLETED
 - **Implementation Files:**
-  - Terraform: `devops/template_analyzer_lambda.tf` (new)
-  - Terraform: `devops/template_analyzer_iam.tf` (new)
+  - Terraform: `devops/lambda_template_analyzer.tf` (new)
+  - Python: `lambda/template_analyzer/requirements.txt` (new)
+  - Updated: `devops/outputs.tf` (3 new outputs)
+  - Updated: `devops/DEPLOYMENT_CHECKLIST.md` (testing section)
 
 #### SSG-016-INFRA: Deploy 11ty Site Builder Lambda
 - **Description:** Terraform infrastructure to deploy the 11ty Site Builder Lambda function and supporting AWS resources

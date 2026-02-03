@@ -87,6 +87,21 @@ output "sites_domain" {
   value       = var.sites_domain
 }
 
+output "lambda_template_analyzer_function_name" {
+  description = "Name of the template analyzer Lambda function"
+  value       = aws_lambda_function.template_analyzer.function_name
+}
+
+output "lambda_template_analyzer_function_arn" {
+  description = "ARN of the template analyzer Lambda function"
+  value       = aws_lambda_function.template_analyzer.arn
+}
+
+output "lambda_template_analyzer_role_arn" {
+  description = "ARN of the template analyzer Lambda execution role"
+  value       = aws_iam_role.lambda_template_analyzer_exec.arn
+}
+
 output "deployment_summary" {
   description = "Deployment summary"
   value = {
