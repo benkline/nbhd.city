@@ -91,6 +91,38 @@ resource "aws_iam_role_policy_attachment" "lambda_dynamodb" {
   policy_arn = aws_iam_policy.lambda_dynamodb.arn
 }
 
+# IAM Policy for Lambda to invoke other Lambdas (asynchronously)
+resource "aws_iam_policy" "lambda_invoke_permission" {
+  name        = "${var.project_name}-lambda-invoke-${var.environment}"
+  description = "IAM policy for API Lambda to invoke site builder and template analyzer Lambdas"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunction"
+        ]
+        Resource = [
+          aws_lambda_function.template_analyzer.arn,
+          aws_lambda_function.site_builder.arn
+        ]
+      }
+    ]
+  })
+
+  tags = {
+    Name = "${var.project_name}-lambda-invoke-${var.environment}"
+  }
+}
+
+# Attach Lambda invocation policy to API Lambda role
+resource "aws_iam_role_policy_attachment" "lambda_invoke" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.lambda_invoke_permission.arn
+}
+
 # Optional: Attach AWS managed policy for X-Ray (if tracing is enabled)
 resource "aws_iam_role_policy_attachment" "lambda_xray" {
   count      = var.enable_xray_tracing ? 1 : 0
