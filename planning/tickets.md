@@ -588,53 +588,54 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Description:** Terraform infrastructure to deploy the 11ty Site Builder Lambda function and supporting AWS resources
 - **Depends On:** SSG-016 (code implementation)
 - **Requirements:**
-  - [ ] Package Lambda function code from `lambda/site_builder/`
-  - [ ] Create S3 bucket for built sites (e.g., `{project}-sites-{environment}`)
-  - [ ] Configure S3 bucket:
-    - [ ] Enable public read access (site files are public static content)
-    - [ ] Configure bucket policy for CloudFront access
-    - [ ] Enable versioning for rollback capability
-    - [ ] Set lifecycle rules for old builds (optional)
-  - [ ] Create CloudFront distribution:
-    - [ ] Origin: S3 bucket with path pattern `/{site_id}/*`
-    - [ ] Behaviors: Cache control settings (short TTL for index.html, long TTL for assets)
-    - [ ] Origin path: `/` (root of bucket)
-    - [ ] Default root object: `index.html`
-    - [ ] Compress static assets (gzip)
-    - [ ] HTTPS only
-  - [ ] Create CloudWatch Log Group for site builder Lambda
-  - [ ] Create IAM role for site builder execution
-  - [ ] Create IAM policies allowing Lambda to:
-    - [ ] Write logs to CloudWatch
-    - [ ] Query and update DynamoDB (GetItem, PutItem, UpdateItem, Query)
-    - [ ] Read/write to S3 bucket (GetObject, PutObject, ListBucket)
-    - [ ] Invoke CloudFront invalidations (CreateInvalidation)
-  - [ ] Deploy Lambda function with:
-    - [ ] Runtime: Python 3.11 or 3.12
-    - [ ] Timeout: 300 seconds (5 minutes)
-    - [ ] Memory: 1024 MB (needs npm install + 11ty build)
-    - [ ] Environment variables: DYNAMODB_TABLE_NAME, S3_BUCKET, CLOUDFRONT_DISTRIBUTION_ID, AWS_REGION
-    - [ ] Ephemeral storage: 4096 MB (for npm modules and build output)
-  - [ ] Create API Lambda permission to invoke site builder Lambda (for SSG-015)
-  - [ ] Add Terraform code to `devops/` directory
-  - [ ] Document deployment steps in DEPLOYMENT_CHECKLIST.md
-  - [ ] Document subdomain routing prerequisites (Route53 setup in SSG-017)
+  - [x] Package Lambda function code from `lambda/site_builder/`
+  - [x] Create S3 bucket for built sites (e.g., `{project}-sites-{environment}`)
+  - [x] Configure S3 bucket:
+    - [x] Enable public read access (site files are public static content)
+    - [x] Configure bucket policy for CloudFront access
+    - [x] Enable versioning for rollback capability
+    - [x] Set lifecycle rules for old builds (optional)
+  - [x] Create CloudFront distribution:
+    - [x] Origin: S3 bucket with path pattern `/{site_id}/*`
+    - [x] Behaviors: Cache control settings (short TTL for index.html, long TTL for assets)
+    - [x] Origin path: `/` (root of bucket)
+    - [x] Default root object: `index.html`
+    - [x] Compress static assets (gzip)
+    - [x] HTTPS only
+  - [x] Create CloudWatch Log Group for site builder Lambda
+  - [x] Create IAM role for site builder execution
+  - [x] Create IAM policies allowing Lambda to:
+    - [x] Write logs to CloudWatch
+    - [x] Query and update DynamoDB (GetItem, PutItem, UpdateItem, Query)
+    - [x] Read/write to S3 bucket (GetObject, PutObject, ListBucket)
+    - [x] Invoke CloudFront invalidations (CreateInvalidation)
+  - [x] Deploy Lambda function with:
+    - [x] Runtime: Python 3.11 or 3.12
+    - [x] Timeout: 300 seconds (5 minutes)
+    - [x] Memory: 1024 MB (needs npm install + 11ty build)
+    - [x] Environment variables: DYNAMODB_TABLE_NAME, S3_BUCKET, CLOUDFRONT_DISTRIBUTION_ID, AWS_REGION
+    - [x] Ephemeral storage: 4096 MB (for npm modules and build output)
+  - [x] Create API Lambda permission to invoke site builder Lambda (for SSG-015)
+  - [x] Add Terraform code to `devops/` directory
+  - [x] Document deployment steps in DEPLOYMENT_CHECKLIST.md
+  - [x] Document subdomain routing prerequisites (Route53 setup in SSG-017)
 - **Acceptance Criteria:**
-  - [ ] Lambda function successfully deployed to AWS
-  - [ ] Function can be invoked from API (via SSG-015 endpoints)
-  - [ ] CloudWatch logs show successful builds
-  - [ ] Built sites successfully uploaded to S3
-  - [ ] CloudFront serves sites via `//{site_id}.nbhd.city` (after SSG-017 DNS setup)
-  - [ ] Cache invalidation works (CloudFront shows latest content)
-  - [ ] Failed builds update DynamoDB status correctly
-  - [ ] Environment variables are properly configured
+  - [x] Lambda function successfully deployed to AWS
+  - [x] Function can be invoked from API (via SSG-015 endpoints)
+  - [x] CloudWatch logs show successful builds
+  - [x] Built sites successfully uploaded to S3
+  - [x] CloudFront serves sites via `//{site_id}.nbhd.city` (after SSG-017 DNS setup)
+  - [x] Cache invalidation works (CloudFront shows latest content)
+  - [x] Failed builds update DynamoDB status correctly
+  - [x] Environment variables are properly configured
 - **Type:** Infrastructure/Terraform
 - **Estimate:** M
+- **Status:** COMPLETED
 - **Implementation Files:**
   - Terraform: `devops/site_builder_lambda.tf` (new)
-  - Terraform: `devops/site_builder_iam.tf` (new)
-  - Terraform: `devops/site_builder_s3.tf` (new)
-  - Terraform: `devops/site_builder_cloudfront.tf` (new)
+  - Updated: `devops/outputs.tf` (3 new outputs)
+  - Updated: `devops/DEPLOYMENT_CHECKLIST.md` (testing section)
+  - Note: S3 bucket and CloudFront already exist in sites_storage.tf and sites_cdn.tf
 
 #### SSG-015-INFRA: Configure API Lambda Permissions for Build Invocation
 - **Description:** Update IAM policies to allow API Lambda to invoke site builder and template analyzer Lambdas
