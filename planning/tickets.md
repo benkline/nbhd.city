@@ -639,27 +639,29 @@ Content creation and management layer. Users can create, edit, and publish conte
 
 #### SSG-015-INFRA: Configure API Lambda Permissions for Build Invocation
 - **Description:** Update IAM policies to allow API Lambda to invoke site builder and template analyzer Lambdas
-- **Depends On:** SSG-009-INFRA, SSG-016-INFRA (must be deployed first)
+- **Depends On:** SSG-009-INFRA ✅, SSG-016-INFRA ✅ (both deployed)
 - **Requirements:**
-  - [ ] Add IAM policy allowing API Lambda to:
-    - [ ] Invoke site builder Lambda asynchronously (InvokeFunction with InvocationType=Event)
-    - [ ] Invoke template analyzer Lambda asynchronously (InvokeFunction with InvocationType=Event)
-  - [ ] Create Lambda permissions:
-    - [ ] Allow API Lambda to invoke site builder Lambda
-    - [ ] Allow API Lambda to invoke template analyzer Lambda
-  - [ ] Update existing `devops/iam.tf` with new policies
-  - [ ] No new Lambda function needed (existing API Lambda)
+  - [x] Add IAM policy allowing API Lambda to:
+    - [x] Invoke site builder Lambda asynchronously (InvokeFunction with InvocationType=Event)
+    - [x] Invoke template analyzer Lambda asynchronously (InvokeFunction with InvocationType=Event)
+  - [x] Create Lambda permissions:
+    - [x] Allow API Lambda to invoke site builder Lambda
+    - [x] Allow API Lambda to invoke template analyzer Lambda
+  - [x] Update existing `devops/iam.tf` with new policies
+  - [x] No new Lambda function needed (existing API Lambda)
 - **Acceptance Criteria:**
-  - [ ] API endpoints in SSG-015 successfully invoke site builder Lambda
-  - [ ] API endpoints in SSG-008 successfully invoke template analyzer Lambda
-  - [ ] Invocations are asynchronous (202 Accepted response)
-  - [ ] CloudWatch logs show successful Lambda invocations
-  - [ ] Build job status updates work correctly
+  - [x] API endpoints in SSG-015 successfully invoke site builder Lambda
+  - [x] API endpoints in SSG-008 successfully invoke template analyzer Lambda
+  - [x] Invocations are asynchronous (202 Accepted response)
+  - [x] CloudWatch logs show successful Lambda invocations
+  - [x] Build job status updates work correctly
 - **Type:** Infrastructure/Terraform
 - **Estimate:** XS
+- **Status:** COMPLETED
 - **Implementation Files:**
-  - Terraform: Update `devops/iam.tf`
-  - Terraform: Update `devops/lambda.tf` (add permissions)
+  - Updated: `devops/iam.tf` (1 new policy + 1 attachment)
+  - Updated: `devops/lambda.tf` (2 new permissions)
+  - New: `devops/tests/test_api_lambda_permissions.py` (infrastructure validation)
 
 ---
 
