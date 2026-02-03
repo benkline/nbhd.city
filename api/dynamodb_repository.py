@@ -928,3 +928,114 @@ def invoke_lambda_async(job_id: str, site_id: str, user_did: str) -> str:
         return response.get('RequestId', job_id)
     except Exception as e:
         raise Exception(f"Failed to invoke Lambda: {str(e)}")
+
+
+# Site Operations
+
+def _build_site_url(site_type: str, nbhd_id: Optional[str], site_id: str) -> str:
+    """
+    Build site URL based on type.
+
+    - personal/project: subdomain (e.g., site-id.nbhd.city)
+    - nbhd: path-based (e.g., nbhd.city/neighborhoods/{nbhd_id}/pages/)
+    """
+    if site_type in ['personal', 'project']:
+        return f"https://{site_id}.nbhd.city"
+    elif site_type == 'nbhd':
+        return f"https://nbhd.city/neighborhoods/{nbhd_id}/pages/"
+    return None
+
+
+async def create_site(table, site_data: dict) -> dict:
+    """
+    Create a new site in DynamoDB.
+
+    Schema:
+        PK: SITE#{site_id}
+        SK: METADATA
+        GSI1: user_id-site_type (for querying user's sites)
+        GSI9: nbhd_id-site_type (for querying nbhd's sites)
+
+    Args:
+        table: DynamoDB table resource
+        site_data: Dictionary containing site data with keys:
+            - user_id: User's DID
+            - title: Site title
+            - template: Template ID
+            - config: Site configuration (dict)
+            - site_type: "personal", "project", or "nbhd"
+            - nbhd_id: Neighborhood ID (required for project/nbhd, forbidden for personal)
+            - status: Draft/published (default "draft")
+
+    Returns:
+        dict: Created site item
+    """
+    site_id = generate_id()
+    now = now_iso()
+
+    # Build URL based on site_type
+    url = _build_site_url(site_data['site_type'], site_data.get('nbhd_id'), site_id)
+
+    item = {
+        "PK": f"SITE#{site_id}",
+        "SK": "METADATA",
+        "entity_type": "site",
+        "site_id": site_id,
+        "user_id": site_data['user_id'],
+        "title": site_data['title'],
+        "template": site_data['template'],
+        "config": site_data['config'],
+        "status": site_data.get('status', 'draft'),
+        "site_type": site_data.get('site_type', 'personal'),
+        "nbhd_id": site_data.get('nbhd_id'),
+        "url": url,
+        "created_at": now,
+        "updated_at": now,
+    }
+
+    await table.put_item(Item=item)
+    return item
+
+
+async def get_site(table, site_id: str) -> Optional[dict]:
+    """Get site by ID."""
+    response = await table.get_item(Key={"PK": f"SITE#{site_id}", "SK": "METADATA"})
+    return response.get("Item")
+
+
+async def list_sites_by_user(table, user_id: str, site_type: Optional[str] = None) -> list:
+    """
+    List sites for a user, optionally filtered by type.
+
+    Uses GSI1: user_id-site_type
+    """
+    if site_type:
+        response = await table.query(
+            IndexName="GSI1",
+            KeyConditionExpression=Key("user_id").eq(user_id) & Key("site_type").eq(site_type)
+        )
+    else:
+        response = await table.query(
+            IndexName="GSI1",
+            KeyConditionExpression=Key("user_id").eq(user_id)
+        )
+    return response.get("Items", [])
+
+
+async def list_sites_by_nbhd(table, nbhd_id: str, site_type: Optional[str] = None) -> list:
+    """
+    List sites for a neighborhood, optionally filtered by type.
+
+    Uses GSI9: nbhd_id-site_type
+    """
+    if site_type:
+        response = await table.query(
+            IndexName="GSI9",
+            KeyConditionExpression=Key("nbhd_id").eq(nbhd_id) & Key("site_type").eq(site_type)
+        )
+    else:
+        response = await table.query(
+            IndexName="GSI9",
+            KeyConditionExpression=Key("nbhd_id").eq(nbhd_id)
+        )
+    return response.get("Items", [])

@@ -102,6 +102,15 @@ resource "aws_dynamodb_table" "nbhd_city" {
     projection_type = "ALL"
   }
 
+  # Global Secondary Index 9: Neighborhood sites lookup by type
+  # Enables efficient querying of sites by neighborhood and type
+  global_secondary_index {
+    name            = "GSI9"
+    hash_key        = "nbhd_id"
+    range_key       = "site_type"
+    projection_type = "ALL"
+  }
+
   # Enable Point-in-Time Recovery
   point_in_time_recovery {
     enabled = var.enable_point_in_time_recovery
