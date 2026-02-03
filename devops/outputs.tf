@@ -102,6 +102,21 @@ output "lambda_template_analyzer_role_arn" {
   value       = aws_iam_role.lambda_template_analyzer_exec.arn
 }
 
+output "lambda_site_builder_function_name" {
+  description = "Name of the site builder Lambda function"
+  value       = aws_lambda_function.site_builder.function_name
+}
+
+output "lambda_site_builder_function_arn" {
+  description = "ARN of the site builder Lambda function"
+  value       = aws_lambda_function.site_builder.arn
+}
+
+output "lambda_site_builder_role_arn" {
+  description = "ARN of the site builder Lambda execution role"
+  value       = aws_iam_role.lambda_site_builder_exec.arn
+}
+
 output "deployment_summary" {
   description = "Deployment summary"
   value = {
