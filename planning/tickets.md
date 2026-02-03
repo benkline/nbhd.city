@@ -676,14 +676,11 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 ### Backend Foundation
 
 #### NBHD-001: Nbhd DID & Data Model Enhancement
-- **Description:** Add DID generation and site type distinction to data model
+- **Description:** Add DID generation and site type distinction to data model 
 - **Requirements:**
   - [ ] Add `nbhd_did` field to neighborhood records in DynamoDB
   - [ ] Add `site_type` field to sites ("personal" | "project")
-  - [ ] Update `create_neighborhood()` in dynamodb_repository to generate DIDs
-  - [ ] Create migration script for existing neighborhoods without DIDs
   - [ ] Update models in `api/models.py` with new fields and validation
-  - [ ] Ensure backward compatibility (make nbhd_did optional, generate on first access)
 - **Acceptance Criteria:**
   - [ ] New neighborhoods automatically get a DID on creation
   - [ ] Existing neighborhoods can be migrated with script

@@ -85,14 +85,16 @@ async def create_site(
     - **title**: Site title
     - **template**: Template ID (blog, project, newsletter)
     - **config**: Configuration object matching template schema
+    - **site_type**: "personal", "project", or "nbhd"
+    - **nbhd_id**: Required for project and nbhd sites, forbidden for personal
 
     Returns created site object.
     """
-    # [x] `POST /api/sites` - Create new site from template + config
-    # [x] Store config JSON in DynamoDB (in-memory for now)
+    from templates import get_template_by_id
+    from dynamodb_client import get_dynamodb_table
+    from dynamodb_repository import create_site as create_site_db, get_neighborhood
 
     # Validate template exists
-    from templates import get_template_by_id
     template_obj = get_template_by_id(site_data.template)
     if not template_obj:
         raise HTTPException(
@@ -100,7 +102,7 @@ async def create_site(
             detail=f"Template '{site_data.template}' not found"
         )
 
-    # [x] Config validation against schema
+    # Config validation against schema
     schema = template_obj.get("schema", {})
     is_valid, error_msg = _validate_config_against_schema(site_data.config, schema)
     if not is_valid:
@@ -109,71 +111,104 @@ async def create_site(
             detail=error_msg or "Invalid configuration"
         )
 
-    # Create site
-    site_id = str(uuid.uuid4())
-    now = datetime.utcnow().isoformat() + "Z"
+    # For project and nbhd sites, verify neighborhood exists
+    if site_data.site_type in ['project', 'nbhd'] and site_data.nbhd_id:
+        try:
+            table = await get_dynamodb_table()
+            nbhd = await get_neighborhood(table, site_data.nbhd_id)
+            if not nbhd:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Neighborhood {site_data.nbhd_id} not found"
+                )
 
-    site = {
-        "site_id": site_id,
-        "user_id": user_id,
-        "title": site_data.title,
-        "template": site_data.template,
-        "config": site_data.config,
-        "status": "draft",
-        "created_at": now,
-        "updated_at": now
-    }
+            # For nbhd sites, verify user is admin (created the nbhd)
+            if site_data.site_type == 'nbhd' and nbhd.get('created_by') != user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Only neighborhood admins can create nbhd sites"
+                )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to verify neighborhood: {str(e)}"
+            )
 
-    # Store in memory (in production, would be DynamoDB)
-    SITES_STORE[site_id] = site
+    # Create site in DynamoDB
+    try:
+        table = await get_dynamodb_table()
+        site = await create_site_db(table, {
+            "user_id": user_id,
+            "title": site_data.title,
+            "template": site_data.template,
+            "config": site_data.config,
+            "site_type": site_data.site_type,
+            "nbhd_id": site_data.nbhd_id,
+            "status": "draft"
+        })
 
-    return {
-        "data": site,
-        "meta": {
-            "timestamp": now,
-            "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        now = datetime.utcnow().isoformat() + "Z"
+        return {
+            "data": site,
+            "meta": {
+                "timestamp": now,
+                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+            }
         }
-    }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create site: {str(e)}"
+        )
 
 
 @router.get("")
 async def list_sites(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    site_type: Optional[str] = None,
     user_id: str = Depends(get_current_user)
 ) -> dict:
     """
-    List user's sites with pagination.
+    List user's sites, optionally filtered by type.
 
     Returns list of site objects for the authenticated user.
     """
-    # [x] `GET /api/sites` - List user's sites
+    from dynamodb_client import get_dynamodb_table
+    from dynamodb_repository import list_sites_by_user
 
-    # Get sites for this user
-    user_sites = [
-        site for site in SITES_STORE.values()
-        if site.get("user_id") == user_id
-    ]
+    try:
+        table = await get_dynamodb_table()
+        # Note: GSI1 query would need proper implementation for pagination
+        # For now, get all and apply pagination in-memory
+        sites = await list_sites_by_user(table, user_id, site_type)
 
-    # Sort by created_at descending
-    user_sites.sort(key=lambda s: s.get("created_at", ""), reverse=True)
+        # Sort by created_at descending
+        sites.sort(key=lambda s: s.get("created_at", ""), reverse=True)
 
-    # Apply pagination
-    total = len(user_sites)
-    sites = user_sites[skip : skip + limit]
+        # Apply pagination
+        total = len(sites)
+        paginated_sites = sites[skip : skip + limit]
 
-    return {
-        "data": sites,
-        "meta": {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S"),
-            "pagination": {
-                "skip": skip,
-                "limit": limit,
-                "total": total
+        return {
+            "data": paginated_sites,
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S"),
+                "pagination": {
+                    "skip": skip,
+                    "limit": limit,
+                    "total": total
+                }
             }
         }
-    }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list sites: {str(e)}"
+        )
 
 
 @router.get("/{site_id}")
@@ -186,31 +221,40 @@ async def get_site(
 
     Returns site object if it exists and user is the owner.
     """
-    # [x] `GET /api/sites/{id}` - Retrieve site config
-    # [x] User can only access their own sites
+    from dynamodb_client import get_dynamodb_table
+    from dynamodb_repository import get_site as get_site_db
 
-    if site_id not in SITES_STORE:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Site '{site_id}' not found"
-        )
+    try:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
 
-    site = SITES_STORE[site_id]
+        if not site:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
 
-    # Verify ownership
-    if site.get("user_id") != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to access this site"
-        )
+        # Verify ownership
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this site"
+            )
 
-    return {
-        "data": site,
-        "meta": {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        return {
+            "data": site,
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+            }
         }
-    }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get site: {str(e)}"
+        )
 
 
 @router.put("/{site_id}")
@@ -224,48 +268,72 @@ async def update_site(
 
     Updates the site's title and/or config if provided.
     """
-    # [x] `PUT /api/sites/{id}` - Update site config
+    from dynamodb_client import get_dynamodb_table
+    from dynamodb_repository import get_site as get_site_db
 
-    if site_id not in SITES_STORE:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Site '{site_id}' not found"
-        )
+    try:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
 
-    site = SITES_STORE[site_id]
-
-    # Verify ownership
-    if site.get("user_id") != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to update this site"
-        )
-
-    # [x] Config validation against schema
-    if site_data.config is not None:
-        schema = _get_template_schema(site.get("template", ""))
-        is_valid, error_msg = _validate_config_against_schema(site_data.config, schema)
-        if not is_valid:
+        if not site:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=error_msg or "Invalid configuration"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
             )
 
-    # Update site
-    now = datetime.utcnow().isoformat() + "Z"
-    if site_data.title is not None:
-        site["title"] = site_data.title
-    if site_data.config is not None:
-        site["config"] = site_data.config
-    site["updated_at"] = now
+        # Verify ownership
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to update this site"
+            )
 
-    return {
-        "data": site,
-        "meta": {
-            "timestamp": now,
-            "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        # Config validation against schema
+        if site_data.config is not None:
+            schema = _get_template_schema(site.get("template", ""))
+            is_valid, error_msg = _validate_config_against_schema(site_data.config, schema)
+            if not is_valid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=error_msg or "Invalid configuration"
+                )
+
+        # Update site in DynamoDB
+        now = datetime.utcnow().isoformat() + "Z"
+        update_expr = "SET updated_at = :now"
+        expr_values = {":now": now}
+
+        if site_data.title is not None:
+            update_expr += ", title = :title"
+            expr_values[":title"] = site_data.title
+        if site_data.config is not None:
+            update_expr += ", #config = :config"
+            expr_values[":config"] = site_data.config
+
+        await table.update_item(
+            Key={"PK": f"SITE#{site_id}", "SK": "METADATA"},
+            UpdateExpression=update_expr,
+            ExpressionAttributeValues=expr_values,
+            ExpressionAttributeNames={"#config": "config"}
+        )
+
+        # Fetch updated site
+        updated_site = await get_site_db(table, site_id)
+
+        return {
+            "data": updated_site,
+            "meta": {
+                "timestamp": now,
+                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+            }
         }
-    }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update site: {str(e)}"
+        )
 
 
 @router.delete("/{site_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -278,25 +346,36 @@ async def delete_site(
 
     Returns 204 No Content on success.
     """
-    # [x] `DELETE /api/sites/{id}` - Delete site
+    from dynamodb_client import get_dynamodb_table
+    from dynamodb_repository import get_site as get_site_db
 
-    if site_id not in SITES_STORE:
+    try:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        # Verify ownership
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to delete this site"
+            )
+
+        # Delete site from DynamoDB
+        await table.delete_item(Key={"PK": f"SITE#{site_id}", "SK": "METADATA"})
+
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Site '{site_id}' not found"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete site: {str(e)}"
         )
-
-    site = SITES_STORE[site_id]
-
-    # Verify ownership
-    if site.get("user_id") != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to delete this site"
-        )
-
-    # Delete site
-    del SITES_STORE[site_id]
 
 
 # SSG-011: Content Records API
@@ -314,17 +393,30 @@ async def create_content(
     ACCEPTANCE: [ ] Content stored in DynamoDB with AT Protocol schema
     """
     # Verify site exists and user owns it
-    if site_id not in SITES_STORE:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Site '{site_id}' not found"
-        )
+    try:
+        from dynamodb_client import get_dynamodb_table
+        from dynamodb_repository import get_site as get_site_db
 
-    site = SITES_STORE[site_id]
-    if site.get("user_id") != user_id:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to create content for this site"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to create content for this site"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to verify site: {str(e)}"
         )
 
     # Generate CID and rkey for AT Protocol record
@@ -394,17 +486,30 @@ async def list_content(
     ACCEPTANCE: [ ] Query by site_id works, Pagination implemented
     """
     # Verify site exists and user owns it
-    if site_id not in SITES_STORE:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Site '{site_id}' not found"
-        )
+    try:
+        from dynamodb_client import get_dynamodb_table
+        from dynamodb_repository import get_site as get_site_db
 
-    site = SITES_STORE[site_id]
-    if site.get("user_id") != user_id:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to read content for this site"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to read content for this site"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to verify site: {str(e)}"
         )
 
     # Query records for user, filter by site_id
@@ -456,17 +561,30 @@ async def get_content(
     REQUIREMENT: [ ] `GET /api/sites/{id}/content/{rkey}` - Get specific content
     """
     # Verify site exists and user owns it
-    if site_id not in SITES_STORE:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Site '{site_id}' not found"
-        )
+    try:
+        from dynamodb_client import get_dynamodb_table
+        from dynamodb_repository import get_site as get_site_db
 
-    site = SITES_STORE[site_id]
-    if site.get("user_id") != user_id:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to read content for this site"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to read content for this site"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to verify site: {str(e)}"
         )
 
     # Get record by URI
@@ -519,17 +637,30 @@ async def update_content(
     REQUIREMENT: [ ] `PUT /api/sites/{id}/content/{rkey}` - Update content
     """
     # Verify site exists and user owns it
-    if site_id not in SITES_STORE:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Site '{site_id}' not found"
-        )
+    try:
+        from dynamodb_client import get_dynamodb_table
+        from dynamodb_repository import get_site as get_site_db
 
-    site = SITES_STORE[site_id]
-    if site.get("user_id") != user_id:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to update content for this site"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to update content for this site"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to verify site: {str(e)}"
         )
 
     # Get old record
@@ -585,17 +716,30 @@ async def delete_content(
     REQUIREMENT: [ ] `DELETE /api/sites/{id}/content/{rkey}` - Delete content
     """
     # Verify site exists and user owns it
-    if site_id not in SITES_STORE:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Site '{site_id}' not found"
-        )
+    try:
+        from dynamodb_client import get_dynamodb_table
+        from dynamodb_repository import get_site as get_site_db
 
-    site = SITES_STORE[site_id]
-    if site.get("user_id") != user_id:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to delete content for this site"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to delete content for this site"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to verify site: {str(e)}"
         )
 
     # Delete record
@@ -663,15 +807,18 @@ async def get_prefill_suggestions(
     # [ ] `GET /api/sites/{id}/prefill` - Get prefill suggestions
     try:
         from content_prefilling import ContentPrefiller
+        from dynamodb_client import get_dynamodb_table
+        from dynamodb_repository import get_site as get_site_db
 
         # Verify site exists and belongs to user
-        if site_id not in SITES_STORE:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Site '{site_id}' not found"
             )
-
-        site = SITES_STORE[site_id]
 
         # Verify ownership
         if site.get("user_id") != user_id:
@@ -723,16 +870,17 @@ async def trigger_build(
     """
     try:
         from dynamodb_client import get_dynamodb_table
-        from dynamodb_repository import create_build_job, invoke_lambda_async
+        from dynamodb_repository import create_build_job, invoke_lambda_async, get_site as get_site_db
 
         # Verify site exists and belongs to user
-        if site_id not in SITES_STORE:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Site '{site_id}' not found"
             )
-
-        site = SITES_STORE[site_id]
 
         # Verify ownership
         if site.get("user_id") != user_id:
@@ -794,16 +942,17 @@ async def get_build_status(
     """
     try:
         from dynamodb_client import get_dynamodb_table
-        from dynamodb_repository import get_build_job
+        from dynamodb_repository import get_build_job, get_site as get_site_db
 
         # Verify site exists and belongs to user
-        if site_id not in SITES_STORE:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Site '{site_id}' not found"
             )
-
-        site = SITES_STORE[site_id]
 
         # Verify ownership
         if site.get("user_id") != user_id:
@@ -867,16 +1016,17 @@ async def list_builds(
     """
     try:
         from dynamodb_client import get_dynamodb_table
-        from dynamodb_repository import list_build_jobs_for_site
+        from dynamodb_repository import list_build_jobs_for_site, get_site as get_site_db
 
         # Verify site exists and belongs to user
-        if site_id not in SITES_STORE:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Site '{site_id}' not found"
             )
-
-        site = SITES_STORE[site_id]
 
         # Verify ownership
         if site.get("user_id") != user_id:
@@ -1203,13 +1353,17 @@ async def export_site(
     """
     try:
         # Validate site exists and user owns it
-        if site_id not in SITES_STORE:
+        from dynamodb_client import get_dynamodb_table
+        from dynamodb_repository import get_site as get_site_db
+
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Site not found"
             )
-
-        site = SITES_STORE[site_id]
 
         if site.get("user_id") != user_id:
             raise HTTPException(

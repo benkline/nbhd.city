@@ -96,6 +96,7 @@ class NbhdResponse(BaseModel):
     created_by: str
     created_at: str  # ISO format timestamp string
     member_count: int = 0
+    nbhd_did: str  # DID for AT Protocol compatibility
 
     class Config:
         from_attributes = True
@@ -142,12 +143,26 @@ class TemplateSchemaResponse(BaseModel):
 
 # Site Models
 
+from pydantic import model_validator
+from typing import Literal
+
 class SiteCreate(BaseModel):
     """Schema for creating a new site."""
 
     title: str
     template: str
     config: Dict = {}
+    site_type: Literal["personal", "project", "nbhd"] = "personal"
+    nbhd_id: Optional[str] = None
+
+    @model_validator(mode='after')
+    def validate_nbhd_id_requirement(self):
+        """Validate nbhd_id based on site_type."""
+        if self.site_type in ['project', 'nbhd'] and not self.nbhd_id:
+            raise ValueError(f'nbhd_id required for {self.site_type} sites')
+        if self.site_type == 'personal' and self.nbhd_id:
+            raise ValueError('nbhd_id not allowed for personal sites')
+        return self
 
     class Config:
         from_attributes = True
@@ -174,6 +189,9 @@ class SiteResponse(BaseModel):
     config: Dict
     created_at: str
     updated_at: str
+    site_type: Literal["personal", "project", "nbhd"] = "personal"
+    nbhd_id: Optional[str] = None
+    url: Optional[str] = None
 
     class Config:
         from_attributes = True
