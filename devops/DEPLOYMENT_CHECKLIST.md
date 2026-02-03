@@ -38,6 +38,44 @@ Use this checklist to deploy nbhd.city to AWS.
 - [ ] Create test neighborhood (with auth token)
 - [ ] Check CloudWatch logs for errors
 
+## Template Analyzer Lambda Testing
+
+After deploying the template analyzer Lambda, verify it works:
+
+- [ ] Test successful analysis:
+  ```bash
+  aws lambda invoke \
+    --function-name nbhd-city-template-analyzer-production \
+    --payload '{"template_id":"test-123","github_url":"https://github.com/11ty/eleventy-base-blog"}' \
+    --region us-east-1 \
+    response.json
+  cat response.json
+  ```
+  Expected: `{"status": "success", "template_id": "test-123", "content_types": {...}}`
+
+- [ ] Check CloudWatch logs:
+  ```bash
+  aws logs tail /aws/lambda/nbhd-city-template-analyzer-production --follow
+  ```
+  Expected: Logs show cloning, validation, and analysis steps
+
+- [ ] Verify DynamoDB updates:
+  - Check that template record was updated with `content_types` field
+  - Status should be "ready"
+
+- [ ] Test error handling with invalid URL:
+  ```bash
+  aws lambda invoke \
+    --function-name nbhd-city-template-analyzer-production \
+    --payload '{"template_id":"error-test","github_url":"https://github.com/nonexistent/repo-404"}' \
+    response.json
+  ```
+  Expected: `{"status": "failed", "error": "..."}`
+
+- [ ] Test timeout handling (optional - uses large repo):
+  - Should timeout after 300 seconds
+  - Status should update to "failed"
+
 ## Post-Deployment
 
 - [ ] Configure custom domain (if using)
