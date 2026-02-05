@@ -2,56 +2,81 @@
 
 Automated ticket-driven development with continuous testing, branching, and PR creation.
 
+**Now integrated with /next-ticket skill for mandatory quality guardrails.**
+
 ## What It Does
 
-The Ralph Loop script orchestrates the complete development workflow for each ticket:
+The Ralph Loop script orchestrates the complete development workflow for each ticket using the `/next-ticket` skill:
 
 ```
 Ticket Found
     ↓
-Create Branch (feature/SSG-XXX off previous branch)
+/next-ticket TICKET-ID
+    ├─ Phase 1: Select & Load
+    ├─ Phase 2: Plan Implementation (PAUSE - Review Required)
+    ├─ Phase 3: Implement (MANDATORY: Verify Branch)
+    ├─ Phase 4: Test & Verify (MANDATORY: Tests Must Pass)
+    ├─ Phase 5: Publish PR (Final Verification)
+    └─ Phase 6: Cleanup (Return to develop)
     ↓
-Display Ticket Requirements + Prompt
-    ↓
-Invoke claude-code for implementation
-    ↓
-Run Integration Tests
-    ├─ PASS: Commit → Push → Create PR → Next Ticket
-    └─ FAIL: Retry up to 3 times
-        ├─ PASS: Commit → Push → Create PR → Next Ticket
-        └─ FAIL: Pause for manual intervention
+Next Ticket
 ```
+
+The script automates the loop, but `/next-ticket` skill provides:
+- ✅ Mandatory branch verification
+- ✅ Blocked tests (won't proceed without passing tests)
+- ✅ Planning phase checkpoint
+- ✅ Environment issue handling (offer debug together)
+- ✅ Automatic cleanup (return to develop)
 
 ## Quick Start
 
-### Continuous Mode (Fully Automated Loop)
+### Recommended: Use /next-ticket Skill Directly
+
+For individual tickets, use the /next-ticket skill directly:
+
+```bash
+/next-ticket TICKET-ID
+```
+
+This guides you through all 6 phases with mandatory quality checkpoints:
+1. Load ticket requirements
+2. Review plan (pauses for approval)
+3. Implement (verifies branch)
+4. Test (blocks if failing)
+5. Publish PR
+6. Return to develop
+
+### Continuous Mode (Fully Automated Ralph Loop)
+
+For continuous automated processing of multiple tickets:
 
 ```bash
 ./scripts/ralph-loop.sh
 ```
 
 This runs forever, processing all pending tickets:
-1. Creates branch for next pending ticket
-2. Displays requirements + prompt
-3. Pauses for you to run `claude-code` to implement
-4. Runs tests automatically (up to 3 attempts)
-5. Commits and creates GitHub PR
-6. Repeats for next ticket
+1. Detects next pending ticket
+2. Invokes `/next-ticket TICKET-ID`
+3. /next-ticket handles phases 1-6 with mandatory guardrails
+4. Pauses for you to run `claude-code` to implement (if needed)
+5. /next-ticket automatically runs tests and blocks if failing
+6. /next-ticket creates PR and cleans up
+7. Ralph Loop repeats for next ticket
 
-### Manual Mode (Step-by-Step)
+### Manual Mode (Per-Ticket with Checkpoints)
+
+For single-ticket workflow with full control:
 
 ```bash
-# 1. Setup next ticket (creates branch + shows requirements)
-./scripts/ralph-loop.sh setup
+# Use /next-ticket skill for complete, checked workflow
+/next-ticket TICKET-ID
 
-# 2. Implement in Claude Code
-claude-code  # You do the implementation
-
-# 3. Run tests (with automatic retries)
-./scripts/ralph-loop.sh test
-
-# 4. Commit and create PR
-./scripts/ralph-loop.sh finalize
+# Or manually step through:
+git checkout develop && git pull
+git checkout -b feature/TICKET-ID
+claude-code  # implement
+/next-ticket  # or continue with /next-ticket to test/publish
 ```
 
 ## Commands
@@ -70,69 +95,102 @@ claude-code  # You do the implementation
 
 ### 1. Branching Strategy
 
-Each ticket gets its own branch:
-- `feature/SSG-011` (off `develop`)
-- `feature/SSG-012` (off `feature/SSG-011`)
-- `feature/SSG-013` (off `feature/SSG-012`)
+Each ticket gets its own clean branch (enforced by /next-ticket):
+- `feature/NBHD-002` (off `develop`)
+- `feature/NBHD-003` (off `develop`, NOT chained)
+- `feature/NBHD-004` (off `develop`, NOT chained)
 - etc.
 
-This creates a linear chain where each branch depends on the previous one.
+**Important**: Each branch is independent, based on current `develop`. The /next-ticket skill ensures:
+- ✅ You checkout correct branch before implementing (Phase 3)
+- ✅ You return to develop after each PR (Phase 6)
+- ✅ No branch reuse across tickets (enforced)
 
 ### 2. Ticket Detection
 
-The script reads `planning/tickets.md` and looks for:
-- Tickets with `[ ]` (pending requirements)
-- Skips tickets marked `COMPLETED`
+Ralph Loop script reads `planning/tickets.md` and looks for:
+- Tickets with pending requirements `[ ]`
+- Skips tickets marked `[x]` (COMPLETED)
 - Processes in order found
 
-### 3. Test Retry Logic
+### 3. Test Validation (via /next-ticket Phase 4)
+
+/next-ticket BLOCKS implementation if tests fail:
 
 ```
-Test Run 1 (FAIL)
-  ↓
-Wait for your edits
-  ↓
-Test Run 2 (FAIL)
-  ↓
-Wait for your edits
-  ↓
-Test Run 3 (FAIL)
-  ↓
-PAUSE - Manual intervention needed
+Tests Run (ATTEMPT 1)
+  ├─ PASS: Proceed to Phase 5 (Publish)
+  └─ FAIL: BLOCK, offer to debug together
+      ↓
+   Contact user with error details
+      ↓
+   Wait for user to fix + rerun tests
+      ↓
+   Tests Pass: Proceed to Phase 5
 ```
 
-You get 3 attempts to fix test failures. After that, the script pauses.
+**No automatic retries**: Tests must pass. If environment issues:
+- /next-ticket offers: "Can we run tests together?"
+- Won't push code without passing tests
 
-### 4. PR Creation
+### 4. PR Creation (via /next-ticket Phase 5)
 
-After tests pass, the script:
+After Phase 4 (tests pass), /next-ticket:
+- Verifies final state
 - Commits with proper message format
-- Pushes to `origin/feature/SSG-XXX`
+- Pushes to `origin/feature/TICKET-ID`
 - Creates GitHub PR via `gh` CLI
-- Updates progress tracking
+- Cleans up (Phase 6: checkout develop)
 
-## Integration with Claude Code
+## Integration with Claude Code & /next-ticket
 
-The script **does NOT** run `claude-code` automatically (that would be circular 🔄). Instead:
+The Ralph Loop script uses the `/next-ticket` skill which coordinates the workflow:
+
+### Workflow:
+1. Ralph Loop detects next pending ticket
+2. Ralph Loop invokes: `/next-ticket TICKET-ID`
+3. /next-ticket handles ALL phases:
+   - **Phase 1**: Load ticket requirements
+   - **Phase 2**: Planning (PAUSE - review required before proceeding)
+   - **Phase 3**: Implementation (MANDATORY: verifies correct branch)
+   - **Phase 4**: Testing (MANDATORY: blocks if tests fail, won't push untested code)
+   - **Phase 5**: Publishing PR (final verification)
+   - **Phase 6**: Cleanup (checkout develop for next ticket)
+4. For implementation, Ralph Loop pauses and waits for you to run `claude-code`
+5. Claude Code implements the ticket
+6. `/next-ticket` handles the rest automatically
 
 ### In Continuous Mode:
-1. Script creates branch and shows requirements
-2. Script pauses and displays:
-   ```
-   👉 Run claude-code to implement this ticket
-   When implementation is complete:
-   Press ENTER here to run tests...
-   ```
-3. You open another terminal and run `claude-code`
-4. Claude Code implements the ticket
-5. You press ENTER in the script terminal
-6. Script runs tests automatically
+```
+Ralph Loop Iteration 1:
+  /next-ticket NBHD-002
+    ├─ Phase 2 PAUSE: Review plan? [Y/n]
+    ├─ Phase 3: Verify branch feature/NBHD-002
+    ├─ Phase 4: Test must pass (blocks if fail)
+    ├─ Phase 5: Create PR
+    └─ Phase 6: Checkout develop
+  ↓
+Ralph Loop Iteration 2: Next ticket...
+```
+
+### Mandatory Guardrails (via /next-ticket):
+
+- ✅ **Phase 2 Checkpoint**: Plan must be reviewed before implementation
+- ✅ **Phase 3 Branch Check**: Must verify correct branch before implementing
+- ✅ **Phase 4 Test Block**: Cannot proceed without passing tests
+  - Environment issues: Offers to debug together
+  - Code issues: Blocks, requires fixes
+- ✅ **Phase 5 Verification**: Final check before pushing
+- ✅ **Phase 6 Cleanup**: Automatically returns to develop
 
 ### Why This Design?
 
-- **Preserves context**: Claude Code keeps full conversation history per ticket
-- **Better UX**: You can see requirements before implementing
-- **Safer**: Tests are run automatically but you control implementation
+- **Mandatory quality gates**: /next-ticket enforces best practices
+- **No untested code**: Phase 4 blocks if tests fail
+- **Branch safety**: Phase 3 verifies correct branch
+- **Context preservation**: Claude Code keeps full conversation history per ticket
+- **Better UX**: You can see requirements and review plan before implementation
+- **Safer**: Tests are required to pass; won't push broken code
 - **Flexible**: Works with manual implementation too (no claude-code needed)
 
 ## File Structure
@@ -195,60 +253,113 @@ cat .ralph-loop-logs/ralph-loop-20260129_213000.log
 
 ## Workflow Example
 
-### Session 1: Automatic Continuous Loop
+### Session 1: Using /next-ticket Directly (Recommended)
+
+```bash
+$ /next-ticket NBHD-002
+
+╔════════════════════════════════════════════════════════════════════╗
+║  PHASE 1: SELECT & LOAD TICKET
+╚════════════════════════════════════════════════════════════════════╝
+
+Loading ticket: NBHD-002
+✓ Nbhd Content API
+
+╔════════════════════════════════════════════════════════════════════╗
+║  PHASE 2: PLAN IMPLEMENTATION
+╚════════════════════════════════════════════════════════════════════╝
+
+[Plan details...]
+
+⚠️  MANDATORY CHECKPOINT BEFORE PROCEEDING:
+🛑 STOP HERE - DO NOT PROCEED WITHOUT USER APPROVAL
+
+Actions:
+  1. REVIEW the plan above with the user
+  2. Get explicit approval to continue
+```
+
+You review the plan. Once approved, /next-ticket continues:
+
+```bash
+╔════════════════════════════════════════════════════════════════════╗
+║  PHASE 3: IMPLEMENT CODE CHANGES
+╚════════════════════════════════════════════════════════════════════╝
+
+⚠️  MANDATORY BRANCH CHECK
+Expected branch: feature/NBHD-002
+
+Starting implementation...
+👉 Run claude-code to implement this ticket
+```
+
+You open another terminal:
+```bash
+$ claude-code
+# ... implement NBHD-002 ...
+# ... when done, Ctrl+D to exit ...
+```
+
+Back in /next-ticket terminal:
+
+```bash
+╔════════════════════════════════════════════════════════════════════╗
+║  PHASE 4: TEST AND VERIFY (CRITICAL - CANNOT BE SKIPPED)
+╚════════════════════════════════════════════════════════════════════╝
+
+Running tests for NBHD-002...
+
+===================== test session starts ======================
+...
+======================== 23 passed in 0.15s ========================
+
+✓ All tests passed!
+
+╔════════════════════════════════════════════════════════════════════╗
+║  PHASE 5: PUBLISH PR
+╚════════════════════════════════════════════════════════════════════╝
+
+Creating PR for NBHD-002...
+
+✓ PR #88: https://github.com/benkline/nbhd.city/pull/88
+
+╔════════════════════════════════════════════════════════════════════╗
+║  PHASE 6: CLEANUP & RESET
+╚════════════════════════════════════════════════════════════════════╝
+
+🔄 RETURN TO DEVELOP BRANCH FOR NEXT TICKET:
+1. git checkout develop
+2. git pull origin develop
+3. Verify: develop ✓
+
+✨ Ticket NBHD-002 Complete!
+```
+
+### Session 2: Ralph Loop Continuous (Multiple Tickets)
 
 ```bash
 $ ./scripts/ralph-loop.sh
 
 [INFO] Starting Ralph Loop Automation
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[INFO] Loop iteration: 1
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[INFO] Processing: SSG-015
 
-[INFO] TICKET: SSG-015
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Description: Site Build Trigger API
-- Requirements:
-  - [ ] POST /api/sites/{id}/build - Trigger build
-  - [ ] GET /api/sites/{id}/builds/{job_id} - Get build status
-  ...
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[INFO] Iteration 1: Processing NBHD-002
+/next-ticket NBHD-002
+  [... all 6 phases with mandatory checks ...]
+  ✓ Completed: NBHD-002
+  ✓ PR created
+  ✓ Returned to develop
 
-[INFO] Branch ready: feature/SSG-015
-👉 Run claude-code to implement this ticket
+[INFO] Iteration 2: Processing NBHD-003
+/next-ticket NBHD-003
+  [... all 6 phases ...]
+  ✓ Completed: NBHD-003
 
-When implementation is complete:
-Press ENTER here to run tests...
+[INFO] Iteration 3: Processing NBHD-004
+/next-ticket NBHD-004
+  [... all 6 phases ...]
 ```
 
-At this point, you open another terminal:
-```bash
-$ claude-code
-# ... implement SSG-015 ...
-# ... when done, press Ctrl+D to exit Claude Code ...
-```
-
-Back in the script terminal, you press ENTER:
-
-```bash
-[INFO] Running tests with up to 3 attempts...
-
-[INFO] Test attempt: 1/3
-===================== test session starts ======================
-...
-======================== 12 passed in 0.03s ========================
-
-[✓] All tests passed!
-[✓] Changes committed
-[✓] Branch pushed
-[✓] PR created successfully
-[✓] Completed: SSG-015
-
-Next ticket in 10 seconds...
-```
-
-Script continues to next ticket automatically.
+Ralph Loop continues automatically through all pending tickets.
 
 ## Troubleshooting
 
