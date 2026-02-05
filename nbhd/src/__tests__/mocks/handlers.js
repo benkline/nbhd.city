@@ -50,6 +50,33 @@ export const handlers = [
     });
   }),
 
+  // Neighborhood endpoints
+  http.all('/api/nbhds/:nbhdId', ({ request }) => {
+    if (request.method === 'OPTIONS') {
+      return new HttpResponse(null, {
+        status: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+      });
+    }
+
+    return HttpResponse.json({
+      data: {
+        id: 'nbhd-123',
+        name: 'Tech Neighborhood',
+        description: 'A community for tech enthusiasts',
+        nbhd_did: 'did:plc:abc123',
+        created_by: 'user-123',
+        created_at: '2026-01-01T00:00:00Z',
+        members: [],
+        site_type: 'neighborhood'
+      }
+    });
+  }),
+
   // Neighborhood content endpoints (NBHD-002/004)
   http.get('/api/nbhds/:nbhdId/content/welcome', () => {
     return HttpResponse.json({
