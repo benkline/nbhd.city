@@ -3,6 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NbhdSettingsForm } from '../../components/NbhdSettingsForm';
 
+// Mock the API client
+vi.mock('../../lib/api');
+
 vi.mock('../../services/neighborhoodService', () => ({
   nbhdService: {
     getNbhd: vi.fn(),

@@ -3,6 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WelcomeContentEditor } from '../../components/WelcomeContentEditor';
 
+// Mock the API client
+vi.mock('../../lib/api');
+
 // Mock the content service
 vi.mock('../../services/nbhdContentService', () => ({
   nbhdContentService: {

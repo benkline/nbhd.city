@@ -1,6 +1,26 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+// Setup mocks at module level before any imports
+vi.mock('axios', () => ({
+  default: {
+    create: vi.fn(function() {
+      return {
+        get: vi.fn(),
+        post: vi.fn(),
+        put: vi.fn(),
+        delete: vi.fn(),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() }
+        }
+      };
+    })
+  }
+}));
+
+// Now import after mocking dependencies
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '../../contexts/AuthContext';
 import AdminPage from '../../pages/AdminPage';
