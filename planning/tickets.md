@@ -758,36 +758,45 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 #### NBHD-004: Admin Page UI
 - **Description:** Create admin interface for neighborhood owners to configure welcome page, announcements, and settings
 - **Requirements:**
-  - [ ] Create `AdminPage.jsx` with tab navigation (Welcome, Announcements, Settings, Sites)
-  - [ ] Create `WelcomeContentEditor.jsx` that wraps ContentEditor component for welcome content
-  - [ ] Create `AnnouncementManager.jsx` to create, list, and delete announcements
-  - [ ] Create `NbhdSettingsForm.jsx` for metadata configuration
-  - [ ] Create `SitesTab.jsx` to list and manage sites for this nbhd
-  - [ ] Add admin route `/nbhds/:id/admin` to `App.jsx`
-  - [ ] Add access check (redirect non-owners to public page)
-  - [ ] Add "Admin" button to NeighborhoodDetail (visible only to owner)
-  - [ ] Tab navigation with visual indicators for unsaved changes
-  - [ ] Save functionality with success/error messages
+  - [x] Create `AdminPage.jsx` with tab navigation (Welcome, Announcements, Settings, Sites)
+  - [x] Create `WelcomeContentEditor.jsx` that wraps ContentEditor component for welcome content
+  - [x] Create `AnnouncementManager.jsx` to create, list, and delete announcements
+  - [x] Create `NbhdSettingsForm.jsx` for metadata configuration
+  - [x] Create `SitesTab.jsx` to list and manage sites for this nbhd
+  - [x] Add admin route `/nbhds/:id/admin` to `App.jsx`
+  - [x] Add access check (redirect non-owners to public page)
+  - [x] Add "Admin" button to NeighborhoodDetail (visible only to owner)
+  - [x] Tab navigation with visual indicators for unsaved changes
+  - [x] Save functionality with success/error messages
 - **Acceptance Criteria:**
-  - [ ] Owners can access admin page (non-owners redirected)
-  - [ ] Welcome tab allows editing markdown content
-  - [ ] Announcements tab supports create/list/delete
-  - [ ] Settings tab allows configuring nbhd metadata
-  - [ ] Sites tab shows project sites linked to nbhd
-  - [ ] All changes save to backend
-  - [ ] Error messages display on failures
-  - [ ] Unsaved changes indicator shown
+  - [x] Owners can access admin page (non-owners redirected)
+  - [x] Welcome tab allows editing markdown content
+  - [x] Announcements tab supports create/list/delete
+  - [x] Settings tab allows configuring nbhd metadata
+  - [x] Sites tab shows project sites linked to nbhd
+  - [x] All changes save to backend
+  - [x] Error messages display on failures
+  - [x] Unsaved changes indicator shown
 - **Type:** Frontend
 - **Estimate:** L
+- **Status:** COMPLETED
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - Frontend Component Architecture section
 - **Files:**
   - `nbhd/src/pages/AdminPage.jsx` (new)
+  - `nbhd/src/pages/AdminPage.module.css` (new)
   - `nbhd/src/components/WelcomeContentEditor.jsx` (new)
+  - `nbhd/src/components/WelcomeContentEditor.module.css` (new)
   - `nbhd/src/components/AnnouncementManager.jsx` (new)
+  - `nbhd/src/components/AnnouncementManager.module.css` (new)
   - `nbhd/src/components/NbhdSettingsForm.jsx` (new)
+  - `nbhd/src/components/NbhdSettingsForm.module.css` (new)
   - `nbhd/src/components/SitesTab.jsx` (new)
-  - `nbhd/src/App.jsx` - Add route and admin button
-  - `nbhd/src/components/NeighborhoodDetail.jsx` - Add admin button
+  - `nbhd/src/components/SitesTab.module.css` (new)
+  - `nbhd/src/services/nbhdContentService.js` (new)
+  - `nbhd/src/App.jsx` - Added route
+  - `nbhd/src/pages/NeighborhoodDetail.jsx` - Added admin button
+  - `nbhd/src/__tests__/mocks/handlers.js` - Added neighborhood content API mocks
+  - Test files created for all components
 
 #### NBHD-005: CMS View for AT Protocol Data
 - **Description:** Create CMS view showing all AT Protocol records for the neighborhood

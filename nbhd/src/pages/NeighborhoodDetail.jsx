@@ -131,6 +131,14 @@ export default function NbhdDetail() {
 
         {isAuthenticated && (
           <div className={styles.actionArea}>
+            {nbhd.created_by === user?.user_id && (
+              <button
+                onClick={() => navigate(`/nbhds/${id}/admin`)}
+                className={styles.adminButton}
+              >
+                🔧 Admin Dashboard
+              </button>
+            )}
             {isMember() ? (
               <button
                 onClick={handleLeave}

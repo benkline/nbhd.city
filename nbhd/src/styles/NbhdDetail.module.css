@@ -61,7 +61,8 @@
 }
 
 .joinButton,
-.leaveButton {
+.leaveButton,
+.adminButton {
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
@@ -83,6 +84,17 @@
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
+.adminButton {
+  background: #28a745;
+  color: white;
+}
+
+.adminButton:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
 .leaveButton {
   background: #f0f0f0;
   color: #666;
@@ -94,7 +106,8 @@
 }
 
 .joinButton:disabled,
-.leaveButton:disabled {
+.leaveButton:disabled,
+.adminButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
