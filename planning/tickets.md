@@ -1,6 +1,6 @@
 # nbhd.city Development Tickets
 
-**Last Updated:** 2026-02-01 (SSG-018 Completed)
+**Last Updated:** 2026-02-04 (NBHD-001 Completed)
 **Phases:** 1-9 (Sequential phases based on execution order and dependencies)
 **Priority:** High
 
@@ -678,15 +678,15 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 #### NBHD-001: Nbhd DID & Data Model Enhancement
 - **Description:** Add DID generation and site type distinction to data model 
 - **Requirements:**
-  - [ ] Add `nbhd_did` field to neighborhood records in DynamoDB
-  - [ ] Add `site_type` field to sites ("personal" | "project")
-  - [ ] Update models in `api/models.py` with new fields and validation
+  - [x] Add `nbhd_did` field to neighborhood records in DynamoDB
+  - [x] Add `site_type` field to sites ("personal" | "project")
+  - [x] Update models in `api/models.py` with new fields and validation
 - **Acceptance Criteria:**
-  - [ ] New neighborhoods automatically get a DID on creation
-  - [ ] Existing neighborhoods can be migrated with script
-  - [ ] Sites can be created with site_type="personal" or "project"
-  - [ ] Project sites require nbhd_id selection
-  - [ ] DID format is consistent and valid
+  - [x] New neighborhoods automatically get a DID on creation
+  - [x] Existing neighborhoods can be migrated with script
+  - [x] Sites can be created with site_type="personal" or "project"
+  - [x] Project sites require nbhd_id selection
+  - [x] DID format is consistent and valid
 - **Type:** Backend
 - **Estimate:** M
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - Data Model section and [SITE-TYPES.md](./SITE-TYPES.md) - Data Model section
