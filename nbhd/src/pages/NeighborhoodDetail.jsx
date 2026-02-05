@@ -129,6 +129,35 @@ export default function NbhdDetail() {
           </p>
         </div>
 
+        {isAuthenticated && (
+          <div className={styles.actionArea}>
+            {nbhd.created_by === user?.user_id && (
+              <button
+                onClick={() => navigate(`/nbhds/${id}/admin`)}
+                className={styles.adminButton}
+              >
+                🔧 Admin Dashboard
+              </button>
+            )}
+            {isMember() ? (
+              <button
+                onClick={handleLeave}
+                disabled={actionLoading}
+                className={styles.leaveButton}
+              >
+                {actionLoading ? 'Leaving...' : 'Leave Nbhd'}
+              </button>
+            ) : (
+              <button
+                onClick={handleJoin}
+                disabled={actionLoading}
+                className={styles.joinButton}
+              >
+                {actionLoading ? 'Joining...' : 'Join Nbhd'}
+              </button>
+            )}
+          </div>
+        )}
         <div className={styles.actionArea}>
           {isAuthenticated && (
             <>
