@@ -730,30 +730,36 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 #### NBHD-003: Welcome Page UI
 - **Description:** Create public-facing welcome page for neighborhoods with setup instructions
 - **Requirements:**
-  - [ ] Create `WelcomePage.jsx` component that shows markdown welcome content
-  - [ ] Create `DefaultWelcomeInstructions.jsx` component showing setup instructions when no content exists
-  - [ ] Install markdown rendering library (or create `MarkdownRenderer.jsx`)
-  - [ ] Add route `/nbhds/:id/welcome` to `App.jsx`
-  - [ ] Create `nbhdContentService.js` with API client functions
-  - [ ] Link from NeighborhoodDetail page
-  - [ ] Mobile-responsive layout
-  - [ ] Handle loading and error states
+  - [x] Create `WelcomePage.jsx` component that shows markdown welcome content
+  - [x] Create `DefaultWelcomeInstructions.jsx` component showing setup instructions when no content exists
+  - [x] Install markdown rendering library (or create `MarkdownRenderer.jsx`)
+  - [x] Add route `/nbhds/:id/welcome` to `App.jsx`
+  - [x] Create `nbhdContentService.js` with API client functions
+  - [x] Link from NeighborhoodDetail page
+  - [x] Mobile-responsive layout
+  - [x] Handle loading and error states
 - **Acceptance Criteria:**
-  - [ ] Unauthenticated users can view welcome page
-  - [ ] With no content, shows setup instructions
-  - [ ] With content, shows rendered markdown
-  - [ ] Markdown renders correctly (headers, links, code blocks)
-  - [ ] Mobile layout works
-  - [ ] Loading state displays while fetching
+  - [x] Unauthenticated users can view welcome page
+  - [x] With no content, shows setup instructions
+  - [x] With content, shows rendered markdown
+  - [x] Markdown renders correctly (headers, links, code blocks)
+  - [x] Mobile layout works
+  - [x] Loading state displays while fetching
 - **Type:** Frontend
 - **Estimate:** S
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - Welcome Page Behavior section
+- **Status:** COMPLETED
 - **Files:**
   - `nbhd/src/pages/WelcomePage.jsx` (new)
   - `nbhd/src/components/DefaultWelcomeInstructions.jsx` (new)
-  - `nbhd/src/components/MarkdownRenderer.jsx` (new, or use library)
+  - `nbhd/src/components/MarkdownRenderer.jsx` (new)
+  - `nbhd/src/components/MarkdownRenderer.module.css` (new)
+  - `nbhd/src/components/DefaultWelcomeInstructions.module.css` (new)
   - `nbhd/src/services/nbhdContentService.js` (new)
+  - `nbhd/src/styles/WelcomePage.module.css` (new)
+  - `nbhd/src/__tests__/pages/WelcomePage.test.jsx` (new)
   - `nbhd/src/App.jsx` - Add route
+  - `nbhd/src/pages/NeighborhoodDetail.jsx` - Add link
 
 #### NBHD-004: Admin Page UI
 - **Description:** Create admin interface for neighborhood owners to configure welcome page, announcements, and settings

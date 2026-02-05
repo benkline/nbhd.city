@@ -7,6 +7,8 @@ import styles from './MarkdownRenderer.module.css';
 /**
  * MarkdownRenderer - Safely renders markdown content as HTML
  * Uses marked for parsing and DOMPurify for sanitization
+ *
+ * @param {string} markdown - Markdown content to render
  */
 export default function MarkdownRenderer({ markdown }) {
   const [html, setHtml] = useState('');
