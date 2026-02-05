@@ -6,6 +6,7 @@ import AuthSuccess from './pages/AuthSuccess';
 import Dashboard from './pages/Dashboard';
 import Nbhds from './pages/Neighborhoods';
 import NbhdDetail from './pages/NeighborhoodDetail';
+import WelcomePage from './pages/WelcomePage';
 import MyNbhds from './pages/MyNeighborhoods';
 import UserProfile from './pages/UserProfile';
 import './App.css';
@@ -21,6 +22,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/nbhds" element={<Nbhds />} />
           <Route path="/nbhds/:id" element={<NbhdDetail />} />
+          <Route path="/nbhds/:id/welcome" element={<WelcomePage />} />
           <Route path="/my-nbhds" element={<MyNbhds />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>

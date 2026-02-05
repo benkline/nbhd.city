@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { nbhdService } from '../services/neighborhoodService';
 import { userService } from '../services/userService';
@@ -129,27 +129,32 @@ export default function NbhdDetail() {
           </p>
         </div>
 
-        {isAuthenticated && (
-          <div className={styles.actionArea}>
-            {isMember() ? (
-              <button
-                onClick={handleLeave}
-                disabled={actionLoading}
-                className={styles.leaveButton}
-              >
-                {actionLoading ? 'Leaving...' : 'Leave Nbhd'}
-              </button>
-            ) : (
-              <button
-                onClick={handleJoin}
-                disabled={actionLoading}
-                className={styles.joinButton}
-              >
-                {actionLoading ? 'Joining...' : 'Join Nbhd'}
-              </button>
-            )}
-          </div>
-        )}
+        <div className={styles.actionArea}>
+          {isAuthenticated && (
+            <>
+              {isMember() ? (
+                <button
+                  onClick={handleLeave}
+                  disabled={actionLoading}
+                  className={styles.leaveButton}
+                >
+                  {actionLoading ? 'Leaving...' : 'Leave Nbhd'}
+                </button>
+              ) : (
+                <button
+                  onClick={handleJoin}
+                  disabled={actionLoading}
+                  className={styles.joinButton}
+                >
+                  {actionLoading ? 'Joining...' : 'Join Nbhd'}
+                </button>
+              )}
+            </>
+          )}
+          <Link to={`/nbhds/${id}/welcome`} className={styles.viewWelcomeButton}>
+            📖 View Welcome Page
+          </Link>
+        </div>
       </div>
 
       {nbhd.description && (
