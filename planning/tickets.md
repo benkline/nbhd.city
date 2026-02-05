@@ -1,6 +1,6 @@
 # nbhd.city Development Tickets
 
-**Last Updated:** 2026-02-01 (SSG-018 Completed)
+**Last Updated:** 2026-02-04 (NBHD-001 & NBHD-002 Completed)
 **Phases:** 1-9 (Sequential phases based on execution order and dependencies)
 **Priority:** High
 
@@ -678,15 +678,15 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 #### NBHD-001: Nbhd DID & Data Model Enhancement
 - **Description:** Add DID generation and site type distinction to data model 
 - **Requirements:**
-  - [ ] Add `nbhd_did` field to neighborhood records in DynamoDB
-  - [ ] Add `site_type` field to sites ("personal" | "project")
-  - [ ] Update models in `api/models.py` with new fields and validation
+  - [x] Add `nbhd_did` field to neighborhood records in DynamoDB
+  - [x] Add `site_type` field to sites ("personal" | "project")
+  - [x] Update models in `api/models.py` with new fields and validation
 - **Acceptance Criteria:**
-  - [ ] New neighborhoods automatically get a DID on creation
-  - [ ] Existing neighborhoods can be migrated with script
-  - [ ] Sites can be created with site_type="personal" or "project"
-  - [ ] Project sites require nbhd_id selection
-  - [ ] DID format is consistent and valid
+  - [x] New neighborhoods automatically get a DID on creation
+  - [x] Existing neighborhoods can be migrated with script
+  - [x] Sites can be created with site_type="personal" or "project"
+  - [x] Project sites require nbhd_id selection
+  - [x] DID format is consistent and valid
 - **Type:** Backend
 - **Estimate:** M
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - Data Model section and [SITE-TYPES.md](./SITE-TYPES.md) - Data Model section
@@ -699,23 +699,23 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 #### NBHD-002: Nbhd Content API
 - **Description:** Create API router for neighborhood-owned AT Protocol content
 - **Requirements:**
-  - [ ] Create `api/nbhd_content.py` router (new file)
-  - [ ] Implement `require_nbhd_admin()` middleware that checks user created/owns nbhd
-  - [ ] `POST /api/nbhds/{id}/content/welcome` - Create/update welcome content (admin only)
-  - [ ] `GET /api/nbhds/{id}/content/welcome` - Get welcome content (public)
-  - [ ] `POST /api/nbhds/{id}/content/announcements` - Create announcement (admin only)
-  - [ ] `GET /api/nbhds/{id}/content/announcements` - List announcements (paginated)
-  - [ ] `DELETE /api/nbhds/{id}/content/announcements/{rkey}` - Delete announcement (admin only)
-  - [ ] `GET /api/nbhds/{id}/content/cms` - CMS view with all content (admin only)
-  - [ ] Store content as AT Protocol records with CID/rkey generation
-  - [ ] Register router in `api/main.py`
+  - [x] Create `api/nbhd_content.py` router (new file)
+  - [x] Implement `verify_nbhd_admin()` helper that checks user created/owns nbhd
+  - [x] `POST /api/nbhds/{id}/content/welcome` - Create/update welcome content (admin only)
+  - [x] `GET /api/nbhds/{id}/content/welcome` - Get welcome content (public)
+  - [x] `POST /api/nbhds/{id}/content/announcements` - Create announcement (admin only)
+  - [x] `GET /api/nbhds/{id}/content/announcements` - List announcements (paginated)
+  - [x] `DELETE /api/nbhds/{id}/content/announcements/{rkey}` - Delete announcement (admin only)
+  - [x] `GET /api/nbhds/{id}/content/cms` - CMS view with all content (admin only)
+  - [x] Store content as AT Protocol records with CID/rkey generation
+  - [x] Register router in `api/main.py`
 - **Acceptance Criteria:**
-  - [ ] Welcome content endpoints work (create, retrieve, delete)
-  - [ ] Announcements CRUD works with pagination
-  - [ ] Non-admin users get 403 on POST/DELETE endpoints
-  - [ ] Content stored as AT Protocol records (app.nbhd.welcome, app.nbhd.announcement)
-  - [ ] CMS endpoint returns aggregated view of all content
-  - [ ] Proper error handling (404 for missing nbhd, 403 for auth)
+  - [x] Welcome content endpoints work (create, retrieve, delete)
+  - [x] Announcements CRUD works with pagination
+  - [x] Non-admin users get 403 on POST/DELETE endpoints
+  - [x] Content stored as AT Protocol records (app.nbhd.welcome, app.nbhd.announcement)
+  - [x] CMS endpoint returns aggregated view of all content
+  - [x] Proper error handling (404 for missing nbhd, 403 for auth)
 - **Type:** Backend
 - **Estimate:** M
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - API Routes, Admin Access Control, and AT Protocol Records sections
@@ -1272,8 +1272,8 @@ Core platform foundation
 **Depends on:** Phase 5 (Content Management) and Phase 6 (Build Pipeline)
 
 Backend Foundation:
-- [ ] NBHD-001 (Nbhd DID & Data Model Enhancement)
-- [ ] NBHD-002 (Nbhd Content API)
+- [x] NBHD-001 (Nbhd DID & Data Model Enhancement)
+- [x] NBHD-002 (Nbhd Content API)
 
 Frontend - Core CMS:
 - [ ] NBHD-003 (Welcome Page UI)
