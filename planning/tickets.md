@@ -719,6 +719,7 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 - **Type:** Backend
 - **Estimate:** M
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - API Routes, Admin Access Control, and AT Protocol Records sections
+- **Status:** COMPLETED
 - **Files:**
   - `api/nbhd_content.py` (new) - Main router
   - `api/main.py` - Register router
