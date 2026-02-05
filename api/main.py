@@ -21,6 +21,7 @@ from nbhd import router as nbhds_router
 from users import router as users_router
 from templates import router as templates_router
 from sites import router as sites_router
+from nbhd_content import router as nbhd_content_router
 
 
 class TestLoginRequest(BaseModel):
@@ -43,6 +44,7 @@ app.include_router(nbhds_router, tags=["nbhds"])
 app.include_router(users_router, prefix="/api/users", tags=["users"])
 app.include_router(templates_router, tags=["templates"])
 app.include_router(sites_router, tags=["sites"])
+app.include_router(nbhd_content_router, tags=["nbhd-content"])
 
 # Store OAuth states (in production, use a database or Redis)
 oauth_states = {}

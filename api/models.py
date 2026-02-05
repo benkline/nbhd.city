@@ -297,3 +297,27 @@ class BuildJobListResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# Neighborhood Content Models
+
+class WelcomeContentCreate(BaseModel):
+    """Schema for creating/updating welcome content."""
+
+    title: str = Field(..., min_length=1, max_length=200)
+    content: str = Field(..., min_length=1, max_length=10000)
+
+    class Config:
+        from_attributes = True
+
+
+class AnnouncementCreate(BaseModel):
+    """Schema for creating announcements."""
+
+    title: str = Field(..., min_length=1, max_length=200)
+    content: str = Field(..., min_length=1, max_length=5000)
+    priority: Optional[Literal["low", "normal", "high"]] = "normal"
+    pinned: Optional[bool] = False
+
+    class Config:
+        from_attributes = True
