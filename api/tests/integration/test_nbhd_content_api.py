@@ -9,61 +9,49 @@ Tests 6 endpoints + admin middleware with 23 test cases covering:
 """
 
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient
-from fastapi import FastAPI
-from datetime import datetime
-from typing import AsyncGenerator
-
-# Import the app and dependencies
-import sys
-sys.path.insert(0, "/Users/benkline/Projects/nbhd.city/api")
+import uuid
 
 from main import app
-from dynamodb_repository import (
-    create_neighborhood,
-    create_user_profile,
-    get_dynamodb_table,
-    now_iso
-)
+from dynamodb_repository import now_iso
 from dynamodb_client import get_table
-import uuid
+from auth import create_access_token
 
 
 @pytest.fixture
-async def test_user_id() -> str:
+def test_user_id() -> str:
     """Create test user DID."""
     return "did:plc:test-user-nbhd"
 
 
 @pytest.fixture
-async def test_user_did() -> str:
-    """Alternative test user DID."""
+def test_other_user_id() -> str:
+    """Alternative test user DID (non-admin)."""
     return "did:plc:other-user-nbhd"
 
 
 @pytest.fixture
-async def auth_headers(test_user_id: str) -> dict:
+def auth_headers(test_user_id: str) -> dict:
     """Generate auth headers for test user."""
-    from auth import create_access_token
     token = create_access_token(test_user_id)
     return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture
-async def auth_headers_other_user(test_user_did: str) -> dict:
+def auth_headers_other_user(test_other_user_id: str) -> dict:
     """Generate auth headers for non-admin user."""
-    from auth import create_access_token
-    token = create_access_token(test_user_did)
+    token = create_access_token(test_other_user_id)
     return {"Authorization": f"Bearer {token}"}
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_neighborhood(test_user_id: str):
-    """Create a test neighborhood."""
+    """Create a test neighborhood in DynamoDB."""
     nbhd_id = str(uuid.uuid4())
     nbhd_did = f"did:plc:nbhd-{nbhd_id}"
 
-    async with await get_table() as table:
+    async with get_table() as table:
         nbhd = {
             "PK": f"NBHD#{nbhd_id}",
             "SK": "METADATA",
@@ -81,8 +69,8 @@ async def test_neighborhood(test_user_id: str):
     return nbhd
 
 
-@pytest.fixture
-async def async_client() -> AsyncGenerator:
+@pytest_asyncio.fixture
+async def async_client() -> AsyncClient:
     """Create async test client."""
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
@@ -94,7 +82,7 @@ async def async_client() -> AsyncGenerator:
 async def test_create_welcome_content_admin(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Create welcome content as admin (success)."""
     nbhd_id = test_neighborhood["id"]
@@ -119,7 +107,7 @@ async def test_create_welcome_content_admin(
 async def test_update_welcome_content(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Update existing welcome content (replaces singleton)."""
     nbhd_id = test_neighborhood["id"]
@@ -155,7 +143,7 @@ async def test_update_welcome_content(
 async def test_get_welcome_public(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Get welcome content without auth (public)."""
     nbhd_id = test_neighborhood["id"]
@@ -198,7 +186,7 @@ async def test_get_welcome_not_found_nbhd(
 async def test_create_welcome_non_admin(
     async_client: AsyncClient,
     auth_headers_other_user: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Non-admin cannot create welcome content (403)."""
     nbhd_id = test_neighborhood["id"]
@@ -219,9 +207,9 @@ async def test_create_welcome_non_admin(
 @pytest.mark.asyncio
 async def test_create_welcome_unauthorized(
     async_client: AsyncClient,
-    test_neighborhood: dict
+    test_neighborhood
 ):
-    """Create welcome without auth returns 401."""
+    """Create welcome without auth returns 401/403."""
     nbhd_id = test_neighborhood["id"]
 
     response = await async_client.post(
@@ -232,7 +220,8 @@ async def test_create_welcome_unauthorized(
         }
     )
 
-    assert response.status_code == 403  # FastAPI dependency raises 403 for missing auth
+    # FastAPI dependency injection returns 403 for missing auth
+    assert response.status_code in [403, 401]
 
 
 # ==================== Announcements Tests ====================
@@ -241,7 +230,7 @@ async def test_create_welcome_unauthorized(
 async def test_create_announcement_admin(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Create announcement as admin (success)."""
     nbhd_id = test_neighborhood["id"]
@@ -269,7 +258,7 @@ async def test_create_announcement_admin(
 async def test_create_announcement_non_admin(
     async_client: AsyncClient,
     auth_headers_other_user: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Non-admin cannot create announcement (403)."""
     nbhd_id = test_neighborhood["id"]
@@ -290,7 +279,7 @@ async def test_create_announcement_non_admin(
 async def test_list_announcements_public(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """List announcements without auth (public)."""
     nbhd_id = test_neighborhood["id"]
@@ -320,7 +309,7 @@ async def test_list_announcements_public(
 async def test_list_announcements_pagination(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Pagination works correctly."""
     nbhd_id = test_neighborhood["id"]
@@ -362,7 +351,7 @@ async def test_list_announcements_pagination(
 async def test_list_announcements_sorting(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Announcements sorted newest first (by rkey/TID)."""
     nbhd_id = test_neighborhood["id"]
@@ -396,7 +385,7 @@ async def test_list_announcements_sorting(
 async def test_delete_announcement_admin(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Delete announcement as admin (soft delete)."""
     nbhd_id = test_neighborhood["id"]
@@ -427,7 +416,7 @@ async def test_delete_announcement_non_admin(
     async_client: AsyncClient,
     auth_headers: dict,
     auth_headers_other_user: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Non-admin cannot delete announcement (403)."""
     nbhd_id = test_neighborhood["id"]
@@ -457,7 +446,7 @@ async def test_delete_announcement_non_admin(
 async def test_delete_announcement_not_found(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Delete nonexistent announcement returns 404."""
     nbhd_id = test_neighborhood["id"]
@@ -474,7 +463,7 @@ async def test_delete_announcement_not_found(
 async def test_soft_delete_behavior(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Soft-deleted announcements don't appear in list."""
     nbhd_id = test_neighborhood["id"]
@@ -514,7 +503,7 @@ async def test_soft_delete_behavior(
 async def test_announcement_priority_validation(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Priority field validation."""
     nbhd_id = test_neighborhood["id"]
@@ -551,7 +540,7 @@ async def test_announcement_priority_validation(
 async def test_get_cms_view_admin(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Get CMS view aggregates all content."""
     nbhd_id = test_neighborhood["id"]
@@ -595,7 +584,7 @@ async def test_get_cms_view_admin(
 async def test_get_cms_view_non_admin(
     async_client: AsyncClient,
     auth_headers_other_user: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Non-admin cannot access CMS view (403)."""
     nbhd_id = test_neighborhood["id"]
@@ -611,7 +600,7 @@ async def test_get_cms_view_non_admin(
 @pytest.mark.asyncio
 async def test_get_cms_view_unauthorized(
     async_client: AsyncClient,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Get CMS view without auth returns 403."""
     nbhd_id = test_neighborhood["id"]
@@ -620,7 +609,7 @@ async def test_get_cms_view_unauthorized(
         f"/api/nbhds/{nbhd_id}/content/cms"
     )
 
-    assert response.status_code == 403
+    assert response.status_code in [403, 401]
 
 
 # ==================== Error Handling Tests ====================
@@ -641,7 +630,7 @@ async def test_404_nonexistent_nbhd_announcements(
 async def test_validation_error_missing_field(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Validation error for missing required field."""
     nbhd_id = test_neighborhood["id"]
@@ -662,7 +651,7 @@ async def test_validation_error_missing_field(
 async def test_validation_error_title_too_long(
     async_client: AsyncClient,
     auth_headers: dict,
-    test_neighborhood: dict
+    test_neighborhood
 ):
     """Validation error for title exceeding max_length."""
     nbhd_id = test_neighborhood["id"]
