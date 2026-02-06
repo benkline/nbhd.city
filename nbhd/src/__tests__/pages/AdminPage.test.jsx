@@ -87,7 +87,7 @@ describe('AdminPage', () => {
 
       await waitFor(() => {
         const welcomeTab = screen.getByRole('button', { name: /welcome/i });
-        expect(welcomeTab).toHaveClass('tabActive');
+        expect(welcomeTab.className).toMatch(/_tabActive/);
       });
     });
 
@@ -99,7 +99,7 @@ describe('AdminPage', () => {
       await user.click(announcementsTab);
 
       await waitFor(() => {
-        expect(announcementsTab).toHaveClass('tabActive');
+        expect(announcementsTab.className).toMatch(/_tabActive/);
       });
     });
   });

@@ -50,19 +50,8 @@ export const handlers = [
     });
   }),
 
-  // Neighborhood endpoints
-  http.all('/api/nbhds/:nbhdId', ({ request }) => {
-    if (request.method === 'OPTIONS') {
-      return new HttpResponse(null, {
-        status: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
-      });
-    }
-
+  // Neighborhood endpoints - Using absolute URLs for MSW to match properly
+  http.get('http://localhost:8000/api/nbhds/:nbhdId', () => {
     return HttpResponse.json({
       data: {
         id: 'nbhd-123',
@@ -78,7 +67,7 @@ export const handlers = [
   }),
 
   // Neighborhood content endpoints (NBHD-002/004)
-  http.get('/api/nbhds/:nbhdId/content/welcome', () => {
+  http.get('http://localhost:8000/api/nbhds/:nbhdId/content/welcome', () => {
     return HttpResponse.json({
       data: {
         title: 'Welcome to Our Community',
@@ -88,7 +77,7 @@ export const handlers = [
     });
   }),
 
-  http.post('/api/nbhds/:nbhdId/content/welcome', () => {
+  http.post('http://localhost:8000/api/nbhds/:nbhdId/content/welcome', () => {
     return HttpResponse.json(
       {
         data: {
@@ -102,7 +91,7 @@ export const handlers = [
     );
   }),
 
-  http.get('/api/nbhds/:nbhdId/content/announcements', () => {
+  http.get('http://localhost:8000/api/nbhds/:nbhdId/content/announcements', () => {
     return HttpResponse.json({
       data: [
         {
@@ -124,7 +113,7 @@ export const handlers = [
     });
   }),
 
-  http.post('/api/nbhds/:nbhdId/content/announcements', () => {
+  http.post('http://localhost:8000/api/nbhds/:nbhdId/content/announcements', () => {
     return HttpResponse.json(
       {
         data: {
@@ -138,11 +127,11 @@ export const handlers = [
     );
   }),
 
-  http.delete('/api/nbhds/:nbhdId/content/announcements/:rkey', () => {
+  http.delete('http://localhost:8000/api/nbhds/:nbhdId/content/announcements/:rkey', () => {
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.get('/api/nbhds/:nbhdId/content/cms', () => {
+  http.get('http://localhost:8000/api/nbhds/:nbhdId/content/cms', () => {
     return HttpResponse.json({
       data: {
         nbhd_id: 'nbhd-123',
