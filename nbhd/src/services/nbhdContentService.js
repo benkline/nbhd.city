@@ -7,9 +7,9 @@ import api from '../lib/api';
 
 export const nbhdContentService = {
   /**
-   * Get welcome content for a neighborhood
+   * Get welcome content for a neighborhood (public endpoint)
    * @param {string} nbhdId - Neighborhood ID
-   * @returns {Promise} Welcome content response
+   * @returns {Promise<Object>} Welcome content data
    */
   async getWelcome(nbhdId) {
     const response = await api.get(`/api/nbhds/${nbhdId}/content/welcome`);
@@ -44,7 +44,7 @@ export const nbhdContentService = {
   /**
    * Create a new announcement
    * @param {string} nbhdId - Neighborhood ID
-   * @param {object} data - Announcement data { title, content, priority?, pinned? }
+   * @param {object} data - Announcement data { title, content, priority?, expires_at? }
    * @returns {Promise} Response with created announcement
    */
   async createAnnouncement(nbhdId, data) {
@@ -63,7 +63,7 @@ export const nbhdContentService = {
   },
 
   /**
-   * Get CMS view with all neighborhood content
+   * Get CMS view with all neighborhood content (admin only)
    * @param {string} nbhdId - Neighborhood ID
    * @returns {Promise} CMS view with welcome, announcements, sites, metadata
    */
