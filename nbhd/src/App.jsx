@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Nbhds from './pages/Neighborhoods';
 import NbhdDetail from './pages/NeighborhoodDetail';
 import AdminPage from './pages/AdminPage';
+import CMSView from './pages/CMSView';
 import WelcomePage from './pages/WelcomePage';
 import MyNbhds from './pages/MyNeighborhoods';
 import UserProfile from './pages/UserProfile';
@@ -24,6 +25,7 @@ function App() {
           <Route path="/nbhds" element={<Nbhds />} />
           <Route path="/nbhds/:id" element={<NbhdDetail />} />
           <Route path="/nbhds/:id/admin" element={<AdminPage />} />
+          <Route path="/nbhds/:id/cms" element={<CMSView />} />
           <Route path="/nbhds/:id/welcome" element={<WelcomePage />} />
           <Route path="/my-nbhds" element={<MyNbhds />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

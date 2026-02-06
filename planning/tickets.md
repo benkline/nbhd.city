@@ -807,24 +807,24 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 #### NBHD-005: CMS View for AT Protocol Data
 - **Description:** Create CMS view showing all AT Protocol records for the neighborhood
 - **Requirements:**
-  - [ ] Create `CMSView.jsx` page (admin only)
-  - [ ] Create `ContentRecordsList.jsx` component for displaying records
-  - [ ] Create `ATProtocolInspector.jsx` component showing CID, rkey, URI details
-  - [ ] Display: welcome content, announcements, member sites, blog posts
-  - [ ] Add filters: record type (welcome, announcement, blog), date range, author
-  - [ ] Add search by content text
-  - [ ] Show record metadata: CID, created_at, modified_at
-  - [ ] Add route `/nbhds/:id/cms` to `App.jsx`
-  - [ ] Link from AdminPage
-  - [ ] Pagination for large record lists
+  - [x] Create `CMSView.jsx` page (admin only)
+  - [x] Create `ContentRecordsList.jsx` component for displaying records
+  - [x] Create `ATProtocolInspector.jsx` component showing CID, rkey, URI details
+  - [x] Display: welcome content, announcements, member sites, blog posts
+  - [x] Add filters: record type (welcome, announcement, blog), date range, author
+  - [x] Add search by content text
+  - [x] Show record metadata: CID, created_at, modified_at
+  - [x] Add route `/nbhds/:id/cms` to `App.jsx`
+  - [x] Link from AdminPage
+  - [x] Pagination for large record lists
 - **Acceptance Criteria:**
-  - [ ] Only admins can view CMS page (403 for non-admins)
-  - [ ] All AT Protocol records displayed with metadata
-  - [ ] Filters work correctly
-  - [ ] Search functionality works
-  - [ ] CID/rkey/URI information shown for each record
-  - [ ] Pagination works with large datasets
-  - [ ] Mobile responsive layout
+  - [x] Only admins can view CMS page (403 for non-admins)
+  - [x] All AT Protocol records displayed with metadata
+  - [x] Filters work correctly
+  - [x] Search functionality works
+  - [x] CID/rkey/URI information shown for each record
+  - [x] Pagination works with large datasets
+  - [x] Mobile responsive layout
 - **Type:** Frontend
 - **Estimate:** M
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - CMS View Response Format section

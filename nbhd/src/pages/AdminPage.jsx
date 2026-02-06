@@ -6,6 +6,7 @@ import { WelcomeContentEditor } from '../components/WelcomeContentEditor';
 import { AnnouncementManager } from '../components/AnnouncementManager';
 import { NbhdSettingsForm } from '../components/NbhdSettingsForm';
 import { SitesTab } from '../components/SitesTab';
+import CMSView from './CMSView';
 import styles from './AdminPage.module.css';
 
 export default function AdminPage() {
@@ -148,6 +149,13 @@ export default function AdminPage() {
               <span className={styles.unsavedIndicator} title="Unsaved changes" />
             )}
           </button>
+
+          <button
+            className={`${styles.tabButton} ${activeTab === 'cms' ? styles.tabActive : ''}`}
+            onClick={() => handleTabClick('cms')}
+          >
+            CMS View
+          </button>
         </div>
 
         <div className={styles.tabContent}>
@@ -197,6 +205,16 @@ export default function AdminPage() {
                 Manage project sites for this neighborhood
               </p>
               <SitesTab nbhdId={id} />
+            </div>
+          )}
+
+          {activeTab === 'cms' && (
+            <div className={styles.tabPane}>
+              <h2>CMS View</h2>
+              <p className={styles.tabDescription}>
+                View all AT Protocol records for this neighborhood
+              </p>
+              <CMSView />
             </div>
           )}
         </div>
