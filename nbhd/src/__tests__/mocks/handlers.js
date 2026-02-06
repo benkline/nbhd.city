@@ -50,8 +50,24 @@ export const handlers = [
     });
   }),
 
+  // Neighborhood endpoints - Using absolute URLs for MSW to match properly
+  http.get('http://localhost:8000/api/nbhds/:nbhdId', () => {
+    return HttpResponse.json({
+      data: {
+        id: 'nbhd-123',
+        name: 'Tech Neighborhood',
+        description: 'A community for tech enthusiasts',
+        nbhd_did: 'did:plc:abc123',
+        created_by: 'user-123',
+        created_at: '2026-01-01T00:00:00Z',
+        members: [],
+        site_type: 'neighborhood'
+      }
+    });
+  }),
+
   // Neighborhood content endpoints (NBHD-002/004)
-  http.get('/api/nbhds/:nbhdId/content/welcome', () => {
+  http.get('http://localhost:8000/api/nbhds/:nbhdId/content/welcome', () => {
     return HttpResponse.json({
       data: {
         title: 'Welcome to Our Community',
@@ -61,7 +77,7 @@ export const handlers = [
     });
   }),
 
-  http.post('/api/nbhds/:nbhdId/content/welcome', () => {
+  http.post('http://localhost:8000/api/nbhds/:nbhdId/content/welcome', () => {
     return HttpResponse.json(
       {
         data: {
@@ -75,7 +91,7 @@ export const handlers = [
     );
   }),
 
-  http.get('/api/nbhds/:nbhdId/content/announcements', () => {
+  http.get('http://localhost:8000/api/nbhds/:nbhdId/content/announcements', () => {
     return HttpResponse.json({
       data: [
         {
@@ -97,7 +113,7 @@ export const handlers = [
     });
   }),
 
-  http.post('/api/nbhds/:nbhdId/content/announcements', () => {
+  http.post('http://localhost:8000/api/nbhds/:nbhdId/content/announcements', () => {
     return HttpResponse.json(
       {
         data: {
@@ -111,11 +127,11 @@ export const handlers = [
     );
   }),
 
-  http.delete('/api/nbhds/:nbhdId/content/announcements/:rkey', () => {
+  http.delete('http://localhost:8000/api/nbhds/:nbhdId/content/announcements/:rkey', () => {
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.get('/api/nbhds/:nbhdId/content/cms', () => {
+  http.get('http://localhost:8000/api/nbhds/:nbhdId/content/cms', () => {
     return HttpResponse.json({
       data: {
         nbhd_id: 'nbhd-123',
