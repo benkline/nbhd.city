@@ -8,7 +8,10 @@ resource "aws_cloudfront_cache_policy" "frontend_api" {
 
   parameters_in_cache_key_and_forwarded_to_origin {
     headers_config {
-      header_behavior = "allViewer"
+      header_behavior = "whitelist"
+      headers {
+        items = ["Host", "Authorization"]
+      }
     }
 
     query_strings_config {
@@ -18,24 +21,6 @@ resource "aws_cloudfront_cache_policy" "frontend_api" {
     cookies_config {
       cookie_behavior = "all"
     }
-  }
-}
-
-# Origin request policy for API requests
-resource "aws_cloudfront_origin_request_policy" "frontend_api" {
-  name            = "${var.project_name}-frontend-api-origin-request-policy"
-  comment         = "Forward all headers and cookies for API requests"
-
-  headers_config {
-    header_behavior = "allViewer"
-  }
-
-  query_strings_config {
-    query_string_behavior = "all"
-  }
-
-  cookies_config {
-    cookie_behavior = "all"
   }
 }
 
