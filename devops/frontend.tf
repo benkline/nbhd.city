@@ -91,7 +91,7 @@ resource "aws_cloudfront_origin_access_identity" "frontend" {
 
 # CloudFront distribution for frontend
 resource "aws_cloudfront_distribution" "frontend" {
-  enabled             = var.cloudfront_enabled
+  enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
 
