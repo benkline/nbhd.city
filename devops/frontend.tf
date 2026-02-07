@@ -171,9 +171,8 @@ resource "aws_cloudfront_distribution" "frontend" {
 # Origin Access Control for S3
 resource "aws_cloudfront_origin_access_control" "frontend" {
   name                              = "${var.project_name}-frontend-oac"
-  origin_access_control_origin_type = "S3"
-  signing_behavior                  = "sigv4"
-  signing_protocol                  = "sigv4"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
 }
 
 # S3 bucket CORS configuration

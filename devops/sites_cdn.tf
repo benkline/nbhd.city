@@ -113,11 +113,15 @@ resource "aws_cloudfront_distribution" "sites" {
   # Change to PriceClass_All if global distribution needed
   price_class = "PriceClass_100"
 
-  # Enable IPv6
-  ipv6_enabled = true
-
   # Enable HTTP/2 and HTTP/2 push
   http_version = "http2and3"
+
+  # Geo-restriction: Allow all locations
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
 
   # Retain distribution when destroyed (prevents accidental deletion)
   retain_on_delete = false
