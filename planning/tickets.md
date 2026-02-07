@@ -896,21 +896,23 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 #### SITES-003: Project Sites Page
 - **Description:** Create dedicated page for viewing and managing project sites
 - **Requirements:**
-  - [ ] Create `ProjectSites.jsx` page
-  - [ ] Create `ProjectSiteSelector.jsx` component for choosing/filtering by nbhd
-  - [ ] Fetch `GET /api/sites?site_type=project`
-  - [ ] Allow filtering by nbhd
-  - [ ] Reuse `SiteManagementDashboard` with site_type="project" filter
-  - [ ] Add create button with site type pre-selected
-  - [ ] Add route `/sites/projects` to `App.jsx`
-  - [ ] Link from user dashboard and neighborhood pages
-  - [ ] Show helpful text explaining project sites
+  - [x] Create `ProjectSites.jsx` page
+  - [x] Create `ProjectSiteSelector.jsx` component for choosing/filtering by nbhd
+  - [x] Fetch `GET /api/sites?site_type=project`
+  - [x] Allow filtering by nbhd
+  - [x] Reuse `SiteManagementDashboard` with site_type="project" filter
+  - [x] Add create button with site type pre-selected
+  - [x] Add route `/sites/projects` to `App.jsx`
+  - [x] Link from user dashboard and neighborhood pages
+  - [x] Show helpful text explaining project sites
 - **Acceptance Criteria:**
-  - [ ] Page loads and displays user's project sites
-  - [ ] Can filter by neighborhood
-  - [ ] Can create new project site (requires nbhd selection)
-  - [ ] Can edit/delete existing project sites
-  - [ ] Mobile responsive
+  - [x] Page loads and displays user's project sites
+  - [x] Can filter by neighborhood
+  - [x] Can create new project site (requires nbhd selection)
+  - [x] Can edit/delete existing project sites
+  - [x] Mobile responsive
+- **Status:** COMPLETED
+- **Merged:** 2026-02-07 via PR #96
 - **Type:** Frontend
 - **Estimate:** S
 - **Reference:** See [SITE-TYPES.md](./SITE-TYPES.md) - UI Patterns and Project Sites Page sections
@@ -960,23 +962,25 @@ These tickets complete the build pipeline UI for the existing SSG-015 and SSG-01
 #### BUILD-002: Build Status Poller
 - **Description:** Component to poll and display build status and logs
 - **Requirements:**
-  - [ ] Create `BuildStatusPoller.jsx` component
-  - [ ] Poll `GET /api/sites/{id}/builds/{job_id}` every 5 seconds
-  - [ ] Display progress: pending → running → completed/failed
-  - [ ] Show build logs (tail last 50 lines)
-  - [ ] Show error messages on failure
-  - [ ] Auto-refresh until completion or timeout
-  - [ ] Manual refresh button
-  - [ ] Stop polling once build completes
-  - [ ] Handle network errors gracefully
+  - [x] Create `BuildStatusPoller.jsx` component
+  - [x] Poll `GET /api/sites/{id}/builds/{job_id}` every 5 seconds
+  - [x] Display progress: pending → running → completed/failed
+  - [x] Show build logs (tail last 50 lines)
+  - [x] Show error messages on failure
+  - [x] Auto-refresh until completion or timeout
+  - [x] Manual refresh button
+  - [x] Stop polling once build completes
+  - [x] Handle network errors gracefully
 - **Acceptance Criteria:**
-  - [ ] Status updates every 5 seconds while building
-  - [ ] Shows correct status text (pending, running, completed, failed)
-  - [ ] Logs display and update as build progresses
-  - [ ] Stops polling once build completes
-  - [ ] Error messages display on build failure
-  - [ ] Network errors handled without crashing
-  - [ ] Can manually refresh status
+  - [x] Status updates every 5 seconds while building
+  - [x] Shows correct status text (pending, running, completed, failed)
+  - [x] Logs display and update as build progresses
+  - [x] Stops polling once build completes
+  - [x] Error messages display on build failure
+  - [x] Network errors handled without crashing
+  - [x] Can manually refresh status
+- **Status:** COMPLETED
+- **Tests:** `nbhd/src/__tests__/components/BuildStatusPoller.test.jsx` (11 tests passing)
 - **Type:** Frontend
 - **Estimate:** M
 - **Reference:** See [BUILD-PIPELINE-UI.md](./BUILD-PIPELINE-UI.md) - BUILD-002 section, Status Lifecycle, and Component Specifications
@@ -1311,12 +1315,12 @@ Frontend - Core CMS:
 Frontend - Site Management:
 - [x] SITES-001 (Site Type Distinction)
 - [x] SITES-002 (Personal Sites Page)
-- [ ] SITES-003 (Project Sites Page)
+- [x] SITES-003 (Project Sites Page) - COMPLETED 2026-02-07
 
 ### 🚀 Phase 8: Build Pipeline UI Completion (Weeks 15-16)
 **Depends on:** Phase 6 (Build Pipeline backend is complete)
 - [ ] BUILD-001 (Site Build Trigger UI)
-- [ ] BUILD-002 (Build Status Poller)
+- [x] BUILD-002 (Build Status Poller) - COMPLETED 2026-02-07
 - [ ] BUILD-003 (Build History Dashboard)
 
 ### 🌐 Phase 9: Full AT Protocol Federation (Weeks 17+)

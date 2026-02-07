@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BuildTriggerButton } from './BuildTriggerButton';
+import { BuildStatusPoller } from './BuildStatusPoller';
 import styles from './SiteManagementDashboard.module.css';
 
 /**
@@ -146,6 +147,7 @@ export function SiteManagementDashboard({ siteType, nbhdId, onEdit, onDelete: on
   const [sites, setSites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeBuild, setActiveBuild] = useState(null); // { site, jobId }
   const navigate = useNavigate();
 
   // Fetch sites on mount
@@ -254,10 +256,21 @@ export function SiteManagementDashboard({ siteType, nbhdId, onEdit, onDelete: on
             site={site}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            onBuildTriggered={() => {}} // BUILD-002 will add modal integration
+            onBuildTriggered={(jobId) => setActiveBuild({ site, jobId })}
           />
         ))}
       </div>
+
+      {activeBuild && (
+        <div className={styles.buildPollerOverlay}>
+          <BuildStatusPoller
+            site={activeBuild.site}
+            jobId={activeBuild.jobId}
+            onBuildComplete={() => setActiveBuild(null)}
+            onClose={() => setActiveBuild(null)}
+          />
+        </div>
+      )}
     </div>
   );
 }
