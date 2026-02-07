@@ -44,23 +44,23 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json'
+          cache-dependency-path: 'nbhd/package-lock.json'
 
       - name: Install frontend dependencies
         run: |
-          cd frontend
+          cd nbhd
           npm ci
 
       - name: Build frontend
         run: |
-          cd frontend
+          cd nbhd
           npm run build
 
       - name: Upload frontend artifacts
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
-          path: frontend/dist/
+          path: nbhd/dist/
 
       # Setup OpenTofu and deploy
       - name: Setup OpenTofu
