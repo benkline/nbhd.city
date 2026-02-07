@@ -808,35 +808,6 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 
 ---
 
-### Phase 5 Follow-up: Complete Test Implementation
-
-#### NBHD-004-TESTS: Debug and Fix MSW Route Matching
-- **Description:** Complete Phase 5 (TEST & VERIFY) by resolving MSW route matching issue
-- **Current Status:** 4/11 AdminPage tests passing, 7 failing due to MSW handler not intercepting GET /api/nbhds/:nbhdId requests
-- **Branch:** `feature/NBHD-004-tests`
-- **Requirements:**
-  - [ ] Debug MSW server initialization (verify handlers are registered)
-  - [ ] Test MSW route matching with parameterized paths
-  - [ ] Verify request logging is working
-  - [ ] Implement fix (likely Solution A, B, C, or D from troubleshooting doc)
-  - [ ] Verify all 11 AdminPage tests pass
-  - [ ] Run full test suite: WelcomeContentEditor, AnnouncementManager, NbhdSettingsForm, SitesTab
-  - [ ] Update tickets.md to mark NBHD-004 as COMPLETED
-  - [ ] Create PR to main branch
-- **Debugging Resources:**
-  - See [NBHD-004-TEST-TROUBLESHOOTING.md](./NBHD-004-TEST-TROUBLESHOOTING.md) for:
-    - Step-by-step debugging instructions
-    - Potential solutions (A, B, C, D)
-    - Test strategy for verification
-    - MSW documentation references
-- **Commits:**
-  - `2467a2a` - chore: Improve test infrastructure for NBHD-004 admin components
-  - `6a95cc2` - chore(NBHD-004): Migrate tests to MSW for API mocking
-- **Type:** Testing/Debugging
-- **Estimate:** S-M
-- **Timeline:** Immediate (blocking completion)
-- **Owner:** (Follow-up implementation needed)
-
 #### NBHD-005: CMS View for AT Protocol Data
 - **Description:** Create CMS view showing all AT Protocol records for the neighborhood
 - **Requirements:**
@@ -902,19 +873,19 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 #### SITES-002: Personal Sites Page
 - **Description:** Create dedicated page for viewing and managing personal sites
 - **Requirements:**
-  - [ ] Create `PersonalSites.jsx` page
-  - [ ] Fetch `GET /api/sites?site_type=personal`
-  - [ ] Reuse `SiteManagementDashboard` with site_type="personal" filter
-  - [ ] Add create button with site type pre-selected
-  - [ ] Add route `/sites/personal` to `App.jsx`
-  - [ ] Link from user dashboard
-  - [ ] Show helpful text explaining personal sites
+  - [x] Create `PersonalSites.jsx` page
+  - [x] Fetch `GET /api/sites?site_type=personal`
+  - [x] Reuse `SiteManagementDashboard` with site_type="personal" filter
+  - [x] Add create button with site type pre-selected
+  - [x] Add route `/personal-sites` to `App.jsx`
+  - [x] Link from user dashboard
+  - [x] Show helpful text explaining personal sites
 - **Acceptance Criteria:**
-  - [ ] Page loads and displays user's personal sites
-  - [ ] Can create new personal site from this page
-  - [ ] Can edit/delete existing personal sites
-  - [ ] No nbhd selection shown on create
-  - [ ] Mobile responsive
+  - [x] Page loads and displays user's personal sites
+  - [x] Can create new personal site from this page
+  - [x] Can edit/delete existing personal sites
+  - [x] No nbhd selection shown on create
+  - [x] Mobile responsive
 - **Type:** Frontend
 - **Estimate:** S
 - **Reference:** See [SITE-TYPES.md](./SITE-TYPES.md) - UI Patterns and Personal Sites Page sections
@@ -1334,8 +1305,8 @@ Frontend - Core CMS:
 - [ ] NBHD-005 (CMS View for AT Protocol Data)
 
 Frontend - Site Management:
-- [ ] SITES-001 (Site Type Distinction)
-- [ ] SITES-002 (Personal Sites Page)
+- [x] SITES-001 (Site Type Distinction)
+- [x] SITES-002 (Personal Sites Page)
 - [ ] SITES-003 (Project Sites Page)
 
 ### 🚀 Phase 8: Build Pipeline UI Completion (Weeks 15-16)

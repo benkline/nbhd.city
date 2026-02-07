@@ -10,6 +10,7 @@ import AdminPage from './pages/AdminPage';
 import CMSView from './pages/CMSView';
 import WelcomePage from './pages/WelcomePage';
 import MyNbhds from './pages/MyNeighborhoods';
+import PersonalSites from './pages/PersonalSites';
 import UserProfile from './pages/UserProfile';
 import './App.css';
 
@@ -28,6 +29,7 @@ function App() {
           <Route path="/nbhds/:id/cms" element={<CMSView />} />
           <Route path="/nbhds/:id/welcome" element={<WelcomePage />} />
           <Route path="/my-nbhds" element={<MyNbhds />} />
+          <Route path="/personal-sites" element={<PersonalSites />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>

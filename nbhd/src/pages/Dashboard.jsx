@@ -80,6 +80,15 @@ export default function Dashboard() {
                 <h4>My Nbhds</h4>
                 <p>View nbhds you've joined</p>
               </button>
+
+              <button
+                onClick={() => navigate('/personal-sites')}
+                className={styles.navCard}
+              >
+                <span className={styles.navIcon}>📄</span>
+                <h4>Personal Sites</h4>
+                <p>Build and manage your static sites</p>
+              </button>
             </div>
           </div>
 
