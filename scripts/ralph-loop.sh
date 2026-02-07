@@ -29,7 +29,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 # Configuration
-TICKETS_FILE="planning/tickets.md"
+TICKETS_FILE="tickets/tickets.md"
 PROMPTS_FILE="prompts.md"
 PROGRESS_FILE=".ticket-progress.json"
 LOG_DIR=".ralph-loop-logs"
@@ -232,7 +232,7 @@ has_changes() {
 run_tests() {
     log_info "Running integration tests..."
 
-    if pytest api/tests/integration/ -v 2>&1 | tee -a "$LOG_FILE"; then
+    if pytest app/api/tests/integration/ -v 2>&1 | tee -a "$LOG_FILE"; then
         log_success "All tests passed!"
         return 0
     else

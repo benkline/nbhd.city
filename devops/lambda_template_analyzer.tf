@@ -4,7 +4,7 @@
 # Archive packaging for template analyzer Lambda
 data "archive_file" "lambda_template_analyzer_package" {
   type        = "zip"
-  source_dir  = "${path.module}/../lambda/template_analyzer"
+  source_dir  = "${path.module}/../app/lambda/template_analyzer"
   output_path = "${path.module}/.terraform/lambda_template_analyzer.zip"
 
   excludes = [

@@ -2,8 +2,8 @@
 Tests for NBHD-001: Nbhd DID & Data Model Enhancement.
 """
 import pytest
-from api.models import SiteCreate
-from api.atproto.neighborhood_did import generate_neighborhood_did, is_valid_neighborhood_did
+from app.api.models import SiteCreate
+from app.api.atproto.neighborhood_did import generate_neighborhood_did, is_valid_neighborhood_did
 
 
 class TestNbhdDIDGeneration:
@@ -120,7 +120,7 @@ class TestSiteTypeValidation:
 
     def test_site_response_has_all_fields(self):
         """SiteResponse should include site_type, nbhd_id, and url fields."""
-        from api.models import SiteResponse
+        from app.api.models import SiteResponse
 
         site = SiteResponse(
             site_id="site123",
@@ -141,7 +141,7 @@ class TestSiteTypeValidation:
 
     def test_site_response_with_nbhd_site(self):
         """SiteResponse should properly handle nbhd sites."""
-        from api.models import SiteResponse
+        from app.api.models import SiteResponse
 
         site = SiteResponse(
             site_id="site456",
