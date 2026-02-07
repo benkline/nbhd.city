@@ -337,7 +337,7 @@ def generate_schema(frontmatter_samples: List[Dict]) -> Dict:
 
 ## API Endpoints
 
-### POST /api/templates/custom
+### POST /app/api/templates/custom
 **Purpose:** Register a custom 11ty template from GitHub
 
 **Request:**
@@ -355,7 +355,7 @@ def generate_schema(frontmatter_samples: List[Dict]) -> Dict:
   "template_id": "template-uuid-123",
   "status": "analyzing",
   "message": "Template analysis started",
-  "poll_url": "/api/templates/custom/template-uuid-123/status"
+  "poll_url": "/app/api/templates/custom/template-uuid-123/status"
 }
 ```
 
@@ -373,7 +373,7 @@ def generate_schema(frontmatter_samples: List[Dict]) -> Dict:
 
 ---
 
-### GET /api/templates/custom/{template_id}/status
+### GET /app/api/templates/custom/{template_id}/status
 **Purpose:** Check analysis status
 
 **Response (In Progress):**
@@ -407,7 +407,7 @@ def generate_schema(frontmatter_samples: List[Dict]) -> Dict:
 
 ---
 
-### GET /api/templates/{template_id}/content-types
+### GET /app/api/templates/{template_id}/content-types
 **Purpose:** Get inferred content types and their schemas
 
 **Response:**
@@ -440,7 +440,7 @@ def generate_schema(frontmatter_samples: List[Dict]) -> Dict:
 
 ## Lambda Function: Template Analyzer
 
-**Location:** `/lambda/template_analyzer/handler.py`
+**Location:** `/app/lambda/template_analyzer/handler.py`
 
 **Runtime:** Python 3.11
 **Timeout:** 5 minutes

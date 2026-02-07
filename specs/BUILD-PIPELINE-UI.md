@@ -16,11 +16,11 @@ The build pipeline consists of three layers:
 Layer 1: Build Trigger
   └── User clicks "Deploy Site"
       → BuildTriggerButton
-      → POST /api/sites/{id}/build
+      → POST /app/api/sites/{id}/build
       → Returns job_id immediately (202 Accepted)
 
 Layer 2: Build Monitoring
-  └── Poll /api/sites/{id}/builds/{job_id} every 5 seconds
+  └── Poll /app/api/sites/{id}/builds/{job_id} every 5 seconds
       → BuildStatusPoller
       → Shows: pending → running → completed/failed
       → Displays logs in real-time
@@ -28,7 +28,7 @@ Layer 2: Build Monitoring
 Layer 3: Build History
   └── View past builds with status/duration
       → BuildHistory component
-      → GET /api/sites/{id}/builds
+      → GET /app/api/sites/{id}/builds
       → Table with all build records
 ```
 
@@ -37,7 +37,7 @@ Layer 3: Build History
 ### Build Trigger Endpoint
 
 ```
-POST /api/sites/{id}/build
+POST /app/api/sites/{id}/build
 {
   "force": boolean (optional, rebuild even if no changes)
 }
@@ -54,7 +54,7 @@ Response (202 Accepted):
 ### Build Status Endpoint
 
 ```
-GET /api/sites/{id}/builds/{job_id}
+GET /app/api/sites/{id}/builds/{job_id}
 
 Response:
 {
@@ -75,7 +75,7 @@ Response:
 ### Build List Endpoint
 
 ```
-GET /api/sites/{id}/builds?limit=50&offset=0
+GET /app/api/sites/{id}/builds?limit=50&offset=0
 
 Response:
 {
@@ -165,7 +165,7 @@ canceled (optional)
      Are you sure you want to rebuild this site?
      [Cancel] [Deploy]
      ```
-   - On confirm: POST /api/sites/{id}/build
+   - On confirm: POST /app/api/sites/{id}/build
    - Show loading spinner
 
 3. **After Trigger**
@@ -199,7 +199,7 @@ function BuildTriggerButton({ site, onBuildTriggered }) {
   async function handleTrigger() {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/sites/${site.id}/build`, {
+      const response = await fetch(`/app/api/sites/${site.id}/build`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -293,7 +293,7 @@ function BuildStatusPoller({ site, jobId, onBuildComplete, onError }) {
   async function fetchStatus() {
     try {
       const response = await fetch(
-        `/api/sites/${site.id}/builds/${jobId}`
+        `/app/api/sites/${site.id}/builds/${jobId}`
       );
       const data = await response.json();
 
@@ -429,7 +429,7 @@ function BuildStatusDisplay({ status, logs, elapsedSeconds, onRefresh, isPolling
 **Behavior:**
 
 1. **Load Builds**
-   - Fetch GET /api/sites/{id}/builds?limit=50
+   - Fetch GET /app/api/sites/{id}/builds?limit=50
    - Display table with pagination
 
 2. **Columns**
@@ -473,7 +473,7 @@ function BuildHistory({ siteId, onBuildClick }) {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/sites/${siteId}/builds?limit=${LIMIT}&offset=${offset}`
+        `/app/api/sites/${siteId}/builds?limit=${LIMIT}&offset=${offset}`
       );
       const data = await response.json();
       setBuilds(data.builds);

@@ -382,7 +382,7 @@ The full blog post and BlueSky summary are **linked** to maintain their relation
 
 ## API Integration
 
-### POST /api/sites/{site_id}/content
+### POST /app/api/sites/{site_id}/content
 
 **Request:**
 ```json
@@ -417,7 +417,7 @@ The full blog post and BlueSky summary are **linked** to maintain their relation
 ### Implementation
 
 ```python
-@router.post("/api/sites/{site_id}/content")
+@router.post("/app/api/sites/{site_id}/content")
 async def create_content(
     site_id: str,
     content: ContentCreate,
@@ -522,7 +522,7 @@ function ContentEditor({ siteId, onSave }) {
       auto_rebuild: autoRebuild
     };
 
-    const response = await api.post(`/api/sites/${siteId}/content`, content);
+    const response = await api.post(`/app/api/sites/${siteId}/content`, content);
 
     if (response.bluesky_post) {
       toast.success('Published to blog and BlueSky!');
@@ -634,7 +634,7 @@ def test_create_link_facets():
 **Integration Tests:**
 ```python
 async def test_create_content_with_bluesky():
-    response = await client.post("/api/sites/site-123/content", json={
+    response = await client.post("/app/api/sites/site-123/content", json={
         "title": "Test Post",
         "content": "# Hello",
         "frontmatter": {"date": "2026-01-21T00:00:00Z"},

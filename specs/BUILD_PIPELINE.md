@@ -18,7 +18,7 @@ The Build Pipeline transforms user content (stored as AT Protocol records in Dyn
 ```
 User clicks "Deploy"
        ↓
-POST /api/sites/{id}/build
+POST /app/api/sites/{id}/build
        ↓
 Create Build Job (DynamoDB)
        ↓
@@ -111,7 +111,7 @@ https://{subdomain}.nbhd.city
 
 ## Lambda Function Implementation
 
-### File: `/lambda/site_builder/handler.py`
+### File: `/app/lambda/site_builder/handler.py`
 
 ```python
 import os
@@ -431,7 +431,7 @@ class SiteBuilder:
 
 ## API Endpoints
 
-### POST /api/sites/{site_id}/build
+### POST /app/api/sites/{site_id}/build
 
 **Purpose:** Trigger site build
 
@@ -443,7 +443,7 @@ class SiteBuilder:
   "job_id": "job-uuid-456",
   "status": "pending",
   "message": "Build started",
-  "poll_url": "/api/sites/site-uuid-123/builds/job-uuid-456"
+  "poll_url": "/app/api/sites/site-uuid-123/builds/job-uuid-456"
 }
 ```
 
@@ -456,7 +456,7 @@ class SiteBuilder:
 
 ---
 
-### GET /api/sites/{site_id}/builds/{job_id}
+### GET /app/api/sites/{site_id}/builds/{job_id}
 
 **Purpose:** Poll build status
 
@@ -498,7 +498,7 @@ class SiteBuilder:
 
 ---
 
-### GET /api/sites/{site_id}/builds
+### GET /app/api/sites/{site_id}/builds
 
 **Purpose:** List build history
 

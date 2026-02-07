@@ -171,7 +171,7 @@ Stream member posts/activities into nbhd:
 Users can export all data:
 
 ```
-GET /api/user/export/atproto
+GET /app/api/user/export/atproto
 ```
 
 Returns complete repository in AT Protocol format:
@@ -194,7 +194,7 @@ Returns complete repository in AT Protocol format:
 # Frontend/mobile SDK calls
 
 # Get DID
-did = await api.get('/api/user/did')
+did = await api.get('/app/api/user/did')
 
 # Get profile via XRPC
 profile = await xrpc.call('com.atproto.repo.getRepo', {
@@ -294,7 +294,7 @@ User A (on PDS1) wants to follow User B (on PDS2)
 
 Users can transfer their data from one PDS to another:
 
-1. Export data from old PDS: `GET /api/user/export/atproto`
+1. Export data from old PDS: `GET /app/api/user/export/atproto`
 2. Register new DID on new PDS
 3. Import exported records
 4. Update directory (old DID → new PDS)

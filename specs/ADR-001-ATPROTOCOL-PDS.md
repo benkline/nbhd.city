@@ -182,7 +182,7 @@ Fields:
 
 **Export API:**
 ```
-GET /api/user/export/atproto
+GET /app/api/user/export/atproto
 ```
 
 Returns complete repository as AT Protocol format:
@@ -253,7 +253,7 @@ Returns complete repository as AT Protocol format:
 ```
 User writes post in ContentEditor
   ↓
-POST /api/sites/{siteId}/content
+POST /app/api/sites/{siteId}/content
   ↓
 Create AT Protocol records:
   - app.nbhd.blog.post (full content)
@@ -280,7 +280,7 @@ Result: Post appears in:
 ```
 User clicks "Follow" on another member
   ↓
-POST /api/users/{userId}/follows/{followedDid}
+POST /app/api/users/{userId}/follows/{followedDid}
   ↓
 Create AT Protocol record:
   - app.bsky.graph.follow
@@ -302,7 +302,7 @@ Result: Member appears in:
 ```
 User opens app and requests firehose
   ↓
-GET /api/user/firehose?limit=50
+GET /app/api/user/firehose?limit=50
   ↓
 Backend:
   1. Query member's follow records

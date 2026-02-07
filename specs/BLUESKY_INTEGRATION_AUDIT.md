@@ -55,8 +55,8 @@ Create local user account
 ```
 
 **OAuth Integration Points:**
-- `api/auth.py` - Authentication endpoints
-- `api/models.py` - User model definition
+- `app/api/auth.py` - Authentication endpoints
+- `app/api/models.py` - User model definition
 - BlueSky Client SDK integration
 
 ### What's Working
@@ -260,7 +260,7 @@ Real-time stream of all events on AT Protocol network:
 1. Subscribe to AT Protocol firehose
 2. Filter for neighborhood member DIDs
 3. Store posts in local format (`app.nbhd.blog.post` or custom)
-4. Make available via `/api/neighborhood/firehose` endpoint
+4. Make available via `/app/api/neighborhood/firehose` endpoint
 
 **Data Flow:**
 ```
@@ -278,7 +278,7 @@ Render in UI
 
 **Example Query:**
 ```python
-GET /api/neighborhoods/{id}/firehose?limit=50&offset=0
+GET /app/api/neighborhoods/{id}/firehose?limit=50&offset=0
 
 Response:
 {
@@ -533,7 +533,7 @@ async def verify_record_signature(record_uri: str, signature: str) -> bool:
 ## Appendix: Current OAuth Code
 
 **Reference Implementation:**
-See `api/auth.py` - Current BlueSky OAuth endpoints
+See `app/api/auth.py` - Current BlueSky OAuth endpoints
 
 **Key Functions:**
 - `get_bluesky_profile()` - Get user profile via OAuth

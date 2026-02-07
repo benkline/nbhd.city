@@ -81,7 +81,7 @@ Foundation layer for AT Protocol record storage and management. This is the crit
 - **Estimate:** M
 - **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
 - **Status:** COMPLETED
-- **Tests:** `api/tests/integration/test_at_protocol_schema.py` (8 tests passing)
+- **Tests:** `app/app/api/tests/integration/test_at_protocol_schema.py` (8 tests passing)
 
 #### ATP-FOUND-002: CID Generation Utilities
 - **Description:** Implement Content Identifier (CID) generation for AT Protocol records
@@ -92,7 +92,7 @@ Foundation layer for AT Protocol record storage and management. This is the crit
   - [x] Create `generate_cid(record_value)` function
   - [x] Ensure immutability (same content → same CID)
   - [x] Add validation for CID format
-  - [x] Create utility file: `/api/atproto/cid.py`
+  - [x] Create utility file: `/app/app/api/atproto/cid.py`
 - **Acceptance Criteria:**
   - [x] CID generation produces valid CIDv1 strings
   - [x] Same record value always produces same CID
@@ -103,7 +103,7 @@ Foundation layer for AT Protocol record storage and management. This is the crit
 - **Estimate:** S
 - **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
 - **Status:** COMPLETED
-- **Tests:** `api/tests/unit/test_cid_generation.py` (14 tests passing)
+- **Tests:** `app/app/api/tests/unit/test_cid_generation.py` (14 tests passing)
 
 #### ATP-FOUND-003: Record Key (rkey) Generation
 - **Description:** Implement TID (Timestamp Identifier) format for record keys
@@ -113,7 +113,7 @@ Foundation layer for AT Protocol record storage and management. This is the crit
   - [x] Base32 encoding for human-readable keys
   - [x] Ensure chronological sorting (newer records sort later)
   - [x] Ensure global uniqueness (no collisions)
-  - [x] Create utility file: `/api/atproto/tid.py`
+  - [x] Create utility file: `/app/app/api/atproto/tid.py`
 - **Acceptance Criteria:**
   - [x] rkeys sort chronologically
   - [x] No collisions in 10,000+ generations
@@ -124,7 +124,7 @@ Foundation layer for AT Protocol record storage and management. This is the crit
 - **Estimate:** S
 - **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
 - **Status:** COMPLETED
-- **Tests:** `api/tests/unit/test_rkey_generation.py` (23 tests passing)
+- **Tests:** `app/app/api/tests/unit/test_rkey_generation.py` (23 tests passing)
 
 #### ATP-FOUND-004: Basic Record CRUD Operations
 - **Description:** Implement core CRUD operations for AT Protocol records in DynamoDB
@@ -135,7 +135,7 @@ Foundation layer for AT Protocol record storage and management. This is the crit
   - [x] `update_record(uri, new_value)` - Create new version (immutable)
   - [x] `delete_record(uri)` - Soft delete (mark as deleted)
   - [x] Link old/new versions on update
-  - [x] Add to `/api/dynamodb_repository.py`
+  - [x] Add to `/app/app/api/dynamodb_repository.py`
 - **Acceptance Criteria:**
   - [x] Can create records with valid CID and rkey
   - [x] Can retrieve records by AT URI
@@ -147,7 +147,7 @@ Foundation layer for AT Protocol record storage and management. This is the crit
 - **Estimate:** M
 - **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
 - **Status:** COMPLETED
-- **Tests:** `api/tests/unit/test_at_protocol_crud.py` (18 tests passing)
+- **Tests:** `app/app/api/tests/unit/test_at_protocol_crud.py` (18 tests passing)
 
 ---
 
@@ -164,7 +164,7 @@ API layer for template discovery, management, and site configuration.
 #### SSG-001: Create Template Gallery UI Component
 - **Description:** Build a `TemplateGallery` component that displays available 11ty templates
 - **Requirements:**
-  - [x] Fetch templates from API (`GET /api/templates`)
+  - [x] Fetch templates from API (`GET /app/app/api/templates`)
   - [x] Display template cards with preview images, name, description
   - [x] "Select template" button to start site configuration
   - [x] Show template tags (blog, project, newsletter, etc)
@@ -213,10 +213,10 @@ API layer for template discovery, management, and site configuration.
 #### SSG-005: Template Management API
 - **Description:** Implement API endpoints for template discovery and metadata
 - **Requirements:**
-  - [x] `GET /api/templates` - List all available templates
-  - [x] `GET /api/templates/{id}` - Get single template metadata
-  - [x] `GET /api/templates/{id}/schema` - Get config schema
-  - [x] `GET /api/templates/{id}/preview` - Get preview image URL
+  - [x] `GET /app/app/api/templates` - List all available templates
+  - [x] `GET /app/app/api/templates/{id}` - Get single template metadata
+  - [x] `GET /app/app/api/templates/{id}/schema` - Get config schema
+  - [x] `GET /app/app/api/templates/{id}/preview` - Get preview image URL
   - [x] Each template includes: name, description, author, version, tags
 - **Acceptance Criteria:**
   - [x] All endpoints return correct JSON structure
@@ -229,11 +229,11 @@ API layer for template discovery, management, and site configuration.
 #### SSG-006: Site Configuration Storage API
 - **Description:** Implement endpoints to save and retrieve site configurations
 - **Requirements:**
-  - [x] `POST /api/sites` - Create new site from template + config
-  - [x] `GET /api/sites/{id}` - Retrieve site config
-  - [x] `PUT /api/sites/{id}` - Update site config
-  - [x] `GET /api/sites` - List user's sites
-  - [x] `DELETE /api/sites/{id}` - Delete site
+  - [x] `POST /app/app/api/sites` - Create new site from template + config
+  - [x] `GET /app/app/api/sites/{id}` - Retrieve site config
+  - [x] `PUT /app/app/api/sites/{id}` - Update site config
+  - [x] `GET /app/app/api/sites` - List user's sites
+  - [x] `DELETE /app/app/api/sites/{id}` - Delete site
   - [x] Store config JSON in DynamoDB
 - **Acceptance Criteria:**
   - [x] Configs persist to DynamoDB
@@ -271,14 +271,14 @@ Research and implementation of automated template analysis.
 - **Estimate:** S
 - **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md), [SSG-007-RESEARCH.md](./SSG-007-RESEARCH.md)
 - **Status:** COMPLETED
-- **Tests:** `api/tests/unit/test_template_schema_inference.py` (26 tests passing)
+- **Tests:** `app/app/api/tests/unit/test_template_schema_inference.py` (26 tests passing)
 
 #### SSG-008: Custom Template Registration API
 - **Description:** API endpoints for registering custom 11ty templates from GitHub
 - **Requirements:**
-  - [x] `POST /api/templates/custom` - Register template from GitHub URL
-  - [x] `GET /api/templates/custom/{id}/status` - Check analysis status
-  - [x] `GET /api/templates/{id}/content-types` - Get inferred content types
+  - [x] `POST /app/app/api/templates/custom` - Register template from GitHub URL
+  - [x] `GET /app/app/api/templates/custom/{id}/status` - Check analysis status
+  - [x] `GET /app/app/api/templates/{id}/content-types` - Get inferred content types
   - [x] GitHub URL validation (github.com, gitlab.com, bitbucket.org)
   - [x] Store template metadata in DynamoDB
   - [x] Async invocation of analyzer Lambda
@@ -292,10 +292,10 @@ Research and implementation of automated template analysis.
 - **Estimate:** M
 - **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
 - **Status:** COMPLETED
-- **Tests:** `api/tests/integration/test_custom_templates.py` (29 tests passing)
+- **Tests:** `app/app/api/tests/integration/test_custom_templates.py` (29 tests passing)
 - **Implementation Files:**
-  - `api/templates.py` - Added `invoke_template_analyzer_async()` function and integrated with `/api/templates/custom` endpoint
-  - `api/tests/integration/test_custom_templates.py` - Added test for async Lambda invocation
+  - `app/app/api/templates.py` - Added `invoke_template_analyzer_async()` function and integrated with `/app/app/api/templates/custom` endpoint
+  - `app/app/api/tests/integration/test_custom_templates.py` - Added test for async Lambda invocation
 
 #### SSG-009: Template Analyzer Lambda Function
 - **Description:** Lambda function to clone, validate, and analyze 11ty templates
@@ -318,7 +318,7 @@ Research and implementation of automated template analysis.
 - **Estimate:** L
 - **Reference:** See [TEMPLATE_ANALYSIS.md](./TEMPLATE_ANALYSIS.md)
 - **Status:** COMPLETED
-- **Tests:** `lambda/tests/test_template_analyzer.py` (23 tests passing)
+- **Tests:** `app/lambda/tests/test_template_analyzer.py` (23 tests passing)
 
 #### SSG-010: Custom Template Selection UI
 - **Description:** UI for users to add and select custom templates
@@ -361,11 +361,11 @@ Content creation and management layer. Users can create, edit, and publish conte
 #### SSG-011: Content Records API
 - **Description:** API for creating and managing content as AT Protocol records
 - **Requirements:**
-  - [x] `POST /api/sites/{id}/content` - Create blog post/page
-  - [x] `GET /api/sites/{id}/content` - List all content
-  - [x] `GET /api/sites/{id}/content/{rkey}` - Get specific content
-  - [x] `PUT /api/sites/{id}/content/{rkey}` - Update content
-  - [x] `DELETE /api/sites/{id}/content/{rkey}` - Delete content
+  - [x] `POST /app/app/api/sites/{id}/content` - Create blog post/page
+  - [x] `GET /app/app/api/sites/{id}/content` - List all content
+  - [x] `GET /app/app/api/sites/{id}/content/{rkey}` - Get specific content
+  - [x] `PUT /app/app/api/sites/{id}/content/{rkey}` - Update content
+  - [x] `DELETE /app/app/api/sites/{id}/content/{rkey}` - Delete content
   - [x] Store as AT Protocol records (app.nbhd.blog.post)
   - [x] Use CID generation from ATP-FOUND-002
   - [x] Use rkey generation from ATP-FOUND-003
@@ -379,7 +379,7 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Type:** Backend
 - **Estimate:** M
 - **Status:** COMPLETED
-- **Tests:** `api/tests/integration/test_content_records_api.py` (12 tests passing)
+- **Tests:** `app/app/api/tests/integration/test_content_records_api.py` (12 tests passing)
 - **Reference:** See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
 
 #### SSG-012: Content Editor UI Component
@@ -423,12 +423,12 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Estimate:** M
 - **Reference:** See [BLUESKY_INTEGRATION.md](./BLUESKY_INTEGRATION.md), [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
 - **Status:** COMPLETED
-- **Tests:** `api/tests/unit/test_bluesky_integration.py` (29 tests passing)
+- **Tests:** `app/app/api/tests/unit/test_bluesky_integration.py` (29 tests passing)
 
 #### SSG-014: Smart Content Prefilling
 - **Description:** Auto-map user profile data to template content fields
 - **Requirements:**
-  - [x] `GET /api/sites/{id}/prefill` - Get prefill suggestions
+  - [x] `GET /app/app/api/sites/{id}/prefill` - Get prefill suggestions
   - [x] Field mapping algorithm (display_name → author, bio → about)
   - [x] Support multiple data sources (profile, previous sites)
   - [x] Preview UI showing suggested mappings
@@ -444,7 +444,7 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Estimate:** M
 - **Reference:** See [CONTENT_PREFILLING.md](./CONTENT_PREFILLING.md)
 - **Status:** COMPLETED
-- **Tests:** `api/tests/unit/test_content_prefilling.py` (21 tests passing), `nbhd/src/__tests__/components/PrefillPreview.test.jsx` (17 tests)
+- **Tests:** `app/app/api/tests/unit/test_content_prefilling.py` (21 tests passing), `app/UI/src/__tests__/components/PrefillPreview.test.jsx` (17 tests)
 
 ---
 
@@ -457,9 +457,9 @@ Content creation and management layer. Users can create, edit, and publish conte
 #### SSG-015: Site Build Trigger API
 - **Description:** Endpoint to initiate Lambda build process
 - **Requirements:**
-  - [x] `POST /api/sites/{id}/build` - Trigger build
-  - [x] `GET /api/sites/{id}/builds/{job_id}` - Get build status
-  - [x] `GET /api/sites/{id}/builds` - List build history
+  - [x] `POST /app/app/api/sites/{id}/build` - Trigger build
+  - [x] `GET /app/app/api/sites/{id}/builds/{job_id}` - Get build status
+  - [x] `GET /app/app/api/sites/{id}/builds` - List build history
   - [x] Returns build status/job ID immediately (202 Accepted)
   - [x] Validates user owns the site
   - [x] Create build job record in DynamoDB
@@ -474,7 +474,7 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Type:** Backend
 - **Estimate:** M
 - **Status:** COMPLETED
-- **Tests:** `api/tests/integration/test_build_jobs_api.py` (11 tests passing)
+- **Tests:** `app/app/api/tests/integration/test_build_jobs_api.py` (11 tests passing)
 
 #### SSG-016: 11ty Lambda Build Function
 - **Description:** Lambda function to build static sites from templates and content
@@ -499,7 +499,7 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Type:** Backend/Lambda/Infrastructure
 - **Estimate:** XL
 - **Status:** COMPLETED
-- **Tests:** `lambda/tests/test_site_builder.py` (15 tests passing)
+- **Tests:** `app/lambda/tests/test_site_builder.py` (15 tests passing)
 
 #### SSG-017: Subdomain Routing Setup
 - **Description:** Configure Route53 + CloudFront for subdomain deployment
@@ -527,7 +527,7 @@ Content creation and management layer. Users can create, edit, and publish conte
 #### SSG-018: Site Export to ZIP
 - **Description:** Generate downloadable ZIP of built site files
 - **Requirements:**
-  - [x] Endpoint: `GET /api/sites/{id}/export`
+  - [x] Endpoint: `GET /app/app/api/sites/{id}/export`
   - [x] Downloads all static files from S3 as ZIP
   - [x] Includes README with deployment instructions
   - [x] Users can self-host the generated site anywhere
@@ -544,9 +544,9 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Merged:** 2026-02-01 via PR #81
 - **Commit:** dccb6aa (feat(SSG-018): Implement site export to ZIP endpoint)
 - **Implementation Files:**
-  - `api/sites.py` - Main endpoint and 4 helper functions
-  - `api/tests/unit/test_site_export.py` - 6 unit tests
-  - `api/tests/integration/test_site_export.py` - 8 integration tests
+  - `app/app/api/sites.py` - Main endpoint and 4 helper functions
+  - `app/app/api/tests/unit/test_site_export.py` - 6 unit tests
+  - `app/app/api/tests/integration/test_site_export.py` - 8 integration tests
 - **Key Features:**
   - Async S3 file download with pagination (supports 1000+ files)
   - DynamoDB content record backup (posts, pages)
@@ -562,7 +562,7 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Description:** Terraform infrastructure to deploy the Template Analyzer Lambda function
 - **Depends On:** SSG-009 (code implementation)
 - **Requirements:**
-  - [x] Package Lambda function code from `lambda/template_analyzer/`
+  - [x] Package Lambda function code from `app/lambda/template_analyzer/`
   - [x] Create CloudWatch Log Group for template analyzer Lambda
   - [x] Create IAM role for template analyzer execution
   - [x] Create IAM policy allowing Lambda to:
@@ -588,7 +588,7 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Status:** COMPLETED
 - **Implementation Files:**
   - Terraform: `devops/lambda_template_analyzer.tf` (new)
-  - Python: `lambda/template_analyzer/requirements.txt` (new)
+  - Python: `app/lambda/template_analyzer/requirements.txt` (new)
   - Updated: `devops/outputs.tf` (3 new outputs)
   - Updated: `devops/DEPLOYMENT_CHECKLIST.md` (testing section)
 
@@ -596,7 +596,7 @@ Content creation and management layer. Users can create, edit, and publish conte
 - **Description:** Terraform infrastructure to deploy the 11ty Site Builder Lambda function and supporting AWS resources
 - **Depends On:** SSG-016 (code implementation)
 - **Requirements:**
-  - [x] Package Lambda function code from `lambda/site_builder/`
+  - [x] Package Lambda function code from `app/lambda/site_builder/`
   - [x] Create S3 bucket for built sites (e.g., `{project}-sites-{environment}`)
   - [x] Configure S3 bucket:
     - [x] Enable public read access (site files are public static content)
@@ -688,7 +688,7 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 - **Requirements:**
   - [x] Add `nbhd_did` field to neighborhood records in DynamoDB
   - [x] Add `site_type` field to sites ("personal" | "project")
-  - [x] Update models in `api/models.py` with new fields and validation
+  - [x] Update models in `app/app/api/models.py` with new fields and validation
 - **Acceptance Criteria:**
   - [x] New neighborhoods automatically get a DID on creation
   - [x] Existing neighborhoods can be migrated with script
@@ -700,24 +700,24 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 - **Status:** COMPLETED
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - Data Model section and [SITE-TYPES.md](./SITE-TYPES.md) - Data Model section
 - **Files:**
-  - `api/dynamodb_repository.py` - Add DID generation
-  - `api/models.py` - Update schemas
-  - `api/migrations/add_nbhd_did.py` (new) - Migration script
-  - `api/tests/test_nbhd_data_model.py` (new) - New tests
+  - `app/app/api/dynamodb_repository.py` - Add DID generation
+  - `app/app/api/models.py` - Update schemas
+  - `app/app/api/migrations/add_nbhd_did.py` (new) - Migration script
+  - `app/app/api/tests/test_nbhd_data_model.py` (new) - New tests
 
 #### NBHD-002: Nbhd Content API
 - **Description:** Create API router for neighborhood-owned AT Protocol content
 - **Requirements:**
-  - [x] Create `api/nbhd_content.py` router (new file)
+  - [x] Create `app/app/api/nbhd_content.py` router (new file)
   - [x] Implement `verify_nbhd_admin()` helper that checks user created/owns nbhd
-  - [x] `POST /api/nbhds/{id}/content/welcome` - Create/update welcome content (admin only)
-  - [x] `GET /api/nbhds/{id}/content/welcome` - Get welcome content (public)
-  - [x] `POST /api/nbhds/{id}/content/announcements` - Create announcement (admin only)
-  - [x] `GET /api/nbhds/{id}/content/announcements` - List announcements (paginated)
-  - [x] `DELETE /api/nbhds/{id}/content/announcements/{rkey}` - Delete announcement (admin only)
-  - [x] `GET /api/nbhds/{id}/content/cms` - CMS view with all content (admin only)
+  - [x] `POST /app/app/api/nbhds/{id}/content/welcome` - Create/update welcome content (admin only)
+  - [x] `GET /app/app/api/nbhds/{id}/content/welcome` - Get welcome content (public)
+  - [x] `POST /app/app/api/nbhds/{id}/content/announcements` - Create announcement (admin only)
+  - [x] `GET /app/app/api/nbhds/{id}/content/announcements` - List announcements (paginated)
+  - [x] `DELETE /app/app/api/nbhds/{id}/content/announcements/{rkey}` - Delete announcement (admin only)
+  - [x] `GET /app/app/api/nbhds/{id}/content/cms` - CMS view with all content (admin only)
   - [x] Store content as AT Protocol records with CID/rkey generation
-  - [x] Register router in `api/main.py`
+  - [x] Register router in `app/app/api/main.py`
 - **Acceptance Criteria:**
   - [x] Welcome content endpoints work (create, retrieve, delete)
   - [x] Announcements CRUD works with pagination
@@ -730,9 +730,9 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - API Routes, Admin Access Control, and AT Protocol Records sections
 - **Status:** COMPLETED
 - **Files:**
-  - `api/nbhd_content.py` (new) - Main router
-  - `api/main.py` - Register router
-  - `api/tests/integration/test_nbhd_content_api.py` (new)
+  - `app/app/api/nbhd_content.py` (new) - Main router
+  - `app/app/api/main.py` - Register router
+  - `app/app/api/tests/integration/test_nbhd_content_api.py` (new)
 
 ### Frontend - Core CMS Features
 
@@ -759,16 +759,16 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - Welcome Page Behavior section
 - **Status:** COMPLETED
 - **Files:**
-  - `nbhd/src/pages/WelcomePage.jsx` (new)
-  - `nbhd/src/components/DefaultWelcomeInstructions.jsx` (new)
-  - `nbhd/src/components/MarkdownRenderer.jsx` (new)
-  - `nbhd/src/components/MarkdownRenderer.module.css` (new)
-  - `nbhd/src/components/DefaultWelcomeInstructions.module.css` (new)
-  - `nbhd/src/services/nbhdContentService.js` (new)
-  - `nbhd/src/styles/WelcomePage.module.css` (new)
-  - `nbhd/src/__tests__/pages/WelcomePage.test.jsx` (new)
-  - `nbhd/src/App.jsx` - Add route
-  - `nbhd/src/pages/NeighborhoodDetail.jsx` - Add link
+  - `app/UI/src/pages/WelcomePage.jsx` (new)
+  - `app/UI/src/components/DefaultWelcomeInstructions.jsx` (new)
+  - `app/UI/src/components/MarkdownRenderer.jsx` (new)
+  - `app/UI/src/components/MarkdownRenderer.module.css` (new)
+  - `app/UI/src/components/DefaultWelcomeInstructions.module.css` (new)
+  - `app/UI/src/services/nbhdContentService.js` (new)
+  - `app/UI/src/styles/WelcomePage.module.css` (new)
+  - `app/UI/src/__tests__/pages/WelcomePage.test.jsx` (new)
+  - `app/UI/src/App.jsx` - Add route
+  - `app/UI/src/pages/NeighborhoodDetail.jsx` - Add link
 
 #### NBHD-004: Admin Page UI
 - **Description:** Create admin interface for neighborhood owners to configure welcome page, announcements, and settings
@@ -799,20 +799,20 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - Frontend Component Architecture section
 - **Fix Applied:** Updated MSW handlers to use absolute URL patterns (http://localhost:8000/*) instead of relative paths, resolving route matching issue. Updated AdminPage tests to use regex matching for CSS-module-hashed class names. Merged via PR#TBD on 2026-02-05.
 - **Files:**
-  - `nbhd/src/pages/AdminPage.jsx` (new)
-  - `nbhd/src/pages/AdminPage.module.css` (new)
-  - `nbhd/src/components/WelcomeContentEditor.jsx` (new)
-  - `nbhd/src/components/WelcomeContentEditor.module.css` (new)
-  - `nbhd/src/components/AnnouncementManager.jsx` (new)
-  - `nbhd/src/components/AnnouncementManager.module.css` (new)
-  - `nbhd/src/components/NbhdSettingsForm.jsx` (new)
-  - `nbhd/src/components/NbhdSettingsForm.module.css` (new)
-  - `nbhd/src/components/SitesTab.jsx` (new)
-  - `nbhd/src/components/SitesTab.module.css` (new)
-  - `nbhd/src/services/nbhdContentService.js` (new)
-  - `nbhd/src/App.jsx` - Added route
-  - `nbhd/src/pages/NeighborhoodDetail.jsx` - Added admin button
-  - `nbhd/src/__tests__/mocks/handlers.js` - Added neighborhood content API mocks
+  - `app/UI/src/pages/AdminPage.jsx` (new)
+  - `app/UI/src/pages/AdminPage.module.css` (new)
+  - `app/UI/src/components/WelcomeContentEditor.jsx` (new)
+  - `app/UI/src/components/WelcomeContentEditor.module.css` (new)
+  - `app/UI/src/components/AnnouncementManager.jsx` (new)
+  - `app/UI/src/components/AnnouncementManager.module.css` (new)
+  - `app/UI/src/components/NbhdSettingsForm.jsx` (new)
+  - `app/UI/src/components/NbhdSettingsForm.module.css` (new)
+  - `app/UI/src/components/SitesTab.jsx` (new)
+  - `app/UI/src/components/SitesTab.module.css` (new)
+  - `app/UI/src/services/nbhdContentService.js` (new)
+  - `app/UI/src/App.jsx` - Added route
+  - `app/UI/src/pages/NeighborhoodDetail.jsx` - Added admin button
+  - `app/UI/src/__tests__/mocks/handlers.js` - Added neighborhood content API mocks
   - Test files created for all components (rewritten for MSW)
 
 ---
@@ -842,10 +842,10 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 - **Estimate:** M
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - CMS View Response Format section
 - **Files:**
-  - `nbhd/src/pages/CMSView.jsx` (new)
-  - `nbhd/src/components/ContentRecordsList.jsx` (new)
-  - `nbhd/src/components/ATProtocolInspector.jsx` (new)
-  - `nbhd/src/App.jsx` - Add route
+  - `app/UI/src/pages/CMSView.jsx` (new)
+  - `app/UI/src/components/ContentRecordsList.jsx` (new)
+  - `app/UI/src/components/ATProtocolInspector.jsx` (new)
+  - `app/UI/src/App.jsx` - Add route
 - **Status:** COMPLETED
 
 ### Frontend - Site Management Enhancement
@@ -855,13 +855,13 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 - **Requirements:**
   - [x] Update `SiteManagementDashboard.jsx` to accept `site_type` filter prop
   - [x] Update site creation flow to include site type selector
-  - [x] Update backend `sites.py` `GET /api/sites` to support `?site_type=personal|project` query param
+  - [x] Update backend `sites.py` `GET /app/app/api/sites` to support `?site_type=personal|project` query param
   - [x] Validate project sites require nbhd_id selection
   - [x] Update site creation form to show/hide nbhd selector based on type
   - [x] Add site type badges to site list
   - [x] Update `SiteConfigForm.jsx` to include site type in form
 - **Acceptance Criteria:**
-  - [x] Filter parameter works on GET /api/sites
+  - [x] Filter parameter works on GET /app/app/api/sites
   - [x] Site creation saves site_type correctly
   - [x] Personal sites don't require nbhd
   - [x] Project sites require nbhd selection
@@ -873,18 +873,18 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 - **Tests:** 35 tests passing (17 SiteManagementDashboard + 18 SiteConfigForm)
 - **Reference:** See [SITE-TYPES.md](./SITE-TYPES.md) - Data Model, API Endpoints, and Validation Rules sections
 - **Implementation Files:**
-  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Added SiteTypeBadge component, siteType prop, API filtering
-  - `nbhd/src/components/SiteBuilder/SiteConfigForm.jsx` - Added site type selector, neighborhood dropdown, validation
-  - `nbhd/src/hooks/useMyNeighborhoods.js` - Used existing hook for neighborhood data
-  - `nbhd/src/__tests__/components/SiteManagementDashboard.test.jsx` - Added 6 new tests for badges and filtering
-  - `nbhd/src/__tests__/components/SiteConfigForm.test.jsx` - Added 5 new tests for site type selection and validation
+  - `app/UI/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Added SiteTypeBadge component, siteType prop, API filtering
+  - `app/UI/src/components/SiteBuilder/SiteConfigForm.jsx` - Added site type selector, neighborhood dropdown, validation
+  - `app/UI/src/hooks/useMyNeighborhoods.js` - Used existing hook for neighborhood data
+  - `app/UI/src/__tests__/components/SiteManagementDashboard.test.jsx` - Added 6 new tests for badges and filtering
+  - `app/UI/src/__tests__/components/SiteConfigForm.test.jsx` - Added 5 new tests for site type selection and validation
   - CSS modules updated with badge and form styling
 
 #### SITES-002: Personal Sites Page
 - **Description:** Create dedicated page for viewing and managing personal sites
 - **Requirements:**
   - [x] Create `PersonalSites.jsx` page
-  - [x] Fetch `GET /api/sites?site_type=personal`
+  - [x] Fetch `GET /app/app/api/sites?site_type=personal`
   - [x] Reuse `SiteManagementDashboard` with site_type="personal" filter
   - [x] Add create button with site type pre-selected
   - [x] Add route `/personal-sites` to `App.jsx`
@@ -900,15 +900,15 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 - **Estimate:** S
 - **Reference:** See [SITE-TYPES.md](./SITE-TYPES.md) - UI Patterns and Personal Sites Page sections
 - **Files:**
-  - `nbhd/src/pages/PersonalSites.jsx` (new)
-  - `nbhd/src/App.jsx` - Add route and link
+  - `app/UI/src/pages/PersonalSites.jsx` (new)
+  - `app/UI/src/App.jsx` - Add route and link
 
 #### SITES-003: Project Sites Page
 - **Description:** Create dedicated page for viewing and managing project sites
 - **Requirements:**
   - [x] Create `ProjectSites.jsx` page
   - [x] Create `ProjectSiteSelector.jsx` component for choosing/filtering by nbhd
-  - [x] Fetch `GET /api/sites?site_type=project`
+  - [x] Fetch `GET /app/app/api/sites?site_type=project`
   - [x] Allow filtering by nbhd
   - [x] Reuse `SiteManagementDashboard` with site_type="project" filter
   - [x] Add create button with site type pre-selected
@@ -927,9 +927,9 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 - **Estimate:** S
 - **Reference:** See [SITE-TYPES.md](./SITE-TYPES.md) - UI Patterns and Project Sites Page sections
 - **Files:**
-  - `nbhd/src/pages/ProjectSites.jsx` (new)
-  - `nbhd/src/components/ProjectSiteSelector.jsx` (new)
-  - `nbhd/src/App.jsx` - Add route and link
+  - `app/UI/src/pages/ProjectSites.jsx` (new)
+  - `app/UI/src/components/ProjectSiteSelector.jsx` (new)
+  - `app/UI/src/App.jsx` - Add route and link
 
 ---
 
@@ -945,7 +945,7 @@ These tickets complete the build pipeline UI for the existing SSG-015 and SSG-01
 - **Description:** Add "Deploy Site" button to trigger site builds
 - **Requirements:**
   - [x] Add "Deploy Site" button to `SiteManagementDashboard.jsx`
-  - [x] Call `POST /api/sites/{id}/build` (endpoint exists from SSG-015)
+  - [x] Call `POST /app/app/api/sites/{id}/build` (endpoint exists from SSG-015)
   - [x] Show loading state during build initialization
   - [x] Display job_id after successful trigger
   - [x] Show error message on failures
@@ -961,19 +961,19 @@ These tickets complete the build pipeline UI for the existing SSG-015 and SSG-01
 - **Type:** Frontend
 - **Estimate:** S
 - **Status:** COMPLETED
-- **Tests:** `nbhd/src/__tests__/components/BuildTriggerButton.test.jsx` (12 tests passing)
+- **Tests:** `app/UI/src/__tests__/components/BuildTriggerButton.test.jsx` (12 tests passing)
 - **Reference:** See [BUILD-PIPELINE-UI.md](./BUILD-PIPELINE-UI.md) - BUILD-001 section and Component Specifications
 - **Implementation Files:**
-  - `nbhd/src/components/SiteBuilder/BuildTriggerButton.jsx` (new)
-  - `nbhd/src/components/SiteBuilder/BuildTriggerButton.module.css` (new)
-  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Added BuildTriggerButton import and integration
-  - `nbhd/src/__tests__/components/BuildTriggerButton.test.jsx` (new)
+  - `app/UI/src/components/SiteBuilder/BuildTriggerButton.jsx` (new)
+  - `app/UI/src/components/SiteBuilder/BuildTriggerButton.module.css` (new)
+  - `app/UI/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Added BuildTriggerButton import and integration
+  - `app/UI/src/__tests__/components/BuildTriggerButton.test.jsx` (new)
 
 #### BUILD-002: Build Status Poller
 - **Description:** Component to poll and display build status and logs
 - **Requirements:**
   - [x] Create `BuildStatusPoller.jsx` component
-  - [x] Poll `GET /api/sites/{id}/builds/{job_id}` every 5 seconds
+  - [x] Poll `GET /app/app/api/sites/{id}/builds/{job_id}` every 5 seconds
   - [x] Display progress: pending → running → completed/failed
   - [x] Show build logs (tail last 50 lines)
   - [x] Show error messages on failure
@@ -990,19 +990,19 @@ These tickets complete the build pipeline UI for the existing SSG-015 and SSG-01
   - [x] Network errors handled without crashing
   - [x] Can manually refresh status
 - **Status:** COMPLETED
-- **Tests:** `nbhd/src/__tests__/components/BuildStatusPoller.test.jsx` (11 tests passing)
+- **Tests:** `app/UI/src/__tests__/components/BuildStatusPoller.test.jsx` (11 tests passing)
 - **Type:** Frontend
 - **Estimate:** M
 - **Reference:** See [BUILD-PIPELINE-UI.md](./BUILD-PIPELINE-UI.md) - BUILD-002 section, Status Lifecycle, and Component Specifications
 - **Files:**
-  - `nbhd/src/components/SiteBuilder/BuildStatusPoller.jsx` (new)
-  - `nbhd/src/hooks/useBuildPoller.js` (new, optional - custom hook)
+  - `app/UI/src/components/SiteBuilder/BuildStatusPoller.jsx` (new)
+  - `app/UI/src/hooks/useBuildPoller.js` (new, optional - custom hook)
 
 #### BUILD-003: Build History Dashboard
 - **Description:** Component to display past builds and their status
 - **Requirements:**
   - [x] Create `BuildHistory.jsx` component
-  - [x] Fetch `GET /api/sites/{id}/builds` (endpoint exists from SSG-015)
+  - [x] Fetch `GET /app/app/api/sites/{id}/builds` (endpoint exists from SSG-015)
   - [x] Display table: Status, Started, Duration, Actions
   - [x] Show build status with color coding (success=green, failed=red, pending=yellow)
   - [x] Link to logs for each build
@@ -1022,11 +1022,11 @@ These tickets complete the build pipeline UI for the existing SSG-015 and SSG-01
 - **Status:** COMPLETED (2026-02-07)
 - **Reference:** See [BUILD-PIPELINE-UI.md](./BUILD-PIPELINE-UI.md) - BUILD-003 section and Component Specifications
 - **Files:**
-  - `nbhd/src/components/SiteBuilder/BuildHistory.jsx` (new) - 220 lines, main component with table, pagination, modals
-  - `nbhd/src/components/SiteBuilder/BuildHistory.module.css` (new) - 180 lines, responsive styling with color-coded badges
-  - `nbhd/src/__tests__/components/BuildHistory.test.jsx` (new) - 450+ lines, 19 comprehensive tests
-  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Added BuildHistory integration
-  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.module.css` - Added button/section styles
+  - `app/UI/src/components/SiteBuilder/BuildHistory.jsx` (new) - 220 lines, main component with table, pagination, modals
+  - `app/UI/src/components/SiteBuilder/BuildHistory.module.css` (new) - 180 lines, responsive styling with color-coded badges
+  - `app/UI/src/__tests__/components/BuildHistory.test.jsx` (new) - 450+ lines, 19 comprehensive tests
+  - `app/UI/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Added BuildHistory integration
+  - `app/UI/src/components/SiteBuilder/SiteManagementDashboard.module.css` - Added button/section styles
 - **PR:** https://github.com/benkline/nbhd.city/pull/98
 - **Tests:** 19/19 tests passing (BUILD-003), 17/17 SiteManagementDashboard, 59 total BUILD tests passing
 
@@ -1153,7 +1153,7 @@ Complete AT Protocol federation and Personal Data Server (PDS) implementation. T
 #### ATP-007: AT Protocol Data Export
 - **Description:** Export member data in standard AT Protocol format
 - **Requirements:**
-  - [ ] Endpoint: `GET /api/user/export/atproto`
+  - [ ] Endpoint: `GET /app/app/api/user/export/atproto`
   - [ ] Exports all user data as AT Protocol records
   - [ ] Includes profiles, posts, follows, custom data
   - [ ] Downloadable ZIP or JSON

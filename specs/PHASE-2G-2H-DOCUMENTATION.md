@@ -172,7 +172,7 @@ This document provides an index of all documentation created for Phase 2g (Nbhd 
 - **Conditional nbhd_id:** Required for project sites, optional for personal
 
 ### APIs
-- **Neighborhood content endpoints:** Namespaced under `/api/nbhds/{id}/content/`
+- **Neighborhood content endpoints:** Namespaced under `/app/api/nbhds/{id}/content/`
 - **Site filtering:** Query parameter `?site_type=personal|project`
 - **Admin access:** Middleware `require_nbhd_admin()` on all modification endpoints
 

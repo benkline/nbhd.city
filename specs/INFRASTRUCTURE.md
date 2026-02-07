@@ -217,7 +217,7 @@ Notifications: SNS → Email
 
 ### Logs
 
-- **Log Group:** `/aws/lambda/nbhd-city-api`
+- **Log Group:** `/aws/app/lambda/nbhd-city-api`
 - **Retention:** 30 days
 - **Format:** JSON (structured logging)
 - **Search:** Via CloudWatch Insights

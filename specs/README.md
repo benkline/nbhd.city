@@ -61,10 +61,11 @@ See [PHASES.md](./PHASES.md) for complete roadmap and [tickets.md](../tickets/ti
 
 ## Key Files
 
-- `/api/` - Python FastAPI backend
-- `/nbhd/` - React frontend
+- `/app/api/` - Python FastAPI backend
+- `/app/UI/` - React frontend
+- `/app/lambda/` - AWS Lambda functions
 - `/devops/` - Terraform infrastructure (AWS)
-- `/planning/` - This documentation
+- `/specs/` - This documentation
 
 ---
 

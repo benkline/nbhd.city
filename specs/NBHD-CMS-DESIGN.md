@@ -59,7 +59,7 @@ Sites Table (DynamoDB)
 **Key Points:**
 - Personal sites: Belong to individual users, no nbhd association
 - Project sites: Belong to neighborhood, created by members
-- Query filtering: `GET /api/sites?site_type=personal|project`
+- Query filtering: `GET /app/api/sites?site_type=personal|project`
 
 ### AT Protocol Records for Neighborhood Content
 
@@ -131,35 +131,35 @@ Record Key: "default" (singleton)
 ### Neighborhood Content Endpoints
 
 ```
-POST /api/nbhds/{id}/content/welcome
+POST /app/api/nbhds/{id}/content/welcome
 ├── Auth: require_nbhd_admin(nbhd_id, user_id)
 ├── Body: { title, content (markdown) }
 ├── Returns: { uri, cid, rkey, created_at }
 └── Action: Creates/updates app.nbhd.welcome record
 
-GET /api/nbhds/{id}/content/welcome
+GET /app/api/nbhds/{id}/content/welcome
 ├── Auth: Public
 ├── Returns: { title, content, updated_at, published_at }
 └── Returns: { error: "not_found" } if no welcome content
 
-POST /api/nbhds/{id}/content/announcements
+POST /app/api/nbhds/{id}/content/announcements
 ├── Auth: require_nbhd_admin(nbhd_id, user_id)
 ├── Body: { title, content, priority?, expires_at? }
 ├── Returns: { uri, cid, rkey, created_at }
 └── Action: Creates app.nbhd.announcement record
 
-GET /api/nbhds/{id}/content/announcements
+GET /app/api/nbhds/{id}/content/announcements
 ├── Auth: Public
 ├── Query: ?limit=50&offset=0 (pagination)
 ├── Returns: [{ rkey, title, content, priority, published_at, expires_at }]
 └── Sorting: newest first (by TID)
 
-DELETE /api/nbhds/{id}/content/announcements/{rkey}
+DELETE /app/api/nbhds/{id}/content/announcements/{rkey}
 ├── Auth: require_nbhd_admin(nbhd_id, user_id)
 ├── Returns: { deleted: true }
 └── Action: Soft-deletes announcement record (marked as deleted)
 
-GET /api/nbhds/{id}/content/cms
+GET /app/api/nbhds/{id}/content/cms
 ├── Auth: require_nbhd_admin(nbhd_id, user_id)
 ├── Returns: CMS View (see below)
 └── Aggregates all AT Protocol records for this nbhd

@@ -64,7 +64,7 @@ project site:
 ### Create Site
 
 ```
-POST /api/sites
+POST /app/api/sites
 {
   "name": "My Blog",
   "template_id": "eleventy-blog",
@@ -86,7 +86,7 @@ Response:
 ### List Sites with Filtering
 
 ```
-GET /api/sites?site_type=personal|project
+GET /app/api/sites?site_type=personal|project
 
 Filtering logic:
   - ?site_type=personal  → Returns only personal sites for user
@@ -100,13 +100,13 @@ Filtering logic:
 ```
 personal sites:
   - Only site creator can view/edit/delete
-  - Returned by: GET /api/sites (auth required)
+  - Returned by: GET /app/api/sites (auth required)
 
 project sites:
   - All authenticated users can view
   - Only nbhd owner can edit/delete
   - Site creator displays in build log (for credit)
-  - Returned by: GET /api/sites and GET /api/nbhds/{id}/sites
+  - Returned by: GET /app/api/sites and GET /app/api/nbhds/{id}/sites
 ```
 
 ## Frontend Architecture
@@ -383,10 +383,10 @@ project site:
 
 ```
 Listing sites:
-  - Personal: GET /api/sites?site_type=personal
+  - Personal: GET /app/api/sites?site_type=personal
     → Returns only authenticated user's personal sites
 
-  - Project: GET /api/sites?site_type=project
+  - Project: GET /app/api/sites?site_type=project
     → Returns all project sites user can access
     → Can filter by nbhd_id
 ```

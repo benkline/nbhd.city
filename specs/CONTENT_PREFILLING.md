@@ -224,7 +224,7 @@ class ContentPrefiller:
 
 ## API Endpoint
 
-### GET /api/sites/{site_id}/prefill
+### GET /app/api/sites/{site_id}/prefill
 
 **Purpose:** Get prefill suggestions for a site
 
@@ -264,7 +264,7 @@ class ContentPrefiller:
 
 **Implementation:**
 ```python
-@router.get("/api/sites/{site_id}/prefill")
+@router.get("/app/api/sites/{site_id}/prefill")
 async def get_prefill_suggestions(
     site_id: str,
     user_did: str = Depends(get_current_user)
@@ -298,7 +298,7 @@ function PrefillPreview({ siteId, onApply, onCancel }) {
   }, [siteId]);
 
   const fetchPrefillSuggestions = async () => {
-    const response = await api.get(`/api/sites/${siteId}/prefill`);
+    const response = await api.get(`/app/api/sites/${siteId}/prefill`);
     setSuggestions(response.suggestions);
     setLoading(false);
   };
@@ -648,7 +648,7 @@ async def test_prefill_endpoint():
     site_id = await create_site(user_did, template_id="blog")
 
     # Get prefill suggestions
-    response = await client.get(f"/api/sites/{site_id}/prefill")
+    response = await client.get(f"/app/api/sites/{site_id}/prefill")
 
     assert response.status_code == 200
     data = response.json()

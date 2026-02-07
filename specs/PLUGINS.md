@@ -69,21 +69,21 @@ plugins/
   "api_routes": [
     {
       "method": "GET",
-      "path": "/api/channels",
+      "path": "/app/api/channels",
       "handler": "api.endpoints.list_channels",
       "auth_required": true,
       "role_required": "member"
     },
     {
       "method": "POST",
-      "path": "/api/channels",
+      "path": "/app/api/channels",
       "handler": "api.endpoints.create_channel",
       "auth_required": true,
       "role_required": "admin"
     },
     {
       "method": "POST",
-      "path": "/api/messages",
+      "path": "/app/api/messages",
       "handler": "api.endpoints.create_message",
       "auth_required": true,
       "role_required": "member"
@@ -182,7 +182,7 @@ touch plugin.config.json README.md
   "api_routes": [
     {
       "method": "GET",
-      "path": "/api/tasks",
+      "path": "/app/api/tasks",
       "handler": "api.endpoints.list_tasks"
     }
   ],
@@ -202,7 +202,7 @@ from fastapi import APIRouter, Depends
 from .models import Task
 from .repository import TaskRepository
 
-router = APIRouter(prefix="/api/tasks")
+router = APIRouter(prefix="/app/api/tasks")
 repo = TaskRepository()
 
 @router.get("")
@@ -227,7 +227,7 @@ export function TasksPage() {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      const response = await get('/api/tasks');
+      const response = await get('/app/api/tasks');
       setTasks(response.data);
     };
     fetchTasks();

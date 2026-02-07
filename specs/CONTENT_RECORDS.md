@@ -240,7 +240,7 @@ def generate_rkey() -> str:
 
 ## API Endpoints
 
-### POST /api/sites/{site_id}/content
+### POST /app/api/sites/{site_id}/content
 
 **Purpose:** Create new blog post or page
 
@@ -292,7 +292,7 @@ def generate_rkey() -> str:
 
 ---
 
-### GET /api/sites/{site_id}/content
+### GET /app/api/sites/{site_id}/content
 
 **Purpose:** List all content for a site
 
@@ -326,7 +326,7 @@ def generate_rkey() -> str:
 
 ---
 
-### GET /api/sites/{site_id}/content/{rkey}
+### GET /app/api/sites/{site_id}/content/{rkey}
 
 **Purpose:** Get specific content record
 
@@ -352,7 +352,7 @@ def generate_rkey() -> str:
 
 ---
 
-### PUT /api/sites/{site_id}/content/{rkey}
+### PUT /app/api/sites/{site_id}/content/{rkey}
 
 **Purpose:** Update content record
 
@@ -380,7 +380,7 @@ def generate_rkey() -> str:
 
 ---
 
-### DELETE /api/sites/{site_id}/content/{rkey}
+### DELETE /app/api/sites/{site_id}/content/{rkey}
 
 **Purpose:** Delete content record
 
@@ -398,7 +398,7 @@ def generate_rkey() -> str:
 ```
 User fills form in ContentEditor
        ↓
-POST /api/sites/{id}/content
+POST /app/api/sites/{id}/content
        ↓
 ┌─────────────────────────┐
 │ Validate Ownership      │
@@ -437,7 +437,7 @@ POST /api/sites/{id}/content
 ```
 User edits existing post
        ↓
-PUT /api/sites/{id}/content/{rkey}
+PUT /app/api/sites/{id}/content/{rkey}
        ↓
 ┌─────────────────────────┐
 │ Get existing record     │
@@ -602,7 +602,7 @@ def test_generate_bluesky_summary():
 ```python
 async def test_create_content_with_bluesky():
     # Create blog post
-    response = await client.post("/api/sites/site-123/content", json={
+    response = await client.post("/app/api/sites/site-123/content", json={
         "title": "Test Post",
         "content": "# Hello",
         "frontmatter": {"date": "2026-01-21T00:00:00Z"},

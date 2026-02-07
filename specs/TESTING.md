@@ -94,7 +94,7 @@ def test_jwt_expires_after_7_days():
 @pytest.mark.asyncio
 async def test_create_site_endpoint(client, auth_headers, dynamodb_mock):
     response = await client.post(
-        "/api/sites",
+        "/app/api/sites",
         json={
             "title": "My Blog",
             "template": "blog",
@@ -108,7 +108,7 @@ async def test_create_site_endpoint(client, auth_headers, dynamodb_mock):
 @pytest.mark.asyncio
 async def test_template_selection_flow(client, auth_headers):
     # Get templates
-    templates_response = await client.get("/api/templates")
+    templates_response = await client.get("/app/api/templates")
     assert len(templates_response.json()['data']) > 0
 
     # Select one
@@ -116,7 +116,7 @@ async def test_template_selection_flow(client, auth_headers):
 
     # Create site
     site_response = await client.post(
-        "/api/sites",
+        "/app/api/sites",
         json={"template": template_id, "config": {}},
         headers=auth_headers
     )
@@ -402,7 +402,7 @@ npm run test:debug
 import { http, HttpResponse } from 'msw';
 
 export const handlers = [
-  http.get('/api/templates', () => {
+  http.get('/app/api/templates', () => {
     return HttpResponse.json({
       data: [
         { id: 'blog', name: 'Blog', preview: '...' },
@@ -411,7 +411,7 @@ export const handlers = [
     });
   }),
 
-  http.post('/api/sites', ({ request }) => {
+  http.post('/app/api/sites', ({ request }) => {
     return HttpResponse.json(
       { data: { id: 'site-001', status: 'draft' } },
       { status: 201 }
@@ -483,7 +483,7 @@ from locust import HttpUser, task
 class SiteBuilderUser(HttpUser):
     @task
     def build_site(self):
-        self.client.post("/api/sites/site-001/build")
+        self.client.post("/app/api/sites/site-001/build")
 ```
 
 ### Query Performance

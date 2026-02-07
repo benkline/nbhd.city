@@ -150,7 +150,7 @@ export function TemplateGallery({ onSelect }) {
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const response = await fetch('/api/templates');
+        const response = await fetch('/app/api/templates');
         const data = await response.json();
         setTemplates(data.data);
       } catch (err) {

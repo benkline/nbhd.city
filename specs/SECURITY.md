@@ -68,7 +68,7 @@ Every API endpoint validates:
 
 ```python
 # Example FastAPI endpoint
-@app.put("/api/neighborhoods/{id}/settings")
+@app.put("/app/api/neighborhoods/{id}/settings")
 def update_neighborhood(id: str, settings: dict, current_user = Depends(get_current_user)):
     # Get neighborhood
     nbhd = get_neighborhood(id)
@@ -160,7 +160,7 @@ from slowapi.util import get_remote_address
 
 limiter = Limiter(key_func=get_remote_address)
 
-@app.post("/api/neighborhoods")
+@app.post("/app/api/neighborhoods")
 @limiter.limit("5/day")
 def create_neighborhood(data: dict, current_user = Depends(get_current_user)):
     # Create neighborhood
@@ -192,7 +192,7 @@ On **hosted nbhd.city:** Email must be verified before creating neighborhoods
 Users can download all their data:
 
 ```
-GET /api/user/export/data
+GET /app/api/user/export/data
 ```
 
 Returns ZIP with:
@@ -206,7 +206,7 @@ Returns ZIP with:
 Users can delete their account:
 
 ```
-DELETE /api/user
+DELETE /app/api/user
 ```
 
 What happens:

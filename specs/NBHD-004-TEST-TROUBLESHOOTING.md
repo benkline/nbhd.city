@@ -34,12 +34,12 @@ The NBHD-004 implementation (Admin Page UI components) is feature-complete with 
 
 ## Current Issue 🔴
 
-**Problem:** MSW handlers not matching GET `/api/nbhds/:nbhdId` requests
+**Problem:** MSW handlers not matching GET `/app/api/nbhds/:nbhdId` requests
 
 **Symptoms:**
 ```
 [MSW] Warning: intercepted a request without a matching request handler:
-• GET http://localhost:8000/api/nbhds/nbhd-123
+• GET http://localhost:8000/app/api/nbhds/nbhd-123
 ```
 
 **Impact:**
@@ -56,15 +56,15 @@ The NBHD-004 implementation (Admin Page UI components) is feature-complete with 
 ## Files Changed
 
 ### Test Files Rewritten
-- `nbhd/src/__tests__/pages/AdminPage.test.jsx`
-- `nbhd/src/__tests__/components/WelcomeContentEditor.test.jsx`
-- `nbhd/src/__tests__/components/AnnouncementManager.test.jsx`
-- `nbhd/src/__tests__/components/NbhdSettingsForm.test.jsx`
+- `app/UI/src/__tests__/pages/AdminPage.test.jsx`
+- `app/UI/src/__tests__/components/WelcomeContentEditor.test.jsx`
+- `app/UI/src/__tests__/components/AnnouncementManager.test.jsx`
+- `app/UI/src/__tests__/components/NbhdSettingsForm.test.jsx`
 
 ### Configuration Updated
-- `nbhd/vitest.config.js` - Added env vars, alias resolution
-- `nbhd/src/__tests__/mocks/handlers.js` - Added neighborhood GET handler
-- `nbhd/src/lib/api.js` - Fixed import.meta.env handling
+- `app/UI/vitest.config.js` - Added env vars, alias resolution
+- `app/UI/src/__tests__/mocks/handlers.js` - Added neighborhood GET handler
+- `app/UI/src/lib/api.js` - Fixed import.meta.env handling
 
 ### Commits
 - `2467a2a` - chore: Improve test infrastructure for NBHD-004 admin components
@@ -111,8 +111,8 @@ Create a minimal test to verify MSW can intercept API calls:
 
 ```javascript
 describe('MSW Setup', () => {
-  it('intercepts GET /api/nbhds/nbhd-123', async () => {
-    const response = await fetch('http://localhost:8000/api/nbhds/nbhd-123');
+  it('intercepts GET /app/api/nbhds/nbhd-123', async () => {
+    const response = await fetch('http://localhost:8000/app/api/nbhds/nbhd-123');
     expect(response.ok).toBe(true);
   });
 });
@@ -124,7 +124,7 @@ describe('MSW Setup', () => {
 Try using `http.all()` with explicit method checking instead of parameterized routes:
 
 ```javascript
-http.all('/api/nbhds/:nbhdId', ({ params, request }) => {
+http.all('/app/api/nbhds/:nbhdId', ({ params, request }) => {
   if (request.method === 'GET') {
     return HttpResponse.json({ data: { ... } });
   }
@@ -136,7 +136,7 @@ http.all('/api/nbhds/:nbhdId', ({ params, request }) => {
 Instead of relative paths, use full URL patterns:
 
 ```javascript
-http.get('http://localhost:8000/api/nbhds/:nbhdId', () => {
+http.get('http://localhost:8000/app/api/nbhds/:nbhdId', () => {
   return HttpResponse.json({ data: { ... } });
 }),
 ```
