@@ -13,7 +13,8 @@ const mockSites = [
     subdomain: 'myblog',
     public_url: 'https://myblog.nbhd.city',
     created_at: '2026-01-15T10:00:00Z',
-    updated_at: '2026-01-18T14:30:00Z'
+    updated_at: '2026-01-18T14:30:00Z',
+    site_type: 'personal'
   },
   {
     site_id: 'site-002',
@@ -23,7 +24,9 @@ const mockSites = [
     subdomain: 'portfolio',
     public_url: 'https://portfolio.nbhd.city',
     created_at: '2026-01-16T09:00:00Z',
-    updated_at: '2026-01-16T09:00:00Z'
+    updated_at: '2026-01-16T09:00:00Z',
+    site_type: 'project',
+    nbhd_name: 'Tech Neighborhood'
   },
   {
     site_id: 'site-003',
@@ -33,7 +36,8 @@ const mockSites = [
     subdomain: 'newsletter',
     public_url: 'https://newsletter.nbhd.city',
     created_at: '2026-01-19T08:00:00Z',
-    updated_at: '2026-01-19T08:15:00Z'
+    updated_at: '2026-01-19T08:15:00Z',
+    site_type: 'personal'
   }
 ];
 
@@ -296,5 +300,128 @@ describe('SiteManagementDashboard', () => {
 
     // Should show error message
     expect(await screen.findByText(/error|failed/i)).toBeInTheDocument();
+  });
+
+  // [ ] Add site type badges to site list
+  it('displays site type badges for each site', async () => {
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: mockSites })
+    });
+    global.fetch = mockFetch;
+
+    render(
+      <BrowserRouter>
+        <SiteManagementDashboard />
+      </BrowserRouter>
+    );
+
+    // Should display personal badges for personal sites
+    const personalBadges = await screen.findAllByText(/👤.*Personal/);
+    expect(personalBadges.length).toBeGreaterThan(0);
+
+    // Should display project badge for project sites
+    expect(await screen.findByText(/🏘️.*Project.*Tech Neighborhood/)).toBeInTheDocument();
+  });
+
+  // [ ] Add site type badges - personal type
+  it('displays personal badge for personal sites', async () => {
+    const personalSites = [mockSites[0]]; // Only personal site
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: personalSites })
+    });
+    global.fetch = mockFetch;
+
+    render(
+      <BrowserRouter>
+        <SiteManagementDashboard />
+      </BrowserRouter>
+    );
+
+    expect(await screen.findByText(/👤.*Personal/)).toBeInTheDocument();
+  });
+
+  // [ ] Add site type badges - project type
+  it('displays project badge with neighborhood name', async () => {
+    const projectSites = [mockSites[1]]; // Only project site
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: projectSites })
+    });
+    global.fetch = mockFetch;
+
+    render(
+      <BrowserRouter>
+        <SiteManagementDashboard />
+      </BrowserRouter>
+    );
+
+    expect(await screen.findByText(/🏘️.*Project.*Tech Neighborhood/)).toBeInTheDocument();
+  });
+
+  // [ ] Filter parameter works on GET /api/sites
+  it('filters sites by type when siteType prop provided', async () => {
+    const personalSites = [mockSites[0], mockSites[2]]; // Only personal sites
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: personalSites })
+    });
+    global.fetch = mockFetch;
+
+    render(
+      <BrowserRouter>
+        <SiteManagementDashboard siteType="personal" />
+      </BrowserRouter>
+    );
+
+    // Wait for data to load
+    await screen.findByText('My Blog');
+
+    // Verify API was called with correct query parameter
+    expect(mockFetch).toHaveBeenCalledWith('/api/sites?site_type=personal');
+  });
+
+  // [ ] Filter parameter works - project sites
+  it('filters to project sites when siteType="project"', async () => {
+    const projectSites = [mockSites[1]];
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: projectSites })
+    });
+    global.fetch = mockFetch;
+
+    render(
+      <BrowserRouter>
+        <SiteManagementDashboard siteType="project" />
+      </BrowserRouter>
+    );
+
+    // Wait for data to load
+    await screen.findByText('Project Portfolio');
+
+    // Verify API was called with correct query parameter
+    expect(mockFetch).toHaveBeenCalledWith('/api/sites?site_type=project');
+  });
+
+  // [ ] Filter parameter - no filter shows all
+  it('shows all sites when no siteType filter provided', async () => {
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: mockSites })
+    });
+    global.fetch = mockFetch;
+
+    render(
+      <BrowserRouter>
+        <SiteManagementDashboard />
+      </BrowserRouter>
+    );
+
+    // Wait for data to load
+    await screen.findByText('My Blog');
+
+    // Verify API was called WITHOUT query parameter
+    expect(mockFetch).toHaveBeenCalledWith('/api/sites');
   });
 });

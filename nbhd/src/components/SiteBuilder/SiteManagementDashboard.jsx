@@ -16,6 +16,24 @@ function StatusBadge({ status }) {
 }
 
 /**
+ * Displays site type badge (personal or project)
+ */
+function SiteTypeBadge({ siteType, nbhdName }) {
+  const typeConfig = {
+    personal: { label: 'Personal', icon: '👤', cssClass: styles.siteTypePersonal },
+    project: { label: nbhdName ? `Project (${nbhdName})` : 'Project', icon: '🏘️', cssClass: styles.siteTypeProject },
+    nbhd: { label: nbhdName ? `Nbhd (${nbhdName})` : 'Nbhd', icon: '🏘️', cssClass: styles.siteTypeNbhd }
+  };
+
+  const config = typeConfig[siteType] || typeConfig.personal;
+  return (
+    <span className={`${styles.siteTypeBadge} ${config.cssClass}`}>
+      {config.icon} {config.label}
+    </span>
+  );
+}
+
+/**
  * Displays a single site card
  */
 function SiteCard({ site, onEdit, onDelete }) {
@@ -39,7 +57,10 @@ function SiteCard({ site, onEdit, onDelete }) {
       <div className={styles.cardHeader}>
         <div className={styles.titleSection}>
           <h3 className={styles.title}>{site.title}</h3>
-          <StatusBadge status={site.status} />
+          <div className={styles.badges}>
+            <StatusBadge status={site.status} />
+            <SiteTypeBadge siteType={site.site_type} nbhdName={site.nbhd_name} />
+          </div>
         </div>
       </div>
 
@@ -116,7 +137,7 @@ function SiteCard({ site, onEdit, onDelete }) {
 /**
  * SiteManagementDashboard - Displays and manages user's sites
  */
-export function SiteManagementDashboard({ onEdit, onDelete: onDeleteCallback }) {
+export function SiteManagementDashboard({ siteType, onEdit, onDelete: onDeleteCallback }) {
   const [sites, setSites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -128,7 +149,10 @@ export function SiteManagementDashboard({ onEdit, onDelete: onDeleteCallback }) 
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('/api/sites');
+        const url = siteType
+          ? `/api/sites?site_type=${siteType}`
+          : '/api/sites';
+        const response = await fetch(url);
 
         if (!response.ok) {
           throw new Error('Failed to fetch sites');
@@ -144,7 +168,7 @@ export function SiteManagementDashboard({ onEdit, onDelete: onDeleteCallback }) 
     };
 
     fetchSites();
-  }, []);
+  }, [siteType]);
 
   const handleEdit = (site) => {
     if (onEdit) {

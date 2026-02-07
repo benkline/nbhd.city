@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useMyNbhds } from '../../hooks/useMyNeighborhoods';
 import styles from './SiteConfigForm.module.css';
 
 /**
@@ -126,10 +127,13 @@ export function SiteConfigForm({
   onSave
 }) {
   const [config, setConfig] = useState({});
+  const [siteType, setSiteType] = useState('personal');
+  const [nbhdId, setNbhdId] = useState(null);
   const [errors, setErrors] = useState({});
   const [isDirty, setIsDirty] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const autoSaveTimeoutRef = useRef(null);
+  const { nbhds, loading: nbhdsLoading } = useMyNbhds();
 
   // Initialize from localStorage
   useEffect(() => {
@@ -213,6 +217,11 @@ export function SiteConfigForm({
   const handleDeploy = useCallback(() => {
     const newErrors = validateConfig(template.schema, config);
 
+    // Validate nbhd_id for project sites
+    if (siteType === 'project' && !nbhdId) {
+      newErrors.nbhd_id = 'Neighborhood is required for project sites';
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -220,11 +229,15 @@ export function SiteConfigForm({
 
     if (onDeploy) {
       setIsSubmitting(true);
-      onDeploy(config).finally(() => {
+      onDeploy({
+        ...config,
+        site_type: siteType,
+        nbhd_id: siteType === 'project' ? nbhdId : null
+      }).finally(() => {
         setIsSubmitting(false);
       });
     }
-  }, [config, template.schema, onDeploy]);
+  }, [config, siteType, nbhdId, template.schema, onDeploy]);
 
   if (!template || !template.schema) {
     return <div className={styles.container}>No template schema available</div>;
@@ -237,6 +250,59 @@ export function SiteConfigForm({
         <p className={styles.description}>
           Customize your site by filling in the fields below
         </p>
+
+        <div className={styles.siteTypeSection}>
+          <h3>Site Type</h3>
+          <div className={styles.radioGroup}>
+            <label>
+              <input
+                type="radio"
+                name="site_type"
+                value="personal"
+                checked={siteType === 'personal'}
+                onChange={(e) => setSiteType(e.target.value)}
+              />
+              👤 Personal Site
+              <small>Your own blog or portfolio</small>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="site_type"
+                value="project"
+                checked={siteType === 'project'}
+                onChange={(e) => setSiteType(e.target.value)}
+              />
+              🏘️ Project Site
+              <small>Belongs to a neighborhood</small>
+            </label>
+          </div>
+
+          {siteType === 'project' && (
+            <div className={styles.formGroup}>
+              <label htmlFor="nbhd_selector">
+                Neighborhood *
+              </label>
+              <select
+                id="nbhd_selector"
+                value={nbhdId || ''}
+                onChange={(e) => setNbhdId(e.target.value)}
+                className={errors.nbhd_id ? styles.inputError : styles.select}
+                disabled={nbhdsLoading}
+              >
+                <option value="">Select a neighborhood...</option>
+                {nbhds.map(nbhd => (
+                  <option key={nbhd.id} value={nbhd.id}>
+                    {nbhd.name}
+                  </option>
+                ))}
+              </select>
+              {errors.nbhd_id && (
+                <span className={styles.error}>{errors.nbhd_id}</span>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className={styles.fields}>
           {Object.keys(template.schema.properties).map((fieldName) => (
