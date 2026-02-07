@@ -96,6 +96,7 @@ class NbhdResponse(BaseModel):
     created_by: str
     created_at: str  # ISO format timestamp string
     member_count: int = 0
+    nbhd_did: str  # DID for AT Protocol compatibility
 
     class Config:
         from_attributes = True
@@ -142,12 +143,26 @@ class TemplateSchemaResponse(BaseModel):
 
 # Site Models
 
+from pydantic import model_validator
+from typing import Literal
+
 class SiteCreate(BaseModel):
     """Schema for creating a new site."""
 
     title: str
     template: str
     config: Dict = {}
+    site_type: Literal["personal", "project", "nbhd"] = "personal"
+    nbhd_id: Optional[str] = None
+
+    @model_validator(mode='after')
+    def validate_nbhd_id_requirement(self):
+        """Validate nbhd_id based on site_type."""
+        if self.site_type in ['project', 'nbhd'] and not self.nbhd_id:
+            raise ValueError(f'nbhd_id required for {self.site_type} sites')
+        if self.site_type == 'personal' and self.nbhd_id:
+            raise ValueError('nbhd_id not allowed for personal sites')
+        return self
 
     class Config:
         from_attributes = True
@@ -174,6 +189,135 @@ class SiteResponse(BaseModel):
     config: Dict
     created_at: str
     updated_at: str
+    site_type: Literal["personal", "project", "nbhd"] = "personal"
+    nbhd_id: Optional[str] = None
+    url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+# Custom Template Models
+
+class CustomTemplateCreate(BaseModel):
+    """Schema for registering a custom template."""
+
+    name: str
+    github_url: str
+    is_public: bool = False
+
+    class Config:
+        from_attributes = True
+
+
+class CustomTemplateRegistrationResponse(BaseModel):
+    """Schema for custom template registration response (202 Accepted)."""
+
+    template_id: str
+    status: str = "analyzing"
+    message: str = "Template analysis started"
+    poll_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class CustomTemplateStatusResponse(BaseModel):
+    """Schema for custom template status response."""
+
+    template_id: str
+    status: str  # analyzing, ready, failed
+    progress: Optional[float] = None
+    message: Optional[str] = None
+    error: Optional[str] = None
+    schema: Optional[Dict] = None
+    content_types: Optional[Dict] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ContentTypeResponse(BaseModel):
+    """Schema for content type information."""
+
+    directory: str
+    schema: Dict
+    example_fields: Optional[Dict] = None
+
+    class Config:
+        from_attributes = True
+
+
+class TemplateContentTypesResponse(BaseModel):
+    """Schema for template content types response."""
+
+    template_id: str
+    content_types: Dict[str, ContentTypeResponse]
+
+    class Config:
+        from_attributes = True
+
+
+# Build Job Models
+
+class BuildJobCreate(BaseModel):
+    """Schema for creating a build job."""
+
+    site_id: str
+    trigger: str = "manual"  # manual, content_update, config_update
+
+    class Config:
+        from_attributes = True
+
+
+class BuildJobResponse(BaseModel):
+    """Schema for build job responses."""
+
+    job_id: str
+    site_id: str
+    user_did: str
+    status: str  # pending, running, completed, failed
+    started_at: str
+    completed_at: Optional[str] = None
+    duration_seconds: Optional[int] = None
+    output_url: Optional[str] = None
+    error: Optional[str] = None
+    error_stage: Optional[str] = None
+    trigger: str = "manual"
+    content_count: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
+class BuildJobListResponse(BaseModel):
+    """Schema for listing build jobs."""
+
+    builds: List[BuildJobResponse]
+
+    class Config:
+        from_attributes = True
+
+
+# Neighborhood Content Models
+
+class WelcomeContentCreate(BaseModel):
+    """Schema for creating/updating welcome content."""
+
+    title: str = Field(..., min_length=1, max_length=200)
+    content: str = Field(..., min_length=1, max_length=10000)
+
+    class Config:
+        from_attributes = True
+
+
+class AnnouncementCreate(BaseModel):
+    """Schema for creating announcements."""
+
+    title: str = Field(..., min_length=1, max_length=200)
+    content: str = Field(..., min_length=1, max_length=5000)
+    priority: Optional[Literal["low", "normal", "high"]] = "normal"
+    pinned: Optional[bool] = False
 
     class Config:
         from_attributes = True

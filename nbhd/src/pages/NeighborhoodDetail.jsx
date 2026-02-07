@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { nbhdService } from '../services/neighborhoodService';
 import { userService } from '../services/userService';
@@ -131,6 +131,14 @@ export default function NbhdDetail() {
 
         {isAuthenticated && (
           <div className={styles.actionArea}>
+            {nbhd.created_by === user?.user_id && (
+              <button
+                onClick={() => navigate(`/nbhds/${id}/admin`)}
+                className={styles.adminButton}
+              >
+                🔧 Admin Dashboard
+              </button>
+            )}
             {isMember() ? (
               <button
                 onClick={handleLeave}
@@ -150,6 +158,35 @@ export default function NbhdDetail() {
             )}
           </div>
         )}
+        <div className={styles.actionArea}>
+          {isAuthenticated && (
+            <>
+              {isMember() ? (
+                <button
+                  onClick={handleLeave}
+                  disabled={actionLoading}
+                  className={styles.leaveButton}
+                >
+                  {actionLoading ? 'Leaving...' : 'Leave Nbhd'}
+                </button>
+              ) : (
+                <button
+                  onClick={handleJoin}
+                  disabled={actionLoading}
+                  className={styles.joinButton}
+                >
+                  {actionLoading ? 'Joining...' : 'Join Nbhd'}
+                </button>
+              )}
+            </>
+          )}
+          <Link to={`/nbhds/${id}/welcome`} className={styles.viewWelcomeButton}>
+            📖 View Welcome Page
+          </Link>
+          <Link to="/project-sites" className={styles.projectSitesButton}>
+            🏗️ Project Sites
+          </Link>
+        </div>
       </div>
 
       {nbhd.description && (

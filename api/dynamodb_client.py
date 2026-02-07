@@ -61,3 +61,29 @@ async def get_table():
     async with session.resource("dynamodb", **kwargs) as dynamodb:
         table = await dynamodb.Table(TABLE_NAME)
         yield table
+
+
+async def get_dynamodb_table():
+    """
+    Get DynamoDB table resource (non-context-manager version).
+
+    Returns the table object directly without needing to use async context manager.
+    This is useful for functions that need to pass the table around.
+
+    Note: This keeps the connection open. For most use cases, prefer using get_table() context manager.
+
+    Usage:
+        table = await get_dynamodb_table()
+        response = await table.get_item(Key={"PK": "...", "SK": "..."})
+    """
+    kwargs = {"region_name": AWS_REGION}
+    if DYNAMODB_ENDPOINT_URL:
+        kwargs["endpoint_url"] = DYNAMODB_ENDPOINT_URL
+        # For local DynamoDB, use dummy credentials if not already set
+        if not os.getenv("AWS_ACCESS_KEY_ID"):
+            kwargs["aws_access_key_id"] = "dummy"
+            kwargs["aws_secret_access_key"] = "dummy"
+
+    dynamodb = session.resource("dynamodb", **kwargs)
+    table = await dynamodb.Table(TABLE_NAME)
+    return table

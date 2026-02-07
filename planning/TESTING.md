@@ -653,4 +653,4 @@ npm test -- --watch SiteEditor.test.jsx
 ## See Also
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - System design
-- [tickets.md](./tickets.md) - Testing tickets (TEST-001)
+- [tickets.md](../tickets/tickets.md) - Testing tickets (TEST-001)

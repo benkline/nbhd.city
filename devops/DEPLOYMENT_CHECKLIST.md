@@ -38,6 +38,103 @@ Use this checklist to deploy nbhd.city to AWS.
 - [ ] Create test neighborhood (with auth token)
 - [ ] Check CloudWatch logs for errors
 
+## Template Analyzer Lambda Testing
+
+After deploying the template analyzer Lambda, verify it works:
+
+- [ ] Test successful analysis:
+  ```bash
+  aws lambda invoke \
+    --function-name nbhd-city-template-analyzer-production \
+    --payload '{"template_id":"test-123","github_url":"https://github.com/11ty/eleventy-base-blog"}' \
+    --region us-east-1 \
+    response.json
+  cat response.json
+  ```
+  Expected: `{"status": "success", "template_id": "test-123", "content_types": {...}}`
+
+- [ ] Check CloudWatch logs:
+  ```bash
+  aws logs tail /aws/lambda/nbhd-city-template-analyzer-production --follow
+  ```
+  Expected: Logs show cloning, validation, and analysis steps
+
+- [ ] Verify DynamoDB updates:
+  - Check that template record was updated with `content_types` field
+  - Status should be "ready"
+
+- [ ] Test error handling with invalid URL:
+  ```bash
+  aws lambda invoke \
+    --function-name nbhd-city-template-analyzer-production \
+    --payload '{"template_id":"error-test","github_url":"https://github.com/nonexistent/repo-404"}' \
+    response.json
+  ```
+  Expected: `{"status": "failed", "error": "..."}`
+
+- [ ] Test timeout handling (optional - uses large repo):
+  - Should timeout after 300 seconds
+  - Status should update to "failed"
+
+## Site Builder Lambda Testing
+
+After deploying the site builder Lambda, verify it works:
+
+- [ ] Test successful site build:
+  ```bash
+  aws lambda invoke \
+    --function-name nbhd-city-site-builder-production \
+    --payload '{"site_id":"test-site-123","user_did":"did:plc:test123","job_id":"job-456"}' \
+    --region us-east-1 \
+    response.json
+  cat response.json
+  ```
+  Expected: `{"status": "success", "url": "https://..."}`
+
+- [ ] Check CloudWatch logs:
+  ```bash
+  aws logs tail /aws/lambda/nbhd-city-site-builder-production --follow
+  ```
+  Expected: Logs show clone, npm install, 11ty build, S3 upload, CloudFront invalidation
+
+- [ ] Verify S3 uploads:
+  ```bash
+  aws s3 ls s3://nbhd-city-sites-{account-id}/sites/
+  ```
+  Expected: Site files present in S3 bucket
+
+- [ ] Verify CloudFront cache invalidation:
+  ```bash
+  aws cloudfront list-invalidations --distribution-id {distribution-id}
+  ```
+  Expected: Recent invalidations for site subdomain
+
+- [ ] Verify DynamoDB build job updates:
+  - Check that build job record has status "completed"
+  - output_url should be set
+  - completed_at should have timestamp
+
+- [ ] Test error handling with missing site:
+  ```bash
+  aws lambda invoke \
+    --function-name nbhd-city-site-builder-production \
+    --payload '{"site_id":"nonexistent","user_did":"did:plc:test123","job_id":"job-error"}' \
+    response.json
+  ```
+  Expected: `{"status": "failed", "error": "..."}`
+
+- [ ] Verify environment variables:
+  ```bash
+  aws lambda get-function-configuration \
+    --function-name nbhd-city-site-builder-production \
+    | grep -A 10 Environment
+  ```
+  Expected: DYNAMODB_TABLE_NAME, S3_BUCKET, CLOUDFRONT_DISTRIBUTION_ID, AWS_REGION set
+
+- [ ] Test timeout handling:
+  - Should timeout after 300 seconds
+  - Status should update to "failed" with error message
+
 ## Post-Deployment
 
 - [ ] Configure custom domain (if using)

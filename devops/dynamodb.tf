@@ -43,6 +43,23 @@ resource "aws_dynamodb_table" "nbhd_city" {
     type = "S"
   }
 
+  # GSI7: Query AT Protocol records by collection type
+  attribute {
+    name = "user_did"
+    type = "S"
+  }
+
+  attribute {
+    name = "record_type_created"
+    type = "S"
+  }
+
+  # GSI8: Subdomain lookup for static site routing
+  attribute {
+    name = "subdomain"
+    type = "S"
+  }
+
   # Global Secondary Index 1
   global_secondary_index {
     name            = "GSI1"
@@ -64,6 +81,33 @@ resource "aws_dynamodb_table" "nbhd_city" {
     name            = "GSI3"
     hash_key        = "user_id"
     range_key       = "joined_at"
+    projection_type = "ALL"
+  }
+
+  # Global Secondary Index 7: AT Protocol Records by Collection Type
+  # Enables queries like: Get all app.nbhd.blog.post records for a user
+  global_secondary_index {
+    name            = "GSI7"
+    hash_key        = "user_did"
+    range_key       = "record_type_created"
+    projection_type = "ALL"
+  }
+
+  # Global Secondary Index 8: Subdomain lookup for static site routing
+  # Enables Lambda@Edge to map subdomains to sites
+  global_secondary_index {
+    name            = "GSI8"
+    hash_key        = "subdomain"
+    range_key       = "SK"
+    projection_type = "ALL"
+  }
+
+  # Global Secondary Index 9: Neighborhood sites lookup by type
+  # Enables efficient querying of sites by neighborhood and type
+  global_secondary_index {
+    name            = "GSI9"
+    hash_key        = "nbhd_id"
+    range_key       = "site_type"
     projection_type = "ALL"
   }
 
