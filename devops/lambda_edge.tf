@@ -86,8 +86,6 @@ data "archive_file" "lambda_edge_subdomain_router" {
 
 # Null resource to run npm install before archiving
 resource "null_resource" "lambda_edge_npm_install" {
-  provisioners = []
-
   triggers = {
     package_json = filemd5("${path.module}/lambda_edge_subdomain_router/package.json")
   }
@@ -111,12 +109,8 @@ resource "aws_lambda_function" "subdomain_router" {
   publish             = true # Required for Lambda@Edge
   architectures       = ["x86_64"] # Lambda@Edge requires x86_64
 
-  environment {
-    variables = {
-      DYNAMODB_TABLE_NAME = aws_dynamodb_table.nbhd_city.name
-      SITES_DOMAIN        = var.sites_domain
-    }
-  }
+  # NOTE: Lambda@Edge cannot have environment variables
+  # Configuration must be hardcoded or read from DynamoDB/resources at runtime
 
   # Lambda@Edge has strict packaging requirements
   # The zip must not exceed 1 MB

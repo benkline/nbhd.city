@@ -217,7 +217,6 @@ resource "aws_lambda_function" "site_builder" {
       DYNAMODB_TABLE_NAME        = aws_dynamodb_table.nbhd_city.name
       S3_BUCKET                  = aws_s3_bucket.sites.bucket
       CLOUDFRONT_DISTRIBUTION_ID = aws_cloudfront_distribution.sites.id
-      AWS_REGION                 = var.aws_region
     }
   }
 
@@ -238,10 +237,4 @@ resource "aws_lambda_function" "site_builder" {
 }
 
 # Lambda permission: Allow API Lambda to invoke site builder Lambda
-resource "aws_lambda_permission" "api_invoke_site_builder" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.site_builder.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
-}
+# is defined in lambda.tf

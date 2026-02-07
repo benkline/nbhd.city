@@ -60,6 +60,17 @@ resource "aws_dynamodb_table" "nbhd_city" {
     type = "S"
   }
 
+  # GSI9: Neighborhood sites lookup by type
+  attribute {
+    name = "nbhd_id"
+    type = "S"
+  }
+
+  attribute {
+    name = "site_type"
+    type = "S"
+  }
+
   # Global Secondary Index 1
   global_secondary_index {
     name            = "GSI1"

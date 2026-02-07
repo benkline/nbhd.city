@@ -112,15 +112,7 @@ resource "aws_api_gateway_stage" "api" {
   }
 }
 
-# CloudWatch Log Group for API Gateway
-resource "aws_cloudwatch_log_group" "api_gateway" {
-  name              = "/aws/apigateway/${var.project_name}-${var.environment}"
-  retention_in_days = var.api_gateway_log_retention_days
-
-  tags = {
-    Name = "${var.project_name}-api-gateway-logs-${var.environment}"
-  }
-}
+# CloudWatch Log Group for API Gateway is defined in backend.tf
 
 # API Gateway Method Settings (for throttling)
 resource "aws_api_gateway_method_settings" "all" {

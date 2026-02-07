@@ -39,19 +39,19 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Lambda layer for Python dependencies
+# Lambda layer for Python dependencies (only if layer is being used)
 resource "aws_lambda_layer_version" "dependencies" {
-  filename   = "${path.module}/../lambda_layer.zip"
-  source_code_hash = data.archive_file.dependencies.output_base64sha256
+  count            = var.use_lambda_layer ? 1 : 0
+  filename         = "${path.module}/../lambda_layer.zip"
+  source_code_hash = var.use_lambda_layer ? data.archive_file.dependencies[0].output_base64sha256 : null
 
   layer_name          = "${var.project_name}-dependencies"
   compatible_runtimes = ["python3.11"]
-
-  depends_on = [data.archive_file.dependencies]
 }
 
-# Archive for Lambda layer
+# Archive for Lambda layer (only if layer is being used)
 data "archive_file" "dependencies" {
+  count       = var.use_lambda_layer ? 1 : 0
   type        = "zip"
   source_dir  = "${path.module}/lambda_layer"
   output_path = "${path.module}/../lambda_layer.zip"
@@ -69,7 +69,7 @@ resource "aws_lambda_function" "api" {
 
   source_code_hash = data.archive_file.api_code.output_base64sha256
 
-  layers = [aws_lambda_layer_version.dependencies.arn]
+  layers = var.use_lambda_layer ? [aws_lambda_layer_version.dependencies[0].arn] : []
 
   environment {
     variables = {
@@ -89,7 +89,6 @@ resource "aws_lambda_function" "api" {
 
   depends_on = [
     aws_iam_role_policy_attachment.lambda_basic,
-    aws_lambda_layer_version.dependencies,
   ]
 }
 
@@ -116,7 +115,7 @@ resource "aws_apigatewayv2_integration" "lambda" {
   api_id             = aws_apigatewayv2_api.api.id
   integration_type   = "AWS_PROXY"
   integration_method = "POST"
-  target             = aws_lambda_function.api.arn
+  integration_uri    = aws_lambda_function.api.invoke_arn
   payload_format_version = "2.0"
 
   lifecycle {
@@ -142,9 +141,7 @@ resource "aws_apigatewayv2_stage" "default" {
     format = jsonencode({
       httpMethod      = "$context.httpMethod"
       requestId       = "$context.requestId"
-      resourcePath    = "$context.resourcePath"
       routeKey        = "$context.routeKey"
-      sourceIp        = "$context.sourceIp"
       status          = "$context.status"
       error           = "$context.error.message"
       integrationErrorMessage = "$context.integrationErrorMessage"

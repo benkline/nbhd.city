@@ -1,0 +1,20 @@
+{
+  "client_id": "https://nbhd.city/client-metadata.json",
+  "client_name": "nbhd.city",
+  "client_uri": "https://nbhd.city",
+  "logo_uri": "https://nbhd.city/logo.png",
+  "redirect_uris": [
+    "https://nbhd.city/auth/callback"
+  ],
+  "scope": "atproto transition:generic",
+  "grant_types": [
+    "authorization_code"
+  ],
+  "response_types": [
+    "code"
+  ],
+  "token_endpoint_auth_method": "client_secret_basic",
+  "contacts": [
+    "support@nbhd.city"
+  ]
+}

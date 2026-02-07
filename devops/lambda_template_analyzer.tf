@@ -140,7 +140,6 @@ resource "aws_lambda_function" "template_analyzer" {
     variables = {
       ENVIRONMENT         = var.environment
       DYNAMODB_TABLE_NAME = aws_dynamodb_table.nbhd_city.name
-      AWS_REGION          = var.aws_region
     }
   }
 
