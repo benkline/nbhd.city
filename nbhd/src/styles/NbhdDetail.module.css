@@ -112,6 +112,33 @@
   cursor: not-allowed;
 }
 
+.viewWelcomeButton,
+.projectSitesButton {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.viewWelcomeButton {
+  background: #667eea;
+}
+
+.viewWelcomeButton:hover {
+  background: #5568d3;
+}
+
+.projectSitesButton {
+  background: #667eea;
+}
+
+.projectSitesButton:hover {
+  background: #5568d3;
+}
+
 .descriptionSection {
   margin-bottom: 32px;
   padding: 24px;

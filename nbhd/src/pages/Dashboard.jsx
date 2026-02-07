@@ -89,6 +89,15 @@ export default function Dashboard() {
                 <h4>Personal Sites</h4>
                 <p>Build and manage your static sites</p>
               </button>
+
+              <button
+                onClick={() => navigate('/project-sites')}
+                className={styles.navCard}
+              >
+                <span className={styles.navIcon}>🏗️</span>
+                <h4>Project Sites</h4>
+                <p>Manage neighborhood project sites</p>
+              </button>
             </div>
           </div>
 
