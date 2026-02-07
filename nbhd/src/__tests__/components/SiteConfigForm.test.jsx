@@ -3,6 +3,19 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { SiteConfigForm } from '../../components/SiteBuilder/SiteConfigForm';
 
+// Mock useMyNbhds hook for site type tests
+vi.mock('../../hooks/useMyNeighborhoods', () => ({
+  useMyNbhds: () => ({
+    nbhds: [
+      { id: 'nbhd-1', name: 'Tech Neighborhood' },
+      { id: 'nbhd-2', name: 'Arts Neighborhood' }
+    ],
+    loading: false,
+    error: null,
+    refresh: vi.fn()
+  })
+}));
+
 // Mock template data with schema
 const mockTemplate = {
   id: 'blog',
@@ -275,6 +288,163 @@ describe('SiteConfigForm', () => {
     expect(mockOnDeploy).toHaveBeenCalledWith(expect.objectContaining({
       title: 'My Blog',
       author: 'John Doe'
+    }));
+  });
+
+  // [ ] Site type selector shown with personal as default
+  it('shows site type selector with personal as default', () => {
+    render(
+      <BrowserRouter>
+        <SiteConfigForm template={mockTemplate} />
+      </BrowserRouter>
+    );
+
+    const personalRadio = screen.getByLabelText(/Personal Site/);
+    const projectRadio = screen.getByLabelText(/Project Site/);
+
+    expect(personalRadio).toBeInTheDocument();
+    expect(projectRadio).toBeInTheDocument();
+    expect(personalRadio).toBeChecked();
+    expect(projectRadio).not.toBeChecked();
+  });
+
+  // [ ] Neighborhood selector hidden for personal sites
+  it('hides neighborhood selector for personal sites', () => {
+    render(
+      <BrowserRouter>
+        <SiteConfigForm template={mockTemplate} />
+      </BrowserRouter>
+    );
+
+    // Personal is default, so neighborhood selector should not be visible
+    expect(screen.queryByLabelText(/Neighborhood/)).not.toBeInTheDocument();
+  });
+
+  // [ ] Neighborhood selector shown when project type selected
+  it('shows neighborhood selector when project type selected', () => {
+    render(
+      <BrowserRouter>
+        <SiteConfigForm template={mockTemplate} />
+      </BrowserRouter>
+    );
+
+    const projectRadio = screen.getByLabelText(/Project Site/);
+    act(() => {
+      fireEvent.click(projectRadio);
+    });
+
+    // Neighborhood selector should now be visible
+    const nbhdSelect = screen.getByLabelText(/Neighborhood/);
+    expect(nbhdSelect).toBeInTheDocument();
+    expect(screen.getByText('Tech Neighborhood')).toBeInTheDocument();
+    expect(screen.getByText('Arts Neighborhood')).toBeInTheDocument();
+  });
+
+  // [ ] Validation error when project site submitted without neighborhood
+  it('validates that project sites require nbhd_id', () => {
+    const mockOnDeploy = vi.fn();
+    render(
+      <BrowserRouter>
+        <SiteConfigForm template={mockTemplate} onDeploy={mockOnDeploy} />
+      </BrowserRouter>
+    );
+
+    // Fill in required fields
+    const titleInput = screen.getByLabelText(/Site Title/);
+    const authorInput = screen.getByLabelText(/Author Name/);
+
+    act(() => {
+      fireEvent.change(titleInput, { target: { value: 'My Blog' } });
+      fireEvent.change(authorInput, { target: { value: 'John Doe' } });
+    });
+
+    // Select project type
+    const projectRadio = screen.getByLabelText(/Project Site/);
+    act(() => {
+      fireEvent.click(projectRadio);
+    });
+
+    // Try to deploy without selecting neighborhood
+    const deployButton = screen.getByRole('button', { name: /deploy/i });
+    act(() => {
+      fireEvent.click(deployButton);
+    });
+
+    // Should show validation error (get all and check at least one exists)
+    const errors = screen.queryAllByText(/Neighborhood is required/);
+    expect(errors.length).toBeGreaterThan(0);
+
+    // Should not call deploy
+    expect(mockOnDeploy).not.toHaveBeenCalled();
+  });
+
+  // [ ] Form submission includes site_type and nbhd_id for project sites
+  it('passes site_type and nbhd_id to onDeploy for project sites', () => {
+    const mockOnDeploy = vi.fn().mockResolvedValue({});
+    render(
+      <BrowserRouter>
+        <SiteConfigForm template={mockTemplate} onDeploy={mockOnDeploy} />
+      </BrowserRouter>
+    );
+
+    const titleInput = screen.getByLabelText(/Site Title/);
+    const authorInput = screen.getByLabelText(/Author Name/);
+
+    act(() => {
+      fireEvent.change(titleInput, { target: { value: 'My Blog' } });
+      fireEvent.change(authorInput, { target: { value: 'John Doe' } });
+    });
+
+    // Select project type
+    const projectRadio = screen.getByLabelText(/Project Site/);
+    act(() => {
+      fireEvent.click(projectRadio);
+    });
+
+    // Select neighborhood
+    const nbhdSelect = screen.getByLabelText(/Neighborhood/);
+    act(() => {
+      fireEvent.change(nbhdSelect, { target: { value: 'nbhd-1' } });
+    });
+
+    // Deploy
+    const deployButton = screen.getByRole('button', { name: /deploy/i });
+    act(() => {
+      fireEvent.click(deployButton);
+    });
+
+    expect(mockOnDeploy).toHaveBeenCalledWith(expect.objectContaining({
+      site_type: 'project',
+      nbhd_id: 'nbhd-1'
+    }));
+  });
+
+  // [ ] Form submission includes site_type for personal sites
+  it('passes site_type and null nbhd_id to onDeploy for personal sites', () => {
+    const mockOnDeploy = vi.fn().mockResolvedValue({});
+    render(
+      <BrowserRouter>
+        <SiteConfigForm template={mockTemplate} onDeploy={mockOnDeploy} />
+      </BrowserRouter>
+    );
+
+    const titleInput = screen.getByLabelText(/Site Title/);
+    const authorInput = screen.getByLabelText(/Author Name/);
+
+    act(() => {
+      fireEvent.change(titleInput, { target: { value: 'My Blog' } });
+      fireEvent.change(authorInput, { target: { value: 'John Doe' } });
+    });
+
+    // Personal is already selected, deploy
+    const deployButton = screen.getByRole('button', { name: /deploy/i });
+    act(() => {
+      fireEvent.click(deployButton);
+    });
+
+    expect(mockOnDeploy).toHaveBeenCalledWith(expect.objectContaining({
+      site_type: 'personal',
+      nbhd_id: null
     }));
   });
 });

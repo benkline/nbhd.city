@@ -872,28 +872,32 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
 #### SITES-001: Site Type Distinction
 - **Description:** Add support for filtering sites by type (personal vs project)
 - **Requirements:**
-  - [ ] Update `SiteManagementDashboard.jsx` to accept `site_type` filter prop
-  - [ ] Update site creation flow to include site type selector
-  - [ ] Update backend `sites.py` `GET /api/sites` to support `?site_type=personal|project` query param
-  - [ ] Validate project sites require nbhd_id selection
-  - [ ] Update site creation form to show/hide nbhd selector based on type
-  - [ ] Add site type badges to site list
-  - [ ] Update `SiteConfigForm.jsx` to include site type in form
+  - [x] Update `SiteManagementDashboard.jsx` to accept `site_type` filter prop
+  - [x] Update site creation flow to include site type selector
+  - [x] Update backend `sites.py` `GET /api/sites` to support `?site_type=personal|project` query param
+  - [x] Validate project sites require nbhd_id selection
+  - [x] Update site creation form to show/hide nbhd selector based on type
+  - [x] Add site type badges to site list
+  - [x] Update `SiteConfigForm.jsx` to include site type in form
 - **Acceptance Criteria:**
-  - [ ] Filter parameter works on GET /api/sites
-  - [ ] Site creation saves site_type correctly
-  - [ ] Personal sites don't require nbhd
-  - [ ] Project sites require nbhd selection
-  - [ ] Badges display correct site type
-  - [ ] Form validates based on site type
+  - [x] Filter parameter works on GET /api/sites
+  - [x] Site creation saves site_type correctly
+  - [x] Personal sites don't require nbhd
+  - [x] Project sites require nbhd selection
+  - [x] Badges display correct site type
+  - [x] Form validates based on site type
 - **Type:** Frontend + Backend
 - **Estimate:** S
+- **Status:** COMPLETED (2026-02-05)
+- **Tests:** 35 tests passing (17 SiteManagementDashboard + 18 SiteConfigForm)
 - **Reference:** See [SITE-TYPES.md](./SITE-TYPES.md) - Data Model, API Endpoints, and Validation Rules sections
-- **Files:**
-  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Add filter
-  - `nbhd/src/components/SiteBuilder/SiteConfigForm.jsx` - Add type selector
-  - `api/sites.py` - Add site_type filtering
-  - `api/models.py` - Update site schema
+- **Implementation Files:**
+  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Added SiteTypeBadge component, siteType prop, API filtering
+  - `nbhd/src/components/SiteBuilder/SiteConfigForm.jsx` - Added site type selector, neighborhood dropdown, validation
+  - `nbhd/src/hooks/useMyNeighborhoods.js` - Used existing hook for neighborhood data
+  - `nbhd/src/__tests__/components/SiteManagementDashboard.test.jsx` - Added 6 new tests for badges and filtering
+  - `nbhd/src/__tests__/components/SiteConfigForm.test.jsx` - Added 5 new tests for site type selection and validation
+  - CSS modules updated with badge and form styling
 
 #### SITES-002: Personal Sites Page
 - **Description:** Create dedicated page for viewing and managing personal sites
