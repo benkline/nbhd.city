@@ -12,6 +12,7 @@ import WelcomePage from './pages/WelcomePage';
 import MyNbhds from './pages/MyNeighborhoods';
 import PersonalSites from './pages/PersonalSites';
 import UserProfile from './pages/UserProfile';
+import ProjectSites from './pages/ProjectSites';
 import './App.css';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
           <Route path="/nbhds/:id/welcome" element={<WelcomePage />} />
           <Route path="/my-nbhds" element={<MyNbhds />} />
           <Route path="/personal-sites" element={<PersonalSites />} />
+          <Route path="/project-sites" element={<ProjectSites />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>

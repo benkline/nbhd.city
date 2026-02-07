@@ -183,6 +183,9 @@ export default function NbhdDetail() {
           <Link to={`/nbhds/${id}/welcome`} className={styles.viewWelcomeButton}>
             📖 View Welcome Page
           </Link>
+          <Link to="/project-sites" className={styles.projectSitesButton}>
+            🏗️ Project Sites
+          </Link>
         </div>
       </div>
 

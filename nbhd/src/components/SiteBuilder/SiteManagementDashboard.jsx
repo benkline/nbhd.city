@@ -137,7 +137,7 @@ function SiteCard({ site, onEdit, onDelete }) {
 /**
  * SiteManagementDashboard - Displays and manages user's sites
  */
-export function SiteManagementDashboard({ siteType, onEdit, onDelete: onDeleteCallback }) {
+export function SiteManagementDashboard({ siteType, nbhdId, onEdit, onDelete: onDeleteCallback }) {
   const [sites, setSites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -149,9 +149,12 @@ export function SiteManagementDashboard({ siteType, onEdit, onDelete: onDeleteCa
       try {
         setLoading(true);
         setError(null);
-        const url = siteType
-          ? `/api/sites?site_type=${siteType}`
-          : '/api/sites';
+        let url = '/api/sites';
+        const params = new URLSearchParams();
+        if (siteType) params.append('site_type', siteType);
+        if (nbhdId) params.append('nbhd_id', nbhdId);
+        if (params.toString()) url += `?${params.toString()}`;
+
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -168,7 +171,7 @@ export function SiteManagementDashboard({ siteType, onEdit, onDelete: onDeleteCa
     };
 
     fetchSites();
-  }, [siteType]);
+  }, [siteType, nbhdId]);
 
   const handleEdit = (site) => {
     if (onEdit) {
