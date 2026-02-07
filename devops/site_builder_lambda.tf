@@ -4,7 +4,7 @@
 # Archive packaging for site builder Lambda
 data "archive_file" "lambda_site_builder_package" {
   type        = "zip"
-  source_dir  = "${path.module}/../lambda/site_builder"
+  source_dir  = "${path.module}/../app/lambda/site_builder"
   output_path = "${path.module}/.terraform/lambda_site_builder.zip"
 
   excludes = [

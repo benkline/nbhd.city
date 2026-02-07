@@ -8,7 +8,7 @@ set -e
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROGRESS_FILE="$PROJECT_ROOT/.ticket-progress.json"
-TICKETS_FILE="$PROJECT_ROOT/planning/tickets.md"
+TICKETS_FILE="$PROJECT_ROOT/tickets/tickets.md"
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # Color codes

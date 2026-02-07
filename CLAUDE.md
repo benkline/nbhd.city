@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**nbhd.city** is a self-hosted neighborhood collaboration platform. See `/planning/README.md` for complete documentation.
+**nbhd.city** is a self-hosted neighborhood collaboration platform. See `/specs/README.md` for complete documentation.
 
 ## Ticket Management
 
@@ -21,19 +21,23 @@ All project tickets are located in `/tickets/`:
 ## Key Directories
 
 ```
-├── /planning/           # Architecture and design documentation
+├── /app/                # Application code
+│   ├── /api/            # Python FastAPI backend
+│   ├── /UI/             # React frontend
+│   ├── /lambda/         # AWS Lambda functions
+│   └── /scripts/        # Migration scripts
+├── /specs/              # Architecture and design documentation
 ├── /tickets/            # Project tickets and specifications
-├── /api/                # Python FastAPI backend
-├── /nbhd/               # React frontend
+├── /tests/              # Infrastructure tests (Lambda, DevOps)
 ├── /devops/             # Terraform infrastructure (AWS)
 └── CLAUDE.md            # This file
 ```
 
 ## Development Phases
 
-Current project phases are documented in `/planning/PHASES.md`:
+Current project phases are documented in `/specs/PHASES.md`:
 1. Phase 1: MVP Foundation ✅
 2. Phase 2: AT Protocol Foundation 🔧
 3. Phase 3+: Advanced features pending
 
-See `/planning/PHASES.md` for complete roadmap and dependencies.
+See `/specs/PHASES.md` for complete roadmap and dependencies.

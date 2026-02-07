@@ -185,11 +185,11 @@ variable "tags" {
 variable "api_artifact_path" {
   description = "Path to API source directory for Lambda packaging"
   type        = string
-  default     = "../api"
+  default     = "../app/api"
 }
 
 variable "frontend_artifact_path" {
   description = "Path to built frontend artifacts directory"
   type        = string
-  default     = "../nbhd/dist"
+  default     = "../app/UI/dist"
 }

@@ -474,7 +474,7 @@ Error cases:
 
 **1 Happy Path + 4 Error Cases:**
 1. ✓ Click deploy: Dialog shown
-2. ✓ Confirm: POST /api/sites/{id}/build
+2. ✓ Confirm: POST /app/api/sites/{id}/build
 3. ✓ 202 response: job_id returned
 4. ✓ Button disabled: Prevent duplicate
 
@@ -678,7 +678,7 @@ Error cases:
 1. ✓ Button visible in dashboard
 2. ✓ Dialog shown on click
 3. ✓ Confirmation text clear
-4. ✓ API call on confirm: POST /api/sites/{id}/build
+4. ✓ API call on confirm: POST /app/api/sites/{id}/build
 5. ✓ Loading state: Button disabled
 6. ✓ Success message: With job_id
 7. ✓ Error message: On failure

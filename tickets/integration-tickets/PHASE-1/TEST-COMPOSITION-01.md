@@ -52,7 +52,7 @@ Comprehensive end-to-end test that chains all Phase 1 features together. Validat
 - ✅ Profile data persisted to database
 - ✅ BlueSky handle visible
 - ✅ DID generated and stored
-- ✅ All updates reflected in GET `/api/user`
+- ✅ All updates reflected in GET `/app/api/user`
 
 ---
 
@@ -97,7 +97,7 @@ Comprehensive end-to-end test that chains all Phase 1 features together. Validat
 - ✅ Button changes to "Leave"
 - ✅ Alice appears in members list without admin badge
 - ✅ Member count incremented
-- ✅ POST `/api/neighborhoods/{id}/join` returns 200
+- ✅ POST `/app/api/neighborhoods/{id}/join` returns 200
 
 ---
 
