@@ -6,7 +6,7 @@ resource "aws_acm_certificate" "sites_wildcard" {
   provider            = aws.us_east_1
   domain_name         = "*.${var.sites_domain}"
   validation_method   = "DNS"
-  subject_alt_names   = [var.sites_domain]
+  subject_alternative_names = [var.sites_domain]
 
   tags = merge(
     var.tags,

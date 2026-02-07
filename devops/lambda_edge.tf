@@ -86,8 +86,6 @@ data "archive_file" "lambda_edge_subdomain_router" {
 
 # Null resource to run npm install before archiving
 resource "null_resource" "lambda_edge_npm_install" {
-  provisioners = []
-
   triggers = {
     package_json = filemd5("${path.module}/lambda_edge_subdomain_router/package.json")
   }

@@ -181,3 +181,15 @@ variable "tags" {
     ManagedBy   = "Terraform"
   }
 }
+
+variable "api_artifact_path" {
+  description = "Path to API source directory for Lambda packaging"
+  type        = string
+  default     = "../api"
+}
+
+variable "frontend_artifact_path" {
+  description = "Path to built frontend artifacts directory"
+  type        = string
+  default     = "../nbhd/dist"
+}

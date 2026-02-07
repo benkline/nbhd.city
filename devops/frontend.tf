@@ -98,7 +98,7 @@ resource "aws_cloudfront_distribution" "frontend" {
   origin {
     domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name
     origin_id                = "s3-frontend"
-    origin_access_control_id = aws_s3_bucket_oac.frontend.id
+    origin_access_control_id = aws_cloudfront_origin_access_control.frontend.id
   }
 
   # Cache behavior for API requests
@@ -169,10 +169,11 @@ resource "aws_cloudfront_distribution" "frontend" {
 }
 
 # Origin Access Control for S3
-resource "aws_s3_bucket_oac" "frontend" {
-  name = "${var.project_name}-frontend-oac"
-
-  origin_access_control_origin_type = "s3"
+resource "aws_cloudfront_origin_access_control" "frontend" {
+  name                              = "${var.project_name}-frontend-oac"
+  origin_access_control_origin_type = "S3"
+  signing_behavior                  = "sigv4"
+  signing_protocol                  = "sigv4"
 }
 
 # S3 bucket CORS configuration
