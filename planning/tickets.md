@@ -961,26 +961,30 @@ These tickets complete the build pipeline UI for the existing SSG-015 and SSG-01
 #### BUILD-001: Site Build Trigger UI
 - **Description:** Add "Deploy Site" button to trigger site builds
 - **Requirements:**
-  - [ ] Add "Deploy Site" button to `SiteManagementDashboard.jsx`
-  - [ ] Call `POST /api/sites/{id}/build` (endpoint exists from SSG-015)
-  - [ ] Show loading state during build initialization
-  - [ ] Display job_id after successful trigger
-  - [ ] Show error message on failures
-  - [ ] Disable button while build is in progress
-  - [ ] Confirm dialog asking to rebuild
+  - [x] Add "Deploy Site" button to `SiteManagementDashboard.jsx`
+  - [x] Call `POST /api/sites/{id}/build` (endpoint exists from SSG-015)
+  - [x] Show loading state during build initialization
+  - [x] Display job_id after successful trigger
+  - [x] Show error message on failures
+  - [x] Disable button while build is in progress
+  - [x] Confirm dialog asking to rebuild
 - **Acceptance Criteria:**
-  - [ ] Button visible in dashboard for each site
-  - [ ] Clicking triggers build (202 Accepted received)
-  - [ ] Loading state displays during request
-  - [ ] Success message shows with job_id
-  - [ ] Error messages clear and helpful
-  - [ ] Can't trigger multiple builds simultaneously
+  - [x] Button visible in dashboard for each site
+  - [x] Clicking triggers build (202 Accepted received)
+  - [x] Loading state displays during request
+  - [x] Success message shows with job_id
+  - [x] Error messages clear and helpful
+  - [x] Can't trigger multiple builds simultaneously
 - **Type:** Frontend
 - **Estimate:** S
+- **Status:** COMPLETED
+- **Tests:** `nbhd/src/__tests__/components/BuildTriggerButton.test.jsx` (12 tests passing)
 - **Reference:** See [BUILD-PIPELINE-UI.md](./BUILD-PIPELINE-UI.md) - BUILD-001 section and Component Specifications
-- **Files:**
-  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Add button and handler
-  - `nbhd/src/components/SiteBuilder/BuildTriggerButton.jsx` (new, optional)
+- **Implementation Files:**
+  - `nbhd/src/components/SiteBuilder/BuildTriggerButton.jsx` (new)
+  - `nbhd/src/components/SiteBuilder/BuildTriggerButton.module.css` (new)
+  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Added BuildTriggerButton import and integration
+  - `nbhd/src/__tests__/components/BuildTriggerButton.test.jsx` (new)
 
 #### BUILD-002: Build Status Poller
 - **Description:** Component to poll and display build status and logs
