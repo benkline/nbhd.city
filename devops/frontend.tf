@@ -8,18 +8,15 @@ resource "aws_cloudfront_cache_policy" "frontend_api" {
 
   parameters_in_cache_key_and_forwarded_to_origin {
     headers_config {
-      header_behavior = "whitelist"
-      headers {
-        items = ["Host", "Authorization"]
-      }
+      header_behavior = "none"
     }
 
     query_strings_config {
-      query_string_behavior = "all"
+      query_string_behavior = "none"
     }
 
     cookies_config {
-      cookie_behavior = "all"
+      cookie_behavior = "none"
     }
   }
 }

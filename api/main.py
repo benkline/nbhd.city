@@ -1,11 +1,12 @@
 from fastapi import FastAPI, HTTPException, status, Query, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from pydantic import BaseModel
 from typing import Optional
 import secrets
 import os
 import httpx
+import json
 from dotenv import load_dotenv
 
 # Load environment variables from .env.local file in project root
@@ -62,6 +63,17 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+
+@app.get("/client-metadata.json")
+def get_client_metadata():
+    """
+    Serve BlueSky OAuth client metadata.
+    This file is required for BlueSky's decentralized OAuth flow.
+    The URL to this endpoint becomes the client_id for OAuth.
+    """
+    metadata_path = os.path.join(os.path.dirname(__file__), "client-metadata.json")
+    return FileResponse(metadata_path, media_type="application/json")
 
 
 @app.get("/auth/login")

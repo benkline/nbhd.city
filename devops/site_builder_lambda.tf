@@ -217,7 +217,6 @@ resource "aws_lambda_function" "site_builder" {
       DYNAMODB_TABLE_NAME        = aws_dynamodb_table.nbhd_city.name
       S3_BUCKET                  = aws_s3_bucket.sites.bucket
       CLOUDFRONT_DISTRIBUTION_ID = aws_cloudfront_distribution.sites.id
-      AWS_REGION                 = var.aws_region
     }
   }
 
