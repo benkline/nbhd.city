@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BuildTriggerButton } from './BuildTriggerButton';
 import { BuildStatusPoller } from './BuildStatusPoller';
+import { BuildHistory } from './BuildHistory';
 import styles from './SiteManagementDashboard.module.css';
 
 /**
@@ -40,6 +41,8 @@ function SiteTypeBadge({ siteType, nbhdName }) {
  */
 function SiteCard({ site, onEdit, onDelete, onBuildTriggered }) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedBuildLogs, setSelectedBuildLogs] = useState(null);
 
   const handleDeleteClick = () => {
     setShowConfirm(true);
@@ -108,6 +111,12 @@ function SiteCard({ site, onEdit, onDelete, onBuildTriggered }) {
         >
           Edit
         </button>
+        <button
+          className={styles.historyButton}
+          onClick={() => setShowHistory(!showHistory)}
+        >
+          {showHistory ? 'Hide' : 'View'} Build History
+        </button>
         {!showConfirm && (
           <button
             className={styles.deleteButton}
@@ -136,6 +145,26 @@ function SiteCard({ site, onEdit, onDelete, onBuildTriggered }) {
           </div>
         )}
       </div>
+
+      {showHistory && (
+        <div className={styles.historySection}>
+          <BuildHistory
+            siteId={site.site_id}
+            onViewLogs={(build) => setSelectedBuildLogs(build)}
+          />
+        </div>
+      )}
+
+      {selectedBuildLogs && (
+        <div className={styles.buildPollerOverlay}>
+          <BuildStatusPoller
+            site={site}
+            jobId={selectedBuildLogs.job_id}
+            onBuildComplete={() => setSelectedBuildLogs(null)}
+            onClose={() => setSelectedBuildLogs(null)}
+          />
+        </div>
+      )}
     </div>
   );
 }
