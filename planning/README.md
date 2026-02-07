@@ -9,7 +9,7 @@
 
 ### 🎯 Planning & Direction
 - **[PHASES.md](./PHASES.md)** - Development roadmap and current phase focus
-- **[tickets.md](./tickets.md)** - Prioritized feature tickets and breakdown
+- **[tickets.md](../tickets/tickets.md)** - Prioritized feature tickets and breakdown
 
 ### 🏗️ System Design
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System overview, deployment model, tech stack
@@ -50,7 +50,7 @@ Two parallel workstreams:
 
 **AT Protocol PDS:** Each nbhd becomes a full Personal Data Server. Members get DIDs, data is federated with BlueSky, full data portability.
 
-See [PHASES.md](./PHASES.md) for complete roadmap and [tickets.md](./tickets.md) for implementation tickets.
+See [PHASES.md](./PHASES.md) for complete roadmap and [tickets.md](../tickets/tickets.md) for implementation tickets.
 
 ## Core Principles
 

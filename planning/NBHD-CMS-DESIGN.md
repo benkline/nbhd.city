@@ -434,4 +434,4 @@ CMSView.test.jsx
 - **AT Protocol Records**: See [CONTENT_RECORDS.md](./CONTENT_RECORDS.md)
 - **API Design**: See [API.md](./API.md)
 - **Frontend Architecture**: See [FRONTEND.md](./FRONTEND.md)
-- **Content Management**: See [SSG-011 - Content Records API](./tickets.md)
+- **Content Management**: See [SSG-011 - Content Records API](../tickets/tickets.md)

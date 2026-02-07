@@ -49,7 +49,7 @@ Foundation layer for AT Protocol record storage and management. This is the crit
 - ATP-FOUND-003: Record key (rkey) generation
 - ATP-FOUND-004: Basic record CRUD operations
 
-See [tickets.md](./tickets.md) for detailed specifications.
+See [tickets.md](../tickets/tickets.md) for detailed specifications.
 
 ---
 
@@ -77,7 +77,7 @@ API layer for template discovery, management, and site configuration. This provi
 - SSG-005: Template Management API
 - SSG-006: Site Configuration Storage API
 
-See [tickets.md](./tickets.md) for detailed specifications.
+See [tickets.md](../tickets/tickets.md) for detailed specifications.
 
 ---
 
@@ -105,7 +105,7 @@ Research and implementation of automated template analysis. Allows users to regi
 - SSG-009: Template Analyzer Lambda Function
 - SSG-010: Custom Template Selection UI
 
-See [tickets.md](./tickets.md) for detailed specifications.
+See [tickets.md](../tickets/tickets.md) for detailed specifications.
 
 ---
 
@@ -132,7 +132,7 @@ Content creation and management layer. Users can create, edit, and publish conte
 - SSG-013: Dual Record Creation (BlueSky Integration)
 - SSG-014: Smart Content Prefilling
 
-See [tickets.md](./tickets.md) for detailed specifications.
+See [tickets.md](../tickets/tickets.md) for detailed specifications.
 
 ---
 
@@ -161,7 +161,7 @@ Server-side build execution and deployment infrastructure. Transforms content re
 - SSG-018: Site Export to ZIP
 - Infrastructure for Lambdas and CDN
 
-See [tickets.md](./tickets.md) for detailed specifications.
+See [tickets.md](../tickets/tickets.md) for detailed specifications.
 
 ---
 
@@ -195,7 +195,7 @@ Neighborhood-level CMS allowing neighborhood owners to manage community content,
 - SITES-002: Personal Sites Page
 - SITES-003: Project Sites Page
 
-See [tickets.md](./tickets.md) for detailed specifications.
+See [tickets.md](../tickets/tickets.md) for detailed specifications.
 
 ---
 
@@ -221,7 +221,7 @@ Frontend UI completion for build pipeline. Provides user-visible interfaces for 
 - BUILD-002: Build Status Poller
 - BUILD-003: Build History Dashboard
 
-See [tickets.md](./tickets.md) for detailed specifications.
+See [tickets.md](../tickets/tickets.md) for detailed specifications.
 
 ---
 
@@ -257,7 +257,7 @@ Complete AT Protocol federation and Personal Data Server (PDS) implementation. N
 - ATP-009: PDS Federation Setup
 - ATP-010: Cross-PDS Neighborhood Lists
 
-See [tickets.md](./tickets.md) for detailed specifications.
+See [tickets.md](../tickets/tickets.md) for detailed specifications.
 
 ---
 
@@ -300,7 +300,7 @@ Phase 9: Full AT Protocol Federation (can run in parallel with earlier phases)
 ## How to Use This Roadmap
 
 1. **For Direction**: Use this to understand WHAT we're building and WHEN
-2. **For Execution**: See [tickets.md](./tickets.md) for HOW (specific tickets and sequencing)
+2. **For Execution**: See [tickets.md](../tickets/tickets.md) for HOW (specific tickets and sequencing)
 3. **For Details**: Reference domain-specific docs (ARCHITECTURE.md, DATABASE.md, etc.)
 
 **Next Step**: Execute Phase 2 (AT Protocol Foundation) - ATP-FOUND-001 through ATP-FOUND-004

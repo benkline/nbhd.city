@@ -237,8 +237,8 @@ Also reference these existing documents for context:
 
 ## Quick Links to Tickets
 
-- [tickets.md - Phase 2g](./tickets.md#phase-2g-nbhd-cms--admin-features-) - All 11 tickets
-- [tickets.md - Phase 2h](./tickets.md#phase-2h-build-pipeline-ui-completion-) - All 3 tickets
+- [tickets.md - Phase 2g](../tickets/tickets.md#phase-2g-nbhd-cms--admin-features-) - All 11 tickets
+- [tickets.md - Phase 2h](../tickets/tickets.md#phase-2h-build-pipeline-ui-completion-) - All 3 tickets
 
 ---
 

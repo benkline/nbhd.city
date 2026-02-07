@@ -1,8 +1,16 @@
-# nbhd.city Development Tickets
+# nbhd.city Development Tickets - Detailed Descriptions
 
-**Last Updated:** 2026-02-04 (NBHD-001 & NBHD-002 Completed)
-**Phases:** 1-9 (Sequential phases based on execution order and dependencies)
-**Priority:** High
+**Last Updated:** 2026-02-07
+**Format:** Detailed ticket specifications and acceptance criteria
+**Priority Reference:** See [ticket-list.md](./ticket-list.md) for priority order and timeline
+
+---
+
+## Quick Reference
+
+For **priority order, timeline, and quick checklist**, see **[ticket-list.md](./ticket-list.md)**.
+
+This document contains detailed descriptions, requirements, and acceptance criteria for all tickets.
 
 ---
 
@@ -689,6 +697,7 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
   - [x] DID format is consistent and valid
 - **Type:** Backend
 - **Estimate:** M
+- **Status:** COMPLETED
 - **Reference:** See [NBHD-CMS-DESIGN.md](./NBHD-CMS-DESIGN.md) - Data Model section and [SITE-TYPES.md](./SITE-TYPES.md) - Data Model section
 - **Files:**
   - `api/dynamodb_repository.py` - Add DID generation
@@ -837,6 +846,7 @@ Transform nbhd.city into a full CMS where neighborhoods can publish AT Protocol 
   - `nbhd/src/components/ContentRecordsList.jsx` (new)
   - `nbhd/src/components/ATProtocolInspector.jsx` (new)
   - `nbhd/src/App.jsx` - Add route
+- **Status:** COMPLETED
 
 ### Frontend - Site Management Enhancement
 
@@ -991,28 +1001,34 @@ These tickets complete the build pipeline UI for the existing SSG-015 and SSG-01
 #### BUILD-003: Build History Dashboard
 - **Description:** Component to display past builds and their status
 - **Requirements:**
-  - [ ] Create `BuildHistory.jsx` component
-  - [ ] Fetch `GET /api/sites/{id}/builds` (endpoint exists from SSG-015)
-  - [ ] Display table: Status, Started, Duration, Actions
-  - [ ] Show build status with color coding (success=green, failed=red, pending=yellow)
-  - [ ] Link to logs for each build
-  - [ ] Pagination for large build histories
-  - [ ] Sort by date (newest first)
-  - [ ] Add to `SiteManagementDashboard` or separate page
-  - [ ] Show last successful/failed build info
+  - [x] Create `BuildHistory.jsx` component
+  - [x] Fetch `GET /api/sites/{id}/builds` (endpoint exists from SSG-015)
+  - [x] Display table: Status, Started, Duration, Actions
+  - [x] Show build status with color coding (success=green, failed=red, pending=yellow)
+  - [x] Link to logs for each build
+  - [x] Pagination for large build histories
+  - [x] Sort by date (newest first)
+  - [x] Add to `SiteManagementDashboard` or separate page
+  - [x] Show last successful/failed build info
 - **Acceptance Criteria:**
-  - [ ] Table displays all builds with correct info
-  - [ ] Status colors are visible and correct
-  - [ ] Pagination works with >10 builds
-  - [ ] Sorting by date works
-  - [ ] Log links are clickable
-  - [ ] Mobile responsive layout
+  - [x] Table displays all builds with correct info
+  - [x] Status colors are visible and correct
+  - [x] Pagination works with >10 builds
+  - [x] Sorting by date works
+  - [x] Log links are clickable
+  - [x] Mobile responsive layout
 - **Type:** Frontend
 - **Estimate:** M
+- **Status:** COMPLETED (2026-02-07)
 - **Reference:** See [BUILD-PIPELINE-UI.md](./BUILD-PIPELINE-UI.md) - BUILD-003 section and Component Specifications
 - **Files:**
-  - `nbhd/src/components/SiteBuilder/BuildHistory.jsx` (new)
-  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Add build history section
+  - `nbhd/src/components/SiteBuilder/BuildHistory.jsx` (new) - 220 lines, main component with table, pagination, modals
+  - `nbhd/src/components/SiteBuilder/BuildHistory.module.css` (new) - 180 lines, responsive styling with color-coded badges
+  - `nbhd/src/__tests__/components/BuildHistory.test.jsx` (new) - 450+ lines, 19 comprehensive tests
+  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.jsx` - Added BuildHistory integration
+  - `nbhd/src/components/SiteBuilder/SiteManagementDashboard.module.css` - Added button/section styles
+- **PR:** https://github.com/benkline/nbhd.city/pull/98
+- **Tests:** 19/19 tests passing (BUILD-003), 17/17 SiteManagementDashboard, 59 total BUILD tests passing
 
 ---
 
@@ -1247,121 +1263,4 @@ Complete AT Protocol federation and Personal Data Server (PDS) implementation. T
 
 ---
 
-## Priority Order & Timeline
-
-**NOTE:** Tickets are organized above in 9-phase execution order. This section provides week-by-week and phase-by-phase timeline.
-
-### ✅ Phase 1: MVP Foundation (Weeks 1-4) - COMPLETE
-Core platform foundation
-- [x] BlueSky OAuth authentication
-- [x] User profiles with BlueSky sync
-- [x] Neighborhood creation and membership
-- [x] DynamoDB single-table design
-- [x] Terraform AWS deployment
-- [x] React frontend with basic pages
-
-### 🔧 Phase 2: AT Protocol Foundation (Weeks 5-6) **← CRITICAL: DO THIS FIRST**
-**Depends on:** Phase 1
-- [ ] ATP-FOUND-001 (AT Protocol Record Schema in DynamoDB)
-- [ ] ATP-FOUND-002 (CID Generation Utilities)
-- [ ] ATP-FOUND-003 (Record Key/rkey Generation)
-- [ ] ATP-FOUND-004 (Basic Record CRUD Operations)
-
-**Why Phase 2 is critical:** All subsequent phases depend on AT Protocol record storage. Build this foundation first.
-
-### 📋 Phase 3: Template System & Site Config APIs (Weeks 6-7)
-**Depends on:** Phase 2 (AT Protocol Foundation)
-- [ ] SSG-001 (Template Gallery UI)
-- [ ] SSG-002 (Site Configuration Form)
-- [ ] SSG-004 (Site Management Dashboard)
-- [ ] SSG-005 (Template Management API)
-- [ ] SSG-006 (Site Configuration Storage API)
-
-### 📐 Phase 4: Template Analysis System (Weeks 7-8)
-**Depends on:** Phase 3 (Template APIs)
-**Can Run In Parallel With:** Phase 5 (Content Management)
-- [ ] SSG-007 (Template Schema Inference Research)
-- [ ] SSG-008 (Custom Template Registration API)
-- [ ] SSG-009 (Template Analyzer Lambda Function)
-- [ ] SSG-010 (Custom Template Selection UI)
-
-### ✍️ Phase 5: Content Management (Weeks 8-9)
-**Depends on:** Phase 2 (AT Protocol Foundation) and Phase 3 (Template APIs)
-- [ ] SSG-011 (Content Records API)
-- [ ] SSG-012 (Content Editor UI)
-- [ ] SSG-013 (Dual Record Creation - BlueSky Integration)
-- [ ] SSG-014 (Smart Content Prefilling)
-
-### 🏗️ Phase 6: Build Pipeline & Deployment (Weeks 10-12)
-**Depends on:** Phase 5 (Content Management - content must exist before building)
-- [ ] SSG-015 (Site Build Trigger API)
-- [ ] SSG-016 (11ty Lambda Build Function)
-- [x] SSG-017 (Subdomain Routing Setup) - COMPLETED 2026-01-31
-- [x] SSG-018 (Site Export to ZIP) - COMPLETED 2026-02-01
-- Infrastructure: SSG-009-INFRA, SSG-016-INFRA, SSG-015-INFRA
-
-### 📝 Phase 7: Nbhd CMS & Admin Features (Weeks 13-15)
-**Depends on:** Phase 5 (Content Management) and Phase 6 (Build Pipeline)
-
-Backend Foundation:
-- [x] NBHD-001 (Nbhd DID & Data Model Enhancement)
-- [x] NBHD-002 (Nbhd Content API)
-
-Frontend - Core CMS:
-- [ ] NBHD-003 (Welcome Page UI)
-- [ ] NBHD-004 (Admin Page UI)
-- [ ] NBHD-005 (CMS View for AT Protocol Data)
-
-Frontend - Site Management:
-- [x] SITES-001 (Site Type Distinction)
-- [x] SITES-002 (Personal Sites Page)
-- [x] SITES-003 (Project Sites Page) - COMPLETED 2026-02-07
-
-### 🚀 Phase 8: Build Pipeline UI Completion (Weeks 15-16)
-**Depends on:** Phase 6 (Build Pipeline backend is complete)
-- [ ] BUILD-001 (Site Build Trigger UI)
-- [x] BUILD-002 (Build Status Poller) - COMPLETED 2026-02-07
-- [ ] BUILD-003 (Build History Dashboard)
-
-### 🌐 Phase 9: Full AT Protocol Federation (Weeks 17+)
-**Depends on:** Phase 2 (AT Protocol Foundation is in place)
-- [ ] ATP-001 (AT Protocol PDS Research & Design)
-- [ ] ATP-002 (BlueSky Integration Review)
-- [ ] ATP-003 (DID Registration for Members)
-- [ ] ATP-004 (DID to BlueSky Handle Mapping)
-- [ ] ATP-005 (Personal Data Repository Implementation)
-- [ ] ATP-006 (Data Sync from BlueSky Firehose)
-- [ ] ATP-007 (AT Protocol Data Export)
-- [ ] ATP-008 (Data Migration Between nbhds)
-- [ ] ATP-009 (PDS Federation Setup)
-- [ ] ATP-010 (Cross-PDS Neighborhood Lists)
-
-### 📝 Ongoing (Throughout All Phases)
-- [ ] TEST-001 (Integration Tests)
-- [ ] DOC-001 (Static Sites User Guide)
-- [ ] DOC-002 (AT Protocol PDS Architecture Document)
-
-### 🎨 Optional Features
-- [ ] SSG-003 (WASM Preview for client-side building - nice to have)
-
----
-
-## Ticket Labels (for GitHub)
-
-- `phase-2` - Phase 2 feature
-- `static-sites` - Static site generation
-- `atproto` - AT Protocol / PDS
-- `backend` - Backend/API work
-- `frontend` - Frontend/React work
-- `infrastructure` - Infrastructure/Lambda/Terraform
-- `template` - 11ty template work
-- `research` - Research/investigation needed
-- `testing` - Tests
-- `docs` - Documentation
-- `priority-high` - Must do
-- `priority-medium` - Should do
-- `priority-low` - Nice to have
-
----
-
-**End of Tickets Document**
+**Detailed descriptions end here. See [ticket-list.md](./ticket-list.md) for priority order and timeline.**
