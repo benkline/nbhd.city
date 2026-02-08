@@ -6,7 +6,7 @@ resource "aws_lambda_permission" "api_invoke_template_analyzer" {
   statement_id  = "AllowAPILambdaInvokeTemplateAnalyzer"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.template_analyzer.function_name
-  principal     = aws_lambda_function.api.arn
+  principal     = "lambda.amazonaws.com"
   source_arn    = aws_lambda_function.api.arn
 }
 
@@ -15,6 +15,6 @@ resource "aws_lambda_permission" "api_invoke_site_builder" {
   statement_id  = "AllowAPILambdaInvokeSiteBuilder"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.site_builder.function_name
-  principal     = aws_lambda_function.api.arn
+  principal     = "lambda.amazonaws.com"
   source_arn    = aws_lambda_function.api.arn
 }

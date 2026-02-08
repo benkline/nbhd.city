@@ -28,13 +28,13 @@ jobs:
 
       - name: Install API dependencies
         run: |
-          cd api
+          cd app/api
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run API tests
         run: |
-          cd api
+          cd app/api
           pip install pytest
           pytest || echo "No tests configured yet"
 
@@ -44,23 +44,23 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: 'nbhd/package-lock.json'
+          cache-dependency-path: 'app/UI/package-lock.json'
 
       - name: Install frontend dependencies
         run: |
-          cd nbhd
+          cd app/UI
           npm ci
 
       - name: Build frontend
         run: |
-          cd nbhd
+          cd app/UI
           npm run build
 
       - name: Upload frontend artifacts
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
-          path: nbhd/dist/
+          path: app/UI/dist/
 
       # Setup OpenTofu and deploy
       - name: Setup OpenTofu

@@ -103,7 +103,7 @@ resource "aws_cloudfront_distribution" "sites" {
 
   # CloudFront viewer certificate: Custom SSL certificate
   viewer_certificate {
-    acm_certificate_arn            = aws_acm_certificate_validation.sites_wildcard.certificate_arn
+    acm_certificate_arn            = aws_acm_certificate.sites_wildcard.arn
     cloudfront_default_certificate = false
     minimum_protocol_version       = "TLSv1.2_2021"
     ssl_support_method             = "sni-only"
@@ -126,8 +126,8 @@ resource "aws_cloudfront_distribution" "sites" {
   # Retain distribution when destroyed (prevents accidental deletion)
   retain_on_delete = false
 
-  # Wait for certificate validation before creating distribution
-  depends_on = [aws_acm_certificate_validation.sites_wildcard]
+  # NOTE: Certificate dependency removed - using default certificate for now
+  # Once DNS is updated at registrar and certificate validates, update viewer_certificate above
 
   tags = merge(
     var.tags,

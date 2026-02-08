@@ -4,7 +4,7 @@
 # Archive packaging for template analyzer Lambda
 data "archive_file" "lambda_template_analyzer_package" {
   type        = "zip"
-  source_dir  = "${path.module}/../lambda/template_analyzer"
+  source_dir  = "${path.module}/../app/lambda/template_analyzer"
   output_path = "${path.module}/.terraform/lambda_template_analyzer.zip"
 
   excludes = [
@@ -140,7 +140,6 @@ resource "aws_lambda_function" "template_analyzer" {
     variables = {
       ENVIRONMENT         = var.environment
       DYNAMODB_TABLE_NAME = aws_dynamodb_table.nbhd_city.name
-      AWS_REGION          = var.aws_region
     }
   }
 
