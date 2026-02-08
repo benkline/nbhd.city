@@ -62,11 +62,11 @@ jobs:
           name: frontend-dist
           path: app/UI/dist/
 
-      # Setup OpenTofu and deploy
-      - name: Setup OpenTofu
-        uses: opentofu/setup-opentofu@v1
+      # Setup Terraform and deploy
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
         with:
-          tofu_version: "~> 1.6.0"
+          terraform_version: ">= 1.5"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -110,40 +110,34 @@ jobs:
           bluesky_oauth_redirect_uri       = "https://nbhd.city/auth/callback"
           TFVARS
 
-      - name: Initialize OpenTofu
+      - name: Initialize Terraform
         run: |
           cd devops
-          tofu init
+          terraform init
 
-      - name: Validate OpenTofu
+      - name: Validate Terraform
         run: |
           cd devops
-          tofu validate
+          terraform validate
 
-      - name: Import existing resources into Terraform state
+      - name: Plan Terraform deployment
         run: |
           cd devops
-          # Import critical existing resources so Terraform doesn't try to recreate them
-          tofu import -auto-approve aws_s3_bucket.frontend nbhd-city-frontend-590183759956 || true
-          tofu import -auto-approve aws_s3_bucket.sites nbhd-city-sites-590183759956 || true
-          tofu import -auto-approve aws_dynamodb_table.nbhd_city nbhd-city-production || true
-          tofu import -auto-approve aws_iam_role.lambda_execution nbhd-city-lambda-execution-role || true
-          tofu import -auto-approve aws_iam_role.lambda_exec nbhd-city-lambda-exec-production || true
-          tofu import -auto-approve aws_cloudwatch_log_group.api_gateway /aws/apigateway/nbhd-city-api || true
-          tofu import -auto-approve aws_cloudwatch_log_group.lambda /aws/lambda/nbhd-city-api || true
-        continue-on-error: true
+          terraform plan -var-file=terraform.tfvars -out=tfplan
 
-      - name: Plan OpenTofu deployment
+      - name: Apply Terraform deployment
         run: |
           cd devops
-          tofu plan -var-file=terraform.tfvars -out=tfplan
+          terraform apply -auto-approve tfplan
 
-      - name: Apply OpenTofu deployment
+      - name: Invalidate CloudFront cache
         run: |
           cd devops
-          tofu apply -auto-approve tfplan
+          FRONTEND_DIST_ID=$(terraform output -raw frontend_cloudfront_distribution_id)
+          aws cloudfront create-invalidation --distribution-id "$FRONTEND_DIST_ID" --paths "/*" --region us-east-1
+          echo "CloudFront cache invalidated for frontend distribution"
 
       - name: Output deployment info
         run: |
           cd devops
-          tofu output -json
+          terraform output -json
