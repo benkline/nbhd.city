@@ -32,11 +32,11 @@ All project tickets are located in `/tickets/`:
 │   ├── /api/            # Python FastAPI backend
 │   ├── /UI/             # React frontend
 │   ├── /lambda/         # AWS Lambda functions
+│   ├── /dynamodb/       # Local DynamoDB development (Docker)
 │   └── /scripts/        # Migration scripts
 ├── /specs/              # Architecture and design documentation
 ├── /tickets/            # Project tickets and specifications
 ├── /tests/              # Infrastructure tests (Lambda, DevOps)
-├── /dynamodb/           # Local DynamoDB development environment
 ├── /devops/             # Terraform infrastructure (AWS)
 └── CLAUDE.md            # This file
 ```
