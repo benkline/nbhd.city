@@ -127,6 +127,10 @@ jobs:
           tofu import -auto-approve aws_s3_bucket.frontend nbhd-city-frontend-590183759956 || true
           tofu import -auto-approve aws_s3_bucket.sites nbhd-city-sites-590183759956 || true
           tofu import -auto-approve aws_dynamodb_table.nbhd_city nbhd-city-production || true
+          tofu import -auto-approve aws_iam_role.lambda_execution nbhd-city-lambda-execution-role || true
+          tofu import -auto-approve aws_iam_role.lambda_exec nbhd-city-lambda-exec-production || true
+          tofu import -auto-approve aws_cloudwatch_log_group.api_gateway /aws/apigateway/nbhd-city-api || true
+          tofu import -auto-approve aws_cloudwatch_log_group.lambda /aws/lambda/nbhd-city-api || true
         continue-on-error: true
 
       - name: Plan OpenTofu deployment
