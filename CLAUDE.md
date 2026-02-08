@@ -36,6 +36,7 @@ All project tickets are located in `/tickets/`:
 ├── /specs/              # Architecture and design documentation
 ├── /tickets/            # Project tickets and specifications
 ├── /tests/              # Infrastructure tests (Lambda, DevOps)
+├── /dynamodb/           # Local DynamoDB development environment
 ├── /devops/             # Terraform infrastructure (AWS)
 └── CLAUDE.md            # This file
 ```
