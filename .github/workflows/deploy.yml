@@ -87,7 +87,7 @@ jobs:
       - name: Plan OpenTofu deployment
         run: |
           cd devops
-          tofu plan -out=tfplan
+          tofu plan -var-file=terraform.tfvars -out=tfplan
 
       - name: Apply OpenTofu deployment
         run: |
