@@ -210,7 +210,7 @@ resource "aws_cloudfront_distribution" "frontend" {
 
   aliases = [var.sites_domain]
 
-  depends_on = [aws_s3_bucket_public_access_block.frontend, aws_acm_certificate.sites_wildcard]
+  depends_on = [aws_s3_bucket_public_access_block.frontend, aws_acm_certificate_validation.sites_wildcard]
 
   tags = {
     Name = "${var.project_name}-frontend-cdn"
