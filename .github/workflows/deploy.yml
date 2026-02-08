@@ -120,6 +120,15 @@ jobs:
           cd devops
           tofu validate
 
+      - name: Import existing resources into Terraform state
+        run: |
+          cd devops
+          # Import critical existing resources so Terraform doesn't try to recreate them
+          tofu import -auto-approve aws_s3_bucket.frontend nbhd-city-frontend-590183759956 || true
+          tofu import -auto-approve aws_s3_bucket.sites nbhd-city-sites-590183759956 || true
+          tofu import -auto-approve aws_dynamodb_table.nbhd_city nbhd-city-production || true
+        continue-on-error: true
+
       - name: Plan OpenTofu deployment
         run: |
           cd devops
