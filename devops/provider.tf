@@ -13,14 +13,13 @@ terraform {
   }
 
   # Remote state management
-  # NOTE: Temporarily commented for bootstrap - will be uncommented after S3 backend is created
-  # backend "s3" {
-  #   bucket         = "nbhd-city-terraform-state-590183759956"
-  #   key            = "prod/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   encrypt        = true
-  #   dynamodb_table = "terraform-locks"
-  # }
+  backend "s3" {
+    bucket         = "nbhd-city-terraform-state-590183759956"
+    key            = "prod/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "terraform-locks"
+  }
 }
 
 provider "aws" {
