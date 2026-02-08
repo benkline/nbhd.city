@@ -10,6 +10,13 @@ All project tickets are located in `/tickets/`:
 - `tickets.md` - Detailed ticket specifications with acceptance criteria
 - `ticket-list.md` - Priority order, timeline, and quick checklist
 
+## Infrastructure & DevOps
+
+**Use Terraform exclusively** (not OpenTofu):
+- All infrastructure changes go through Terraform
+- Run commands from `/devops/` directory
+- Always use `terraform plan` before `terraform apply`
+
 ## Skills
 
 ⚠️ **All skills are global** (located at `~/.claude/skills/`)
