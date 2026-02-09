@@ -1078,7 +1078,7 @@ This phase improves the authentication and onboarding experience:
 
 ---
 
-### FL-9.2: Enhanced OAuth Login Flow
+gs
 
 **Description:** Improve the BlueSky OAuth login experience with clear prompts, error handling, and redirect logic.
 
@@ -1130,8 +1130,9 @@ This phase improves the authentication and onboarding experience:
 
 **Type:** Frontend + Backend
 **Estimate:** M
-**Status:** PENDING - BLOCKED (test-login endpoint needs fix)
-**Tests:** `tickets/integration-tickets/PHASE-10/TEST-LOGIN-OAUTH-001.md`
+**Status:** IN PROGRESS - test-login endpoint fixed, ready for manual testing
+**Tests:** `app/api/tests/test_auth.py` (4/4 passing)
+**Commit:** d4365f3 - "fix(FL-9.2): Fix test-login endpoint to accept real BlueSky credentials"
 
 **Implementation Notes:**
 - The `/auth/test-login` endpoint at `app/api/main.py:178-239` needs to be refactored
