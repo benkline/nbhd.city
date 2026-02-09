@@ -1092,8 +1092,28 @@ This phase improves the authentication and onboarding experience:
 - [ ] Store session token securely (localStorage or HTTP-only cookie)
 - [ ] Redirect to home page or dashboard on successful login
 - [ ] Display user's BlueSky profile picture and handle after login
-- [ ] Add logout endpoint: `POST /app/app/api/auth/logout`
+- [ ] Add logout endpoint: `POST /app/app/api/auth/logout` ✅ (already exists)
 - [ ] Clear session on logout and redirect to login page
+
+**Known Issues to Fix:**
+- [x] **`/auth/test-login` endpoint is broken for actual BlueSky credentials** ✅ FIXED
+  - **Problem:** The endpoint only accepts hardcoded test credentials (checks if username/password match BSKY_USERNAME/BSKY_PASSWORD env vars)
+  - **Error:** When using valid BlueSky credentials, returns 401 but frontend gets "Failed to execute 'json' on 'Response': Unexpected end of JSON input"
+  - **Root Cause:** Endpoint was designed only for development/test use, not for actual users
+  - **Solution Applied:**
+    1. ✅ Removed hardcoded test credential validation (line 194 in main.py)
+    2. ✅ Updated endpoint to accept any valid BlueSky credentials
+    3. ✅ Integrated with BlueSky's com.atproto.server.createSession API
+    4. ✅ Added comprehensive error handling for BlueSky API failures and invalid credentials
+    5. ✅ Return proper error response format with meaningful error messages (400, 401, 503, 500)
+    6. ✅ Use proper Pydantic models (Token, User) instead of plain dicts
+    7. ✅ Extract actual user handle and DID from BlueSky response
+    8. ✅ Add error logging for debugging
+  - **Changes Made:** `app/api/main.py:178-239` completely refactored
+- [x] **Error response handling** ✅ FIXED
+  - [x] Return structured error responses with clear messages
+  - [x] All error paths return valid JSON (no empty bodies)
+  - [x] Added logging to debug BlueSky API failures
 
 **Acceptance Criteria:**
 - [ ] OAuth sign-in button displays and functions correctly
@@ -1105,11 +1125,19 @@ This phase improves the authentication and onboarding experience:
 - [ ] Loading states show during OAuth flow
 - [ ] Error messages display for failed OAuth attempts
 - [ ] Session persists across page refreshes
+- [ ] **Test-login endpoint accepts actual BlueSky credentials** (or OAuth flow is properly implemented)
+- [ ] **Error responses are always valid JSON with meaningful messages**
 
 **Type:** Frontend + Backend
 **Estimate:** M
-**Status:** PENDING
+**Status:** PENDING - BLOCKED (test-login endpoint needs fix)
 **Tests:** `tickets/integration-tickets/PHASE-10/TEST-LOGIN-OAUTH-001.md`
+
+**Implementation Notes:**
+- The `/auth/test-login` endpoint at `app/api/main.py:178-239` needs to be refactored
+- Line 194: Remove the test credential check that rejects actual BlueSky users
+- Line 206-218: BlueSky API call logic is correct, but error handling needs improvement
+- Consider whether test-login should support any BlueSky credentials or if it should be removed in favor of proper OAuth
 
 ---
 
