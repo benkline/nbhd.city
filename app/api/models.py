@@ -97,6 +97,7 @@ class NbhdResponse(BaseModel):
     created_at: str  # ISO format timestamp string
     member_count: int = 0
     nbhd_did: str  # DID for AT Protocol compatibility
+    settings: Optional[Dict] = {}  # Neighborhood settings (is_home_page, etc)
 
     class Config:
         from_attributes = True
