@@ -147,6 +147,21 @@ resource "aws_cloudfront_distribution" "frontend" {
     origin_access_control_id = aws_cloudfront_origin_access_control.frontend.id
   }
 
+  # Handle SPA routing - serve index.html for missing files
+  custom_error_response {
+    error_code            = 404
+    response_code         = 200
+    response_page_path    = "/index.html"
+    error_caching_min_ttl = 0
+  }
+
+  custom_error_response {
+    error_code            = 403
+    response_code         = 200
+    response_page_path    = "/index.html"
+    error_caching_min_ttl = 0
+  }
+
   # Optional: API Gateway origin (uncomment when API is deployed)
   # origin {
   #   domain_name = var.api_gateway_domain
@@ -188,10 +203,14 @@ resource "aws_cloudfront_distribution" "frontend" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn      = aws_acm_certificate.sites_wildcard.arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
-  depends_on = [aws_s3_bucket_public_access_block.frontend]
+  aliases = [var.sites_domain]
+
+  depends_on = [aws_s3_bucket_public_access_block.frontend, aws_acm_certificate_validation.sites_wildcard]
 
   tags = {
     Name = "${var.project_name}-frontend-cdn"

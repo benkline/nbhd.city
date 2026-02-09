@@ -12,14 +12,14 @@ terraform {
     }
   }
 
-  # Uncomment and configure for remote state management
-  # backend "s3" {
-  #   bucket         = "nbhd-city-terraform-state"
-  #   key            = "prod/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   encrypt        = true
-  #   dynamodb_table = "terraform-locks"
-  # }
+  # Remote state management
+  backend "s3" {
+    bucket         = "nbhd-city-terraform-state-590183759956"
+    key            = "prod/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "terraform-locks"
+  }
 }
 
 provider "aws" {

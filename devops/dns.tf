@@ -40,10 +40,9 @@ resource "aws_route53_record" "wildcard_sites" {
   depends_on = [aws_cloudfront_distribution.sites]
 }
 
-# Apex domain A record (optional): {sites_domain} → main frontend CloudFront
-# Points to the main frontend distribution if it exists and has a custom domain
+# Apex domain A record: {sites_domain} → main frontend CloudFront
+# Points the root domain to the frontend distribution
 resource "aws_route53_record" "apex_sites" {
-  count   = var.custom_domain_name == "" ? 0 : 1
   zone_id = local.route53_zone_id
   name    = var.sites_domain
   type    = "A"

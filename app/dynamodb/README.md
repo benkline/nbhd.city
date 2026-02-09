@@ -6,7 +6,7 @@ This folder provides a complete local development environment for DynamoDB using
 
 ```bash
 # Start everything
-cd devlocal
+cd dynamodb
 ./scripts/start.sh
 
 # Open DynamoDB Admin
@@ -107,7 +107,7 @@ python import_data.py ../data/exports/all_items_20250101_120000.json
 ## Directory Structure
 
 ```
-devlocal/
+dynamodb/
 ├── docker-compose.yml       # Docker services
 ├── Dockerfile.init          # Table initialization image
 ├── init/
@@ -186,7 +186,7 @@ cd ../api && uvicorn main:app --reload
 
 ```bash
 # Before switching branches
-cd devlocal/scripts
+cd dynamodb/scripts
 python export_data.py       # Backup data
 
 # After switching branches

@@ -41,17 +41,15 @@ resource "aws_route53_record" "sites_cert_validation" {
 }
 
 # Wait for certificate validation to complete
-# NOTE: Commented out to avoid blocking deployment. Manually verify certificate
-# is validated in AWS ACM console when DNS records have propagated.
-# resource "aws_acm_certificate_validation" "sites_wildcard" {
-#   provider        = aws.us_east_1
-#   certificate_arn = aws_acm_certificate.sites_wildcard.arn
-#
-#   # Wait for all DNS validation records to be created
-#   # Note: DNS propagation can take up to 10-15 minutes globally
-#   timeouts {
-#     create = "30m"
-#   }
-#
-#   depends_on = [aws_route53_record.sites_cert_validation]
-# }
+resource "aws_acm_certificate_validation" "sites_wildcard" {
+  provider        = aws.us_east_1
+  certificate_arn = aws_acm_certificate.sites_wildcard.arn
+
+  # Wait for all DNS validation records to be created
+  # Note: DNS propagation can take up to 10-15 minutes globally
+  timeouts {
+    create = "30m"
+  }
+
+  depends_on = [aws_route53_record.sites_cert_validation]
+}
