@@ -46,8 +46,9 @@ Frontend will be available at `http://localhost:5173`
 
 | Service | Port | Purpose |
 |---------|------|---------|
-| DynamoDB Local | 8000 | Database backend (internal) |
-| Backend API | 8001 | REST API (external: http://localhost:8001) |
+| DynamoDB Local | 8000 | Database backend |
+| Backend API | 8001 | REST API (http://localhost:8001) |
+| DynamoDB Admin UI | 8002 | Database administration |
 | Frontend | 5173 | Web UI |
 
 ## Configuration Files
