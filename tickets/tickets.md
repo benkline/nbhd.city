@@ -17,6 +17,8 @@ This document contains detailed descriptions, requirements, and acceptance crite
 ## Phase Overview
 
 The development roadmap is organized into 9 sequential phases:
+
+Completed 
 1. **Phase 1** - MVP Foundation ✅ COMPLETE
 2. **Phase 2** - AT Protocol Foundation (ATP-FOUND-001 to 004) - foundational for everything
 3. **Phase 3** - Template System & Site Config APIs (SSG-001, 002, 004, 005, 006)
@@ -25,20 +27,11 @@ The development roadmap is organized into 9 sequential phases:
 6. **Phase 6** - Build Pipeline & Deployment (SSG-015, 016, 017, 018 + infrastructure)
 7. **Phase 7** - Nbhd CMS & Admin Features (NBHD-001 through SITES-003)
 8. **Phase 8** - Build Pipeline UI Completion (BUILD-001, 002, 003)
-9. **Phase 9** - Full AT Protocol Federation (ATP-001 through ATP-010)
 
-### Relevant Documentation
+Curretly working on
+9. **Phase 9** - Testing and Refinement
+10. **Phase 10** - Full AT Protocol Federation (ATP-001 through ATP-010)
 
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System design and tech stack
-- **[DATABASE.md](./DATABASE.md)** - DynamoDB schema for static sites and PDS data
-- **[API.md](./API.md)** - REST endpoints for templates, sites, and PDS
-- **[FRONTEND.md](./FRONTEND.md)** - React components for site builder
-- **[INFRASTRUCTURE.md](./INFRASTRUCTURE.md)** - Lambda builds, S3, CloudFront, Terraform
-- **[SECURITY.md](./SECURITY.md)** - DID key management, authentication
-- **[ATPROTOCOL.md](./ATPROTOCOL.md)** - PDS implementation details
-- **[TESTING.md](./TESTING.md)** - Testing strategy for Phase 2
-
----
 
 ## Phase 1: MVP Foundation ✅ COMPLETE
 
@@ -1032,7 +1025,193 @@ These tickets complete the build pipeline UI for the existing SSG-015 and SSG-01
 
 ---
 
-## Phase 9: Full AT Protocol Federation 🌐
+## Phase 9.1: Frontend Login & Authentication 🔐
+
+**Status:** Pending
+**Timeline:** Weeks TBD
+**Depends On:** Phase 1 (BlueSky OAuth), Phase 7 (Neighborhoods)
+
+Enhanced login experience with OAuth flow, session management, and user onboarding. All authentication is managed exclusively through BlueSky OAuth - no password management.
+
+### Overview
+
+This phase improves the authentication and onboarding experience:
+1. Context-aware home page that displays neighborhood welcome or login
+2. Enhanced OAuth login with CSRF protection
+3. Session persistence and automatic token refresh
+4. First-time user onboarding flow
+5. Secure logout with session cleanup
+
+---
+
+### FL-9.1: Context-Aware Home Page
+
+**Description:** Display appropriate home page based on context - use neighborhood welcome page if available, otherwise show login page.
+
+**Requirements:**
+- [x] Check if there's an nbhd-type static site configured as home page
+- [x] If nbhd site exists, display it as the home page
+- [x] If no nbhd site exists, fall back to login page
+- [x] Add route resolution logic to App.jsx
+- [x] Query `GET /app/app/api/nbhds/{id}/content/welcome` for nbhd content
+- [x] Handle loading state while checking for nbhd site
+- [x] Handle missing/404 nbhd gracefully
+- [x] Add configuration option to neighborhood settings to designate home page site
+- [x] Display appropriate redirect logic based on user auth state
+
+**Acceptance Criteria:**
+- [x] Unauthenticated users see home page (nbhd welcome or login)
+- [x] Authenticated users see their personal dashboard or nbhd home if configured
+- [x] No error if no nbhd is designated as home page
+- [x] Loading state displays while checking for home page content
+- [x] Navigation handles both logged-in and logged-out states correctly
+- [x] Home page context switches work without full page reload
+
+**Type:** Frontend + Backend
+**Estimate:** M
+**Status:** COMPLETED
+**Merged:** PR #105 on 2026-02-08
+**Tests:** `tickets/integration-tickets/PHASE-10/TEST-LOGIN-CONTEXT-001.md`
+
+---
+
+### FL-9.2: Enhanced OAuth Login Flow
+
+**Description:** Improve the BlueSky OAuth login experience with clear prompts, error handling, and redirect logic.
+
+**Requirements:**
+- [ ] Create `LoginPage.jsx` component with clear OAuth sign-in button
+- [ ] Add helpful messaging explaining the OAuth flow ("Sign in with your BlueSky account")
+- [ ] Display loading state while OAuth request is being processed
+- [ ] Handle OAuth callback with `code` and `state` parameters
+- [ ] Validate OAuth state parameter to prevent CSRF
+- [ ] Extract and store BlueSky DID from OAuth response
+- [ ] Store session token securely (localStorage or HTTP-only cookie)
+- [ ] Redirect to home page or dashboard on successful login
+- [ ] Display user's BlueSky profile picture and handle after login
+- [ ] Add logout endpoint: `POST /app/app/api/auth/logout`
+- [ ] Clear session on logout and redirect to login page
+
+**Acceptance Criteria:**
+- [ ] OAuth sign-in button displays and functions correctly
+- [ ] User can click button and be redirected to BlueSky OAuth
+- [ ] After OAuth callback, user is logged in with valid session
+- [ ] CSRF token validation prevents unauthorized access
+- [ ] User profile displays correct BlueSky handle
+- [ ] Logout clears session and redirects to login page
+- [ ] Loading states show during OAuth flow
+- [ ] Error messages display for failed OAuth attempts
+- [ ] Session persists across page refreshes
+
+**Type:** Frontend + Backend
+**Estimate:** M
+**Status:** PENDING
+**Tests:** `tickets/integration-tickets/PHASE-10/TEST-LOGIN-OAUTH-001.md`
+
+---
+
+### FL-9.3: Persistent Sessions & Token Refresh
+
+**Description:** Implement session persistence and BlueSky OAuth token refresh to keep users logged in across browser sessions.
+
+**Requirements:**
+- [ ] Implement token refresh endpoint: `POST /app/app/api/auth/refresh`
+- [ ] Store BlueSky OAuth refresh token securely in backend (encrypted in DynamoDB)
+- [ ] Detect session expiration and automatically attempt refresh
+- [ ] Create `useAuth()` hook that checks session validity on app load
+- [ ] Implement token refresh logic before API calls (check expiry, refresh if needed)
+- [ ] Add "remember me" option during login (30-day persistence)
+- [ ] Store session metadata (expires_at, last_activity) in DynamoDB
+- [ ] Clear expired sessions from DynamoDB
+- [ ] Add session timeout warning before logout (15 min inactivity)
+- [ ] Graceful degradation if refresh fails (redirect to login)
+
+**Acceptance Criteria:**
+- [ ] User stays logged in after browser restart if "remember me" was checked
+- [ ] Expired tokens are refreshed automatically without user action
+- [ ] Session timeout warning appears after 15 minutes of inactivity
+- [ ] Token refresh only happens once per expiration (no duplicate requests)
+- [ ] Refresh fails gracefully and redirects to login
+- [ ] Session metadata stored correctly in DynamoDB
+- [ ] Old sessions cleaned up from database
+
+**Type:** Frontend + Backend
+**Estimate:** M
+**Depends On:** FL-9.2
+**Status:** PENDING
+**Tests:** `tickets/integration-tickets/PHASE-10/TEST-LOGIN-SESSIONS-001.md`
+
+---
+
+### FL-9.4: User Onboarding After First Login
+
+**Description:** Create onboarding flow for first-time users after BlueSky OAuth login.
+
+**Requirements:**
+- [ ] Detect first-time login (check if user profile exists in DynamoDB)
+- [ ] Redirect to `OnboardingFlow.jsx` page on first login
+- [ ] Step 1: Welcome message with BlueSky profile summary
+- [ ] Step 2: Create or join neighborhoods (show options)
+- [ ] Step 3: Choose site type preference (personal/project)
+- [ ] Step 4: Invite to template selection (create first site)
+- [ ] Store onboarding completion status in user profile
+- [ ] Allow users to skip onboarding and go to dashboard
+- [ ] Add "view onboarding" link in settings for future reference
+- [ ] Pre-populate user data from BlueSky OAuth response (handle, display_name, avatar)
+
+**Acceptance Criteria:**
+- [ ] First-time users see onboarding flow
+- [ ] Returning users skip onboarding and go to dashboard
+- [ ] All onboarding steps display correctly
+- [ ] Users can skip onboarding and go directly to dashboard
+- [ ] Profile data pre-filled from BlueSky
+- [ ] Onboarding status stored and respected
+- [ ] Users can re-access onboarding from settings
+- [ ] All neighborhoods/sites created during onboarding are functional
+
+**Type:** Frontend + Backend
+**Estimate:** L
+**Depends On:** FL-9.2, Phase 7 (neighborhoods & sites)
+**Status:** PENDING
+**Tests:** `tickets/integration-tickets/PHASE-10/TEST-LOGIN-ONBOARDING-001.md`
+
+---
+
+### FL-9.5: Logout Flow & Session Cleanup
+
+**Description:** Implement secure logout with session cleanup and proper redirect.
+
+**Requirements:**
+- [ ] Add logout button to user menu/navigation
+- [ ] Call `POST /app/app/api/auth/logout` on logout click
+- [ ] Backend invalidates session token in DynamoDB
+- [ ] Backend clears any stored refresh tokens
+- [ ] Frontend clears all stored session data (localStorage, cookies)
+- [ ] Redirect to login page after logout
+- [ ] Optional: Show "logged out successfully" message
+- [ ] Optional: Offer "sign in again" button on login page
+- [ ] Handle logout during inactive session (automatic cleanup)
+- [ ] Prevent API calls after logout
+
+**Acceptance Criteria:**
+- [ ] Logout button visible in navigation
+- [ ] Clicking logout calls backend endpoint
+- [ ] Session invalidated on backend (tokens cleared)
+- [ ] Frontend clears local session storage
+- [ ] User redirected to login page
+- [ ] User cannot access protected pages after logout
+- [ ] API calls rejected after logout (401 Unauthorized)
+- [ ] Automatic logout works after inactivity timeout
+
+**Type:** Frontend + Backend
+**Estimate:** S
+**Depends On:** FL-9.2, FL-9.3
+**Status:** PENDING
+**Tests:** `tickets/integration-tickets/PHASE-10/TEST-LOGIN-LOGOUT-001.md`
+
+---
+
+## Phase 9.2: Full AT Protocol Federation 🌐
 
 **Status:** Pending
 **Timeline:** Weeks 17+
