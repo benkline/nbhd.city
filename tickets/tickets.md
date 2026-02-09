@@ -1,6 +1,6 @@
 # nbhd.city Development Tickets - Detailed Descriptions
 
-**Last Updated:** 2026-02-07
+**Last Updated:** 2026-02-08
 **Format:** Detailed ticket specifications and acceptance criteria
 **Priority Reference:** See [ticket-list.md](./ticket-list.md) for priority order and timeline
 
@@ -8,9 +8,12 @@
 
 ## Quick Reference
 
-For **priority order, timeline, and quick checklist**, see **[ticket-list.md](./ticket-list.md)**.
+- **Priority Order & Timeline:** See **[ticket-list.md](./ticket-list.md)**
+- **Completed Tickets Archive:** See **[completed/COMPLETED.md](./completed/COMPLETED.md)** (31 tickets completed)
 
 This document contains detailed descriptions, requirements, and acceptance criteria for all tickets.
+
+📦 **Note:** Completed tickets have been archived to [tickets/completed/COMPLETED.md](./completed/COMPLETED.md) for easier reference. This file contains all 31 completed tickets arranged by completion date (most recent first).
 
 ---
 
