@@ -68,6 +68,11 @@ output "sites_cloudfront_distribution_id" {
   value       = aws_cloudfront_distribution.sites.id
 }
 
+output "frontend_cloudfront_distribution_id" {
+  description = "ID of the CloudFront distribution for frontend (nbhd.city)"
+  value       = aws_cloudfront_distribution.frontend.id
+}
+
 output "route53_zone_id" {
   description = "Route53 hosted zone ID for sites domain"
   value       = local.route53_zone_id

@@ -56,7 +56,7 @@ pip install -r requirements.txt
 ### 3. Start Local DynamoDB (Recommended)
 
 ```bash
-cd ../devlocal
+cd ../dynamodb
 ./scripts/start.sh
 ```
 
@@ -65,7 +65,7 @@ This will:
 - Start DynamoDB Admin UI on port 8001
 - Automatically create all required tables
 
-See [devlocal/README.md](../devlocal/README.md) for more details.
+See [dynamodb/README.md](../dynamodb/README.md) for more details.
 
 ### 4. Start the API Server
 
@@ -158,7 +158,7 @@ const response = await fetch('http://localhost:8000/api/nbhds', {
 
 ```bash
 # Terminal 1: Start DynamoDB
-cd devlocal
+cd dynamodb
 ./scripts/reset.sh
 python init/seed_data.py
 
@@ -172,7 +172,7 @@ uvicorn main:app --reload
 
 ```bash
 # Terminal 1: Start DynamoDB (preserves existing data)
-cd devlocal
+cd dynamodb
 ./scripts/start.sh
 
 # Terminal 2: Start API
@@ -208,7 +208,7 @@ open http://localhost:8001
 ### Seeding Test Data
 
 ```bash
-cd devlocal
+cd dynamodb
 python init/seed_users.py  # Create test users
 python init/seed_data.py   # Create test neighborhoods
 ```
@@ -216,7 +216,7 @@ python init/seed_data.py   # Create test neighborhoods
 ### Export/Import Data
 
 ```bash
-cd devlocal/scripts
+cd dynamodb/scripts
 
 # Export
 python export_data.py
@@ -331,7 +331,7 @@ lsof -ti:8000 | xargs kill -9
 curl http://localhost:8000
 
 # Restart DynamoDB
-cd devlocal
+cd dynamodb
 ./scripts/start.sh
 
 # Verify connection
@@ -361,7 +361,7 @@ pip install -r requirements.txt
 ## Additional Documentation
 
 - [Authentication Guide](./AUTH_README.md) - Detailed auth documentation
-- [Local DynamoDB Setup](../devlocal/README.md) - Database setup guide
+- [Local DynamoDB Setup](../dynamodb/README.md) - Database setup guide
 - [Frontend README](../nbhd/README.md) - Frontend documentation
 
 ## API Endpoints Reference
@@ -396,7 +396,7 @@ For detailed request/response schemas, visit http://localhost:8000/docs when run
 
 - Check the [interactive API docs](http://localhost:8000/docs)
 - Review [AUTH_README.md](./AUTH_README.md) for authentication help
-- See [devlocal/README.md](../devlocal/README.md) for database issues
+- See [dynamodb/README.md](../dynamodb/README.md) for database issues
 - Open an issue on the project repository
 
 ## License
