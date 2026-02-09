@@ -1,6 +1,7 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import AuthSuccess from './pages/AuthSuccess';
 import Dashboard from './pages/Dashboard';
@@ -32,7 +33,7 @@ function App() {
           <Route path="/my-nbhds" element={<MyNbhds />} />
           <Route path="/personal-sites" element={<PersonalSites />} />
           <Route path="/project-sites" element={<ProjectSites />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<HomePage />} />
         </Routes>
       </AuthProvider>
     </Router>
