@@ -178,62 +178,98 @@ async def logout(user_id: str = Depends(get_current_user)):
 @app.post("/auth/test-login", response_model=Token)
 async def test_login(request: TestLoginRequest):
     """
-    Test login endpoint for development/testing.
-    Authenticates against credentials in BSKY_USERNAME and BSKY_PASSWORD environment variables.
-    For testing purposes, also attempts to get a real BlueSky token.
+    Test login endpoint for development/testing with real BlueSky credentials.
+    Authenticates against BlueSky's production server and returns a JWT token.
+
+    Args:
+        request: TestLoginRequest with username and password (BlueSky credentials)
+
+    Returns:
+        Token with access_token, token_type, and user info
+
+    Raises:
+        HTTPException: If BlueSky authentication fails or credentials are invalid
     """
-    test_username = os.getenv("BSKY_USERNAME")
-    test_password = os.getenv("BSKY_PASSWORD")
-
-    if not test_username or not test_password:
+    if not request.username or not request.password:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Test credentials not configured"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username and password are required"
         )
 
-    if request.username != test_username or request.password != test_password:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials"
-        )
-
-    # Try to get a real BlueSky token using the test credentials
     bluesky_token = None
-    test_user_id = None
+    user_id = None
+    user_handle = None
 
     try:
         async with httpx.AsyncClient() as client:
-            # Use the Bluesky XRPC server.createSession endpoint
+            # Authenticate against BlueSky's production XRPC endpoint
             response = await client.post(
                 "https://bsky.social/xrpc/com.atproto.server.createSession",
                 json={
-                    "identifier": test_username,
-                    "password": test_password,
+                    "identifier": request.username,
+                    "password": request.password,
                 }
             )
 
-            if response.status_code == 200:
-                auth_data = response.json()
-                bluesky_token = auth_data.get("accessJwt")
-                test_user_id = auth_data.get("did")
+            # Check for authentication failures
+            if response.status_code == 401:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid BlueSky credentials. Please check your username/password."
+                )
+            elif response.status_code != 200:
+                error_detail = f"BlueSky authentication failed with status {response.status_code}"
+                try:
+                    error_data = response.json()
+                    if "error" in error_data:
+                        error_detail = error_data.get("error", error_detail)
+                    if "message" in error_data:
+                        error_detail = error_data.get("message", error_detail)
+                except Exception:
+                    pass
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=error_detail
+                )
+
+            # Parse successful response
+            auth_data = response.json()
+            bluesky_token = auth_data.get("accessJwt")
+            user_id = auth_data.get("did")
+            user_handle = auth_data.get("handle")
+
+            if not user_id or not bluesky_token:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Invalid response from BlueSky: missing DID or token"
+                )
+
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Failed to connect to BlueSky: {str(e)}"
+        )
+    except HTTPException:
+        # Re-raise HTTPException as-is
+        raise
     except Exception as e:
-        print(f"Warning: Failed to get BlueSky token: {e}")
+        print(f"Unexpected error during BlueSky authentication: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during authentication"
+        )
 
-    # Fallback to test user if BlueSky auth fails
-    if not test_user_id:
-        test_user_id = "did:plc:test-user"
+    # Create JWT token with BlueSky token
+    access_token = create_access_token(user_id, bluesky_token=bluesky_token)
 
-    # Create JWT token with optional BlueSky token
-    access_token = create_access_token(test_user_id, bluesky_token=bluesky_token)
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": {
-            "id": test_user_id,
-            "handle": request.username,
-            "display_name": "Test User",
-            "avatar": None,
-            "created_at": None
-        }
-    }
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+        user=User(
+            id=user_id,
+            handle=user_handle or request.username,
+            display_name=None,
+            avatar=None,
+            created_at=None
+        )
+    )
