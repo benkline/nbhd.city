@@ -37,6 +37,23 @@ export const nbhdService = {
   },
 
   /**
+   * Get the neighborhood designated as the home page
+   * @returns {Promise<Object|null>} Home page neighborhood or null if not configured
+   */
+  async getHomeNbhd() {
+    try {
+      const response = await apiClient.get('/api/nbhds/home');
+      return response.data;
+    } catch (err) {
+      // If endpoint returns 404 or other error, return null
+      if (err.response?.status === 404 || !err.response) {
+        return null;
+      }
+      throw err;
+    }
+  },
+
+  /**
    * Join a nbhd
    * @param {number} id - Nbhd ID
    * @returns {Promise<Object>} Join response

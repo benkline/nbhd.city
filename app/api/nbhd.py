@@ -38,6 +38,28 @@ async def list_nbhds(limit: int = 100, last_key: Optional[str] = None):
         return nbhds
 
 
+@router.get("/api/nbhds/home", response_model=Optional[NbhdResponse])
+async def get_home_nbhd():
+    """
+    Get the neighborhood designated as the home page.
+    Returns the first neighborhood with is_home_page=true in settings.
+    Returns null if no home page neighborhood is configured.
+    Public endpoint - no authentication required.
+    """
+    async with get_table() as table:
+        # Query all neighborhoods using existing list function
+        nbhds, _ = await list_neighborhoods(table, limit=100)
+
+        # Find neighborhood with is_home_page = true in settings
+        for nbhd in nbhds:
+            settings = nbhd.get("settings", {})
+            if settings.get("is_home_page") is True:
+                return nbhd
+
+        # No home page neighborhood configured
+        return None
+
+
 @router.get("/api/nbhds/{nbhd_id}", response_model=NbhdDetailResponse)
 async def get_nbhd_detail(nbhd_id: str):
     """
@@ -70,6 +92,8 @@ async def get_nbhd_detail(nbhd_id: str):
             created_by=nbhd["created_by"],
             created_at=nbhd["created_at"],
             member_count=nbhd.get("member_count", 0),
+            nbhd_did=nbhd.get("nbhd_did", ""),
+            settings=nbhd.get("settings", {}),
             members=member_responses,
         )
 
