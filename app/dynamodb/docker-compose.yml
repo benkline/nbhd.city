@@ -56,7 +56,7 @@ services:
     volumes:
       - ./init:/app/init
       - ../scripts:/app/scripts
-    command: bash -c "python /app/init/create_tables.py && python /app/scripts/add_nbhd_did_migration.py"
+    command: bash -c "python /app/init/create_tables.py && python /app/scripts/add_nbhd_did_migration.py || echo 'Migration skipped - run manually if needed'"
 
   # Backend API
   api:
