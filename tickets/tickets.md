@@ -1243,6 +1243,106 @@ gs
 
 ---
 
+## Bugfix Tickets: Profile & User Endpoint Issues 🐛
+
+Critical issues blocking user onboarding and profile creation discovered during local development.
+
+### BUGFIX-001: Add nbhd_did to Existing Neighborhoods
+
+**Description:** Old neighborhoods in the database are missing the required `nbhd_did` field, causing ResponseValidationError when fetching neighborhoods.
+
+**Requirements:**
+- [ ] Create migration script: `app/api/migrations/add_nbhd_did_to_existing_neighborhoods.py`
+- [ ] Script should:
+  - [ ] Query all NBHD records from DynamoDB
+  - [ ] For each neighborhood without nbhd_did, generate one using existing DID generation logic
+  - [ ] Update the record with the generated nbhd_did
+  - [ ] Log progress and any errors
+  - [ ] Handle already-migrated records gracefully
+- [ ] Add instruction to DEVELOPMENT.md to run migration after initial setup
+
+**Acceptance Criteria:**
+- [ ] Migration script runs without errors
+- [ ] All neighborhoods have nbhd_did field after running
+- [ ] Fetching neighborhoods no longer returns ResponseValidationError
+- [ ] GET /api/nbhds works and returns proper NbhdResponse objects
+
+**Type:** Backend/Database
+**Estimate:** S
+**Status:** PENDING
+**Root Cause:** Neighborhoods created before nbhd_did field was added
+
+---
+
+### BUGFIX-002: Fix GET /api/users/me Endpoint
+
+**Description:** GET /api/users/me returns 404 Not Found during onboarding - but this is intentional design, not a bug.
+
+**Investigation Result:** The 404 is the correct behavior. It signals to the frontend that the user is authenticated but has no profile yet (needs onboarding). The endpoint is properly implemented and working as designed.
+
+**Type:** Backend
+**Estimate:** S
+**Status:** COMPLETED - BY DESIGN
+**Notes:** Not a bug. 404 is intentional and signals "needs onboarding". The AuthContext correctly interprets this and sets `needsOnboarding=true`.
+
+---
+
+### BUGFIX-003: Fix POST /api/users/me/profile Validation
+
+**Description:** POST /api/users/me/profile returns 422 Unprocessable Entity because empty email strings fail EmailStr validation.
+
+**Root Cause:** UserProfile.jsx sends empty string `""` for optional `email` field, but Pydantic's `EmailStr` type rejects `""` as invalid.
+
+**Solution:** Sanitize form data before sending - convert empty strings to `null` in UserProfile.jsx.
+
+**Requirements:**
+- [x] Identify root cause: empty string validation error
+- [x] Update UserProfile.jsx to sanitize form data
+- [x] Convert empty strings to null before POST/PUT
+- [x] Improve error display so users see the error message
+
+**Acceptance Criteria:**
+- [x] POST /api/users/me/profile returns 201 Created when email is empty (null)
+- [x] User profile is created in DynamoDB
+- [x] Response includes updated User object
+- [x] Error messages display properly when they occur
+- [x] "Create Profile" button works without blank screen
+
+**Type:** Frontend
+**Estimate:** S
+**Status:** COMPLETED (2026-02-08)
+**Changes:** `app/UI/src/pages/UserProfile.jsx` - Added form data sanitization in handleSubmit
+
+---
+
+### BUGFIX-004: Add Empty State to My Neighborhoods Page
+
+**Description:** MyNeighborhoods page was missing an empty state when users have no neighborhood memberships.
+
+**Status Check:** The component already exists at `app/UI/src/pages/MyNeighborhoods.jsx` and ALREADY includes the empty state! The empty state shows:
+- Globe emoji (🌍)
+- "You haven't joined any nbhds yet" message
+- "Browse Nbhds" button to discover neighborhoods
+
+**Requirements:**
+- [x] Component exists with proper structure
+- [x] Empty state displays when nbhds.length === 0
+- [x] Browse button navigates to /nbhds
+- [x] Loading and error states handled
+
+**Acceptance Criteria:**
+- [x] Page loads at /#/my-nbhds
+- [x] If user has no memberships, shows empty state
+- [x] If user has memberships, shows neighborhood grid
+- [x] Browse button works and navigates correctly
+
+**Type:** Frontend
+**Estimate:** S
+**Status:** COMPLETED - NO CHANGES NEEDED
+**Notes:** Component already has the required empty state implementation
+
+---
+
 ## Phase 9.2: Full AT Protocol Federation 🌐
 
 **Status:** Pending

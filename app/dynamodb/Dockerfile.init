@@ -11,5 +11,8 @@ RUN pip install --no-cache-dir \
 # Copy initialization scripts
 COPY init/ /app/init/
 
+# Copy migration scripts from parent app directory
+COPY ../scripts/ /app/scripts/
+
 # Default command (can be overridden)
 CMD ["python", "/app/init/create_tables.py"]
