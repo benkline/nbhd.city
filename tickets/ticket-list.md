@@ -107,6 +107,15 @@ Core platform foundation
 - [ ] FL-9.4 (User Onboarding After First Login)
 - [ ] FL-9.5 (Logout Flow & Session Cleanup)
 
+### 🐛 Bugfix Tickets: Critical Profile & Endpoint Issues
+
+**PRIORITY: High** - Blocking user onboarding and profile creation
+
+- [ ] BUGFIX-001 (Add nbhd_did to Existing Neighborhoods)
+- [ ] BUGFIX-002 (Fix GET /api/users/me Endpoint)
+- [ ] BUGFIX-003 (Fix POST /api/users/me/profile Validation)
+- [ ] BUGFIX-004 (Create Profile Page Component)
+
 ### 🌐 Phase 9.2: Full AT Protocol Federation (Weeks 17+)
 
 **Depends on:** Phase 2 (AT Protocol Foundation is in place)

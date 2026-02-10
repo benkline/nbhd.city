@@ -28,7 +28,7 @@ services:
     environment:
       - DYNAMO_ENDPOINT=http://dynamodb-local:8000
       - AWS_REGION=us-east-1
-      - AWS_ACCESS_KEY_ID=
+      - AWS_ACCESS_KEY_ID=dummy
       - AWS_SECRET_ACCESS_KEY=dummy
     depends_on:
       dynamodb-local:
@@ -36,7 +36,7 @@ services:
     networks:
       - nbhd-network
 
-  # Table Initializer - Runs once to create tables
+  # Table Initializer - Runs once to create tables and run migrations
   table-init:
     build:
       context: .
@@ -55,7 +55,8 @@ services:
       - nbhd-network
     volumes:
       - ./init:/app/init
-    command: python /app/init/create_tables.py
+      - ../scripts:/app/scripts
+    command: bash -c "python /app/init/create_tables.py && python /app/scripts/add_nbhd_did_migration.py"
 
   # Backend API
   api:
