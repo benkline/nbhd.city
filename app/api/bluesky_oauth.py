@@ -103,7 +103,7 @@ async def exchange_code_for_token(code: str, code_verifier: str) -> dict:
     Raises:
         HTTPException: If the token exchange fails
     """
-    if not all([BLUESKY_OAUTH_CLIENT_ID, BLUESKY_OAUTH_CLIENT_SECRET, BLUESKY_OAUTH_REDIRECT_URI]):
+    if not all([BLUESKY_OAUTH_CLIENT_ID, BLUESKY_OAUTH_REDIRECT_URI]):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="OAuth is not properly configured"
@@ -111,16 +111,23 @@ async def exchange_code_for_token(code: str, code_verifier: str) -> dict:
 
     async with httpx.AsyncClient() as client:
         try:
+            # Build token request data
+            # For public clients (token_endpoint_auth_method: "none"), don't send client_secret
+            token_data = {
+                "grant_type": "authorization_code",
+                "code": code,
+                "client_id": BLUESKY_OAUTH_CLIENT_ID,
+                "redirect_uri": BLUESKY_OAUTH_REDIRECT_URI,
+                "code_verifier": code_verifier,
+            }
+
+            # Only include client_secret if it's configured (for backward compatibility with confidential clients)
+            if BLUESKY_OAUTH_CLIENT_SECRET:
+                token_data["client_secret"] = BLUESKY_OAUTH_CLIENT_SECRET
+
             response = await client.post(
                 BLUESKY_OAUTH_TOKEN_ENDPOINT,
-                data={
-                    "grant_type": "authorization_code",
-                    "code": code,
-                    "client_id": BLUESKY_OAUTH_CLIENT_ID,
-                    "client_secret": BLUESKY_OAUTH_CLIENT_SECRET,
-                    "redirect_uri": BLUESKY_OAUTH_REDIRECT_URI,
-                    "code_verifier": code_verifier,
-                },
+                data=token_data,
             )
 
             if response.status_code != 200:
