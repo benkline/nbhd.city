@@ -16,6 +16,7 @@ import hashlib
 import base64
 import json
 import time
+import re
 from urllib.parse import urlencode
 from typing import Optional
 from fastapi import HTTPException, status
@@ -60,7 +61,7 @@ def generate_code_challenge(code_verifier: str) -> str:
     return base64.urlsafe_b64encode(code_sha).decode().rstrip('=')
 
 
-def generate_dpop_proof(http_method: str, http_url: str, access_token: Optional[str] = None) -> tuple[str, dict]:
+def generate_dpop_proof(http_method: str, http_url: str, access_token: Optional[str] = None, nonce: Optional[str] = None) -> tuple[str, dict]:
     """
     Generate a DPoP (Demonstrating Proof of Possession) proof JWT.
 
@@ -71,6 +72,7 @@ def generate_dpop_proof(http_method: str, http_url: str, access_token: Optional[
         http_method: HTTP method (POST, GET, etc.)
         http_url: Full URL of the HTTP request
         access_token: Optional access token for refresh/reauth flows
+        nonce: Optional nonce from server (required by some OAuth providers)
 
     Returns:
         Tuple of (DPoP JWT string, private key dict for future use)
@@ -92,12 +94,6 @@ def generate_dpop_proof(http_method: str, http_url: str, access_token: Optional[
     now = int(time.time())
     jti = base64.urlsafe_b64encode(secrets.token_bytes(16)).decode().rstrip('=')
 
-    payload = {
-        "typ": "dpop+jwt",
-        "alg": "ES256",
-        "jwk": jwk
-    }
-
     claims = {
         "jti": jti,
         "htm": http_method.upper(),
@@ -105,13 +101,16 @@ def generate_dpop_proof(http_method: str, http_url: str, access_token: Optional[
         "iat": now,
     }
 
+    # Add nonce if provided (required by BlueSky)
+    if nonce:
+        claims["nonce"] = nonce
+
     if access_token:
         claims["ath"] = base64.urlsafe_b64encode(
             hashlib.sha256(access_token.encode()).digest()
         ).decode().rstrip('=')
 
-    # Sign the JWT (simplified - would normally use proper JWT library)
-    # For this implementation, we'll use a basic JWT structure
+    # Sign the JWT using PyJWT
     import jwt
 
     dpop_jwt = jwt.encode(
@@ -194,10 +193,31 @@ async def exchange_code_for_token(code: str, code_verifier: str) -> dict:
             if BLUESKY_OAUTH_CLIENT_SECRET:
                 token_data["client_secret"] = BLUESKY_OAUTH_CLIENT_SECRET
 
-            # Generate DPoP proof for token endpoint (required by BlueSky when dpop_bound_access_tokens is true)
-            dpop_proof, dpop_keys = generate_dpop_proof("POST", BLUESKY_OAUTH_TOKEN_ENDPOINT)
+            # First, try to get the nonce from the token endpoint
+            # BlueSky requires nonce in DPoP proofs
+            nonce = None
 
-            # Send token request with DPoP proof
+            # Make initial request to get nonce from 401 response
+            response = await client.post(
+                BLUESKY_OAUTH_TOKEN_ENDPOINT,
+                data=token_data,
+            )
+
+            # If we get a 401 with nonce requirement, extract nonce and retry
+            if response.status_code == 401:
+                www_authenticate = response.headers.get("WWW-Authenticate", "")
+                # Extract nonce from header like: DPoP realm="...", nonce="..."
+                if "nonce=" in www_authenticate:
+                    import re
+                    match = re.search(r'nonce="([^"]+)"', www_authenticate)
+                    if match:
+                        nonce = match.group(1)
+                        print(f"Extracted nonce from 401 response: {nonce}")
+
+            # Generate DPoP proof with nonce (required by BlueSky when dpop_bound_access_tokens is true)
+            dpop_proof, dpop_keys = generate_dpop_proof("POST", BLUESKY_OAUTH_TOKEN_ENDPOINT, nonce=nonce)
+
+            # Send token request with DPoP proof and nonce
             headers = {
                 "DPoP": dpop_proof,
             }
