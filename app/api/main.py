@@ -71,9 +71,30 @@ def get_client_metadata():
     Serve BlueSky OAuth client metadata.
     This file is required for BlueSky's decentralized OAuth flow.
     The URL to this endpoint becomes the client_id for OAuth.
+    The client_id and redirect_uris are dynamically set to match the current environment.
     """
+    import json
+
     metadata_path = os.path.join(os.path.dirname(__file__), "client-metadata.json")
-    return FileResponse(metadata_path, media_type="application/json")
+
+    # Load the base metadata
+    with open(metadata_path, 'r') as f:
+        metadata = json.load(f)
+
+    # Update client_id to match the current BLUESKY_OAUTH_CLIENT_ID
+    # This ensures BlueSky can validate the metadata matches the URL it was fetched from
+    client_id = os.getenv("BLUESKY_OAUTH_CLIENT_ID")
+    if client_id:
+        metadata["client_id"] = client_id
+
+    # Update redirect_uri to match the current BLUESKY_OAUTH_REDIRECT_URI
+    # Remove localhost URLs as they're not allowed in OAuth (RFC 8252)
+    redirect_uri = os.getenv("BLUESKY_OAUTH_REDIRECT_URI")
+    if redirect_uri:
+        # Use only the configured redirect URI, remove localhost variants
+        metadata["redirect_uris"] = [redirect_uri]
+
+    return metadata
 
 
 @app.get("/auth/login")
