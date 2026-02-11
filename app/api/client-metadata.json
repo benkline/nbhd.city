@@ -16,7 +16,7 @@
   "response_types": [
     "code"
   ],
-  "token_endpoint_auth_method": "client_secret_basic",
+  "token_endpoint_auth_method": "none",
   "dpop_bound_access_tokens": true,
   "contacts": [
     "support@nbhd.city"
