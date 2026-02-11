@@ -104,6 +104,17 @@ def get_client_metadata():
     return metadata
 
 
+@app.get("/callback.html")
+def get_callback():
+    """
+    Serve the OAuth callback HTML page.
+    This page handles the redirect from BlueSky after successful authorization.
+    It receives the token and stores it in localStorage, then redirects to the app.
+    """
+    callback_path = os.path.join(os.path.dirname(__file__), "static", "callback.html")
+    return FileResponse(callback_path, media_type="text/html")
+
+
 @app.get("/auth/login")
 async def login(return_url: str = Query(default=None)):
     """
