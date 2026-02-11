@@ -49,6 +49,10 @@ export default function Dashboard() {
           <div className={styles.userInfo}>
             <h3>Your Account</h3>
             <div className={styles.infoItem}>
+              <label>BlueSky Handle:</label>
+              <code>{user?.handle ? `@${user.handle}` : 'N/A'}</code>
+            </div>
+            <div className={styles.infoItem}>
               <label>User ID:</label>
               <code>{user?.user_id || 'N/A'}</code>
             </div>

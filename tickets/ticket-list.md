@@ -111,10 +111,10 @@ Core platform foundation
 
 **PRIORITY: High** - Blocking user onboarding and profile creation
 
-- [ ] BUGFIX-001 (Add nbhd_did to Existing Neighborhoods)
-- [ ] BUGFIX-002 (Fix GET /api/users/me Endpoint)
-- [ ] BUGFIX-003 (Fix POST /api/users/me/profile Validation)
-- [ ] BUGFIX-004 (Create Profile Page Component)
+- [x] BUGFIX-001 (Add nbhd_did to Existing Neighborhoods) - COMPLETED 2026-02-10
+- [x] BUGFIX-002 (Fix GET /api/users/me Endpoint) - COMPLETED BY DESIGN
+- [x] BUGFIX-003 (Fix POST /api/users/me/profile Validation) - COMPLETED 2026-02-08
+- [x] BUGFIX-004 (Create Profile Page Component) - ALREADY IMPLEMENTED
 
 ### 🌐 Phase 9.2: Full AT Protocol Federation (Weeks 17+)
 
