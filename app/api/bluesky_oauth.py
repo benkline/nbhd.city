@@ -196,7 +196,7 @@ async def exchange_code_for_token(code: str, code_verifier: str) -> dict:
             # BlueSky requires nonce in DPoP proofs
             nonce = None
 
-            # First, make initial request without DPoP to get nonce from 401 response
+            # First, make initial request without DPoP to get nonce from response headers
             print("Token exchange: Making initial request to get nonce...")
             response = await client.post(
                 BLUESKY_OAUTH_TOKEN_ENDPOINT,
@@ -204,25 +204,15 @@ async def exchange_code_for_token(code: str, code_verifier: str) -> dict:
             )
 
             print(f"Token exchange: Initial response status: {response.status_code}")
-            print(f"Token exchange: Response headers: {dict(response.headers)}")
 
-            # If we get a 401 with nonce requirement, extract nonce and retry
-            if response.status_code == 401:
-                www_authenticate = response.headers.get("WWW-Authenticate", "")
-                print(f"Token exchange: WWW-Authenticate header: {www_authenticate}")
-
-                # Extract nonce from header like: DPoP realm="...", nonce="..."
-                if "nonce=" in www_authenticate:
-                    match = re.search(r'nonce="([^"]+)"', www_authenticate)
-                    if match:
-                        nonce = match.group(1)
-                        print(f"Token exchange: Extracted nonce: {nonce}")
-                    else:
-                        print("Token exchange: nonce= found but regex didn't match")
-                else:
-                    print("Token exchange: nonce= not found in WWW-Authenticate header")
-
-                print(f"Token exchange: Response body: {response.text}")
+            # Extract nonce from DPoP-Nonce header (BlueSky uses this header for the nonce)
+            # The header might be "dpop-nonce" or "DPoP-Nonce" depending on casing
+            nonce = response.headers.get("dpop-nonce") or response.headers.get("DPoP-Nonce")
+            if nonce:
+                print(f"Token exchange: Extracted nonce from DPoP-Nonce header: {nonce}")
+            else:
+                print("Token exchange: No nonce found in DPoP-Nonce header")
+                print(f"Token exchange: Response headers: {dict(response.headers)}")
 
             # Generate DPoP proof with nonce (required by BlueSky when dpop_bound_access_tokens is true)
             print(f"Token exchange: Generating DPoP proof with nonce={nonce}")
