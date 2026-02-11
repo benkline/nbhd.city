@@ -232,6 +232,8 @@ async def exchange_code_for_token(code: str, code_verifier: str) -> dict:
 
             print(f"Token exchange: Final response status: {response.status_code}")
 
+            print(f"Token exchange: Response status: {response.status_code}")
+
             if response.status_code != 200:
                 # Try to get error details from BlueSky response
                 try:
@@ -247,6 +249,7 @@ async def exchange_code_for_token(code: str, code_verifier: str) -> dict:
                 )
 
             token_data = response.json()
+            print(f"Token exchange: Success! Token data: {token_data}")
             return token_data
 
         except HTTPException:

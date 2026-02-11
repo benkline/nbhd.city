@@ -167,11 +167,21 @@ async def oauth_callback(code: str = Query(...), state: str = Query(...)):
         )
 
     # Create our JWT token with BlueSky access token and handle included
-    access_token = create_access_token(
-        user_id=token_data["did"],
-        bluesky_token=token_data.get("access_token"),
-        bsky_handle=token_data.get("handle")
-    )
+    print(f"Auth callback: Token data keys: {token_data.keys() if isinstance(token_data, dict) else 'not a dict'}")
+    print(f"Auth callback: Token data: {token_data}")
+
+    try:
+        access_token = create_access_token(
+            user_id=token_data["did"],
+            bluesky_token=token_data.get("access_token"),
+            bsky_handle=token_data.get("handle")
+        )
+    except KeyError as e:
+        print(f"Auth callback: Missing key in token data: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Token response missing required field: {e}"
+        )
 
     # In production, you'd save the user info and BlueSky tokens to your database
     # For now, we'll just return the token
