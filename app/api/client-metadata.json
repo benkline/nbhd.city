@@ -4,8 +4,8 @@
   "client_uri": "https://nbhd.city",
   "logo_uri": "https://nbhd.city/logo.png",
   "redirect_uris": [
-    "https://nbhd.city/auth/callback",
-    "http://localhost:5173/#/auth/success"
+    "https://nbhd.city/callback.html",
+    "http://localhost:5173/callback.html"
   ],
   "scope": "atproto transition:generic",
   "grant_types": [

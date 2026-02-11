@@ -130,9 +130,9 @@ async def oauth_callback(code: str = Query(...), state: str = Query(...)):
     # In production, you'd save the user info and BlueSky tokens to your database
     # For now, we'll just return the token
     frontend_url = state_data.get("frontend_url") or os.getenv("FRONTEND_URL", "http://localhost:5173")
-    # Redirect to hash router auth/success route with token as query param
+    # Redirect to callback.html which handles storing token and redirecting to hash router
     return RedirectResponse(
-        url=f"{frontend_url}/#/auth/success?token={access_token}",
+        url=f"{frontend_url}/callback.html?token={access_token}",
         status_code=status.HTTP_302_FOUND
     )
 
