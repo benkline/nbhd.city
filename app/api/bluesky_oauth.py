@@ -131,16 +131,27 @@ async def exchange_code_for_token(code: str, code_verifier: str) -> dict:
             )
 
             if response.status_code != 200:
+                # Try to get error details from BlueSky response
+                try:
+                    error_data = response.json()
+                    error_detail = error_data.get("error_description", error_data.get("error", response.text))
+                except:
+                    error_detail = response.text
+
+                print(f"BlueSky token exchange error: {error_detail}")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Failed to exchange authorization code for token"
+                    detail=f"BlueSky OAuth error: {error_detail}"
                 )
 
             token_data = response.json()
             return token_data
 
-        except httpx.RequestError as e:
+        except HTTPException:
+            raise
+        except Exception as e:
+            print(f"Token exchange exception: {str(e)}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to communicate with BlueSky OAuth provider: {str(e)}"
+                detail=f"Failed to exchange token: {str(e)}"
             )

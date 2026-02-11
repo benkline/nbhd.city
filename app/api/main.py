@@ -156,10 +156,14 @@ async def oauth_callback(code: str = Query(...), state: str = Query(...)):
         # Exchange code for token using PKCE code_verifier
         code_verifier = state_data.get("code_verifier")
         token_data = await exchange_code_for_token(code, code_verifier)
+    except HTTPException:
+        # Pass through HTTPException with detailed error message
+        raise
     except Exception as e:
+        print(f"Callback error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Failed to authenticate with BlueSky"
+            detail=f"Authentication failed: {str(e)}"
         )
 
     # Create our JWT token with BlueSky access token and handle included
