@@ -53,10 +53,19 @@ export default function UserProfile() {
     setSuccess(false);
 
     try {
+      // Sanitize form data: convert empty strings to null for optional fields
+      const sanitizedData = {
+        display_name: formData.display_name || null,
+        bio: formData.bio || null,
+        location: formData.location || null,
+        email: formData.email || null,  // null instead of empty string prevents EmailStr validation error
+        avatar: formData.avatar || null
+      };
+
       if (isEditing) {
-        await userService.updateProfile(formData);
+        await userService.updateProfile(sanitizedData);
       } else {
-        await userService.createProfile(formData);
+        await userService.createProfile(sanitizedData);
       }
       setSuccess(true);
 

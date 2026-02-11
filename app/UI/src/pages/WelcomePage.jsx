@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { nbhdContentService } from '../services/nbhdContentService';
+import { useParams, useNavigate } from 'react-router-dom';
 import { nbhdService } from '../services/neighborhoodService';
-import MarkdownRenderer from '../components/MarkdownRenderer';
-import DefaultWelcomeInstructions from '../components/DefaultWelcomeInstructions';
+import WelcomePageContent from '../components/WelcomePageContent';
 import styles from '../styles/WelcomePage.module.css';
 
 /**
@@ -23,15 +21,14 @@ export default function WelcomePage() {
   const navigate = useNavigate();
 
   const [nbhd, setNbhd] = useState(null);
-  const [welcomeContent, setWelcomeContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    fetchNbhd();
   }, [id]);
 
-  const fetchData = async () => {
+  const fetchNbhd = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -39,22 +36,9 @@ export default function WelcomePage() {
       // Fetch neighborhood details (to verify it exists)
       const nbhdData = await nbhdService.getNbhd(id);
       setNbhd(nbhdData);
-
-      // Fetch welcome content (might not exist)
-      try {
-        const content = await nbhdContentService.getWelcomeContent(id);
-        setWelcomeContent(content.data);
-      } catch (contentErr) {
-        // Welcome content doesn't exist - that's okay
-        if (contentErr.response?.status === 404 || contentErr.response?.data?.data === null) {
-          setWelcomeContent(null);
-        } else {
-          throw contentErr;
-        }
-      }
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Failed to load welcome page');
-      console.error('Error fetching welcome page:', err);
+      setError(err.response?.data?.detail || err.message || 'Failed to load neighborhood');
+      console.error('Error fetching neighborhood:', err);
     } finally {
       setLoading(false);
     }
@@ -82,35 +66,5 @@ export default function WelcomePage() {
     );
   }
 
-  return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <Link to={`/nbhds/${id}`} className={styles.backLink}>
-          ← Back to {nbhd?.name || 'Neighborhood'}
-        </Link>
-        <h1>{nbhd?.name}</h1>
-      </header>
-
-      <div className={styles.content}>
-        {welcomeContent ? (
-          <div className={styles.welcomeContent}>
-            <h2>{welcomeContent.value?.title || 'Welcome'}</h2>
-            <MarkdownRenderer markdown={welcomeContent.value?.content || ''} />
-            <div className={styles.meta}>
-              Last updated:{' '}
-              {new Date(welcomeContent.value?.updated_at).toLocaleDateString()}
-            </div>
-          </div>
-        ) : (
-          <DefaultWelcomeInstructions />
-        )}
-      </div>
-
-      <footer className={styles.footer}>
-        <Link to={`/nbhds/${id}`} className={styles.button}>
-          View Neighborhood Details
-        </Link>
-      </footer>
-    </div>
-  );
+  return nbhd ? <WelcomePageContent nbhd={nbhd} showBackLink={true} /> : null;
 }

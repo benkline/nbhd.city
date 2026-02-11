@@ -1,6 +1,6 @@
 # nbhd.city Development Tickets - Detailed Descriptions
 
-**Last Updated:** 2026-02-07
+**Last Updated:** 2026-02-08
 **Format:** Detailed ticket specifications and acceptance criteria
 **Priority Reference:** See [ticket-list.md](./ticket-list.md) for priority order and timeline
 
@@ -8,15 +8,20 @@
 
 ## Quick Reference
 
-For **priority order, timeline, and quick checklist**, see **[ticket-list.md](./ticket-list.md)**.
+- **Priority Order & Timeline:** See **[ticket-list.md](./ticket-list.md)**
+- **Completed Tickets Archive:** See **[completed/COMPLETED.md](./completed/COMPLETED.md)** (31 tickets completed)
 
 This document contains detailed descriptions, requirements, and acceptance criteria for all tickets.
+
+📦 **Note:** Completed tickets have been archived to [tickets/completed/COMPLETED.md](./completed/COMPLETED.md) for easier reference. This file contains all 31 completed tickets arranged by completion date (most recent first).
 
 ---
 
 ## Phase Overview
 
 The development roadmap is organized into 9 sequential phases:
+
+Completed 
 1. **Phase 1** - MVP Foundation ✅ COMPLETE
 2. **Phase 2** - AT Protocol Foundation (ATP-FOUND-001 to 004) - foundational for everything
 3. **Phase 3** - Template System & Site Config APIs (SSG-001, 002, 004, 005, 006)
@@ -25,20 +30,11 @@ The development roadmap is organized into 9 sequential phases:
 6. **Phase 6** - Build Pipeline & Deployment (SSG-015, 016, 017, 018 + infrastructure)
 7. **Phase 7** - Nbhd CMS & Admin Features (NBHD-001 through SITES-003)
 8. **Phase 8** - Build Pipeline UI Completion (BUILD-001, 002, 003)
-9. **Phase 9** - Full AT Protocol Federation (ATP-001 through ATP-010)
 
-### Relevant Documentation
+Curretly working on
+9. **Phase 9** - Testing and Refinement
+10. **Phase 10** - Full AT Protocol Federation (ATP-001 through ATP-010)
 
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System design and tech stack
-- **[DATABASE.md](./DATABASE.md)** - DynamoDB schema for static sites and PDS data
-- **[API.md](./API.md)** - REST endpoints for templates, sites, and PDS
-- **[FRONTEND.md](./FRONTEND.md)** - React components for site builder
-- **[INFRASTRUCTURE.md](./INFRASTRUCTURE.md)** - Lambda builds, S3, CloudFront, Terraform
-- **[SECURITY.md](./SECURITY.md)** - DID key management, authentication
-- **[ATPROTOCOL.md](./ATPROTOCOL.md)** - PDS implementation details
-- **[TESTING.md](./TESTING.md)** - Testing strategy for Phase 2
-
----
 
 ## Phase 1: MVP Foundation ✅ COMPLETE
 
@@ -1032,7 +1028,322 @@ These tickets complete the build pipeline UI for the existing SSG-015 and SSG-01
 
 ---
 
-## Phase 9: Full AT Protocol Federation 🌐
+## Phase 9.1: Frontend Login & Authentication 🔐
+
+**Status:** Pending
+**Timeline:** Weeks TBD
+**Depends On:** Phase 1 (BlueSky OAuth), Phase 7 (Neighborhoods)
+
+Enhanced login experience with OAuth flow, session management, and user onboarding. All authentication is managed exclusively through BlueSky OAuth - no password management.
+
+### Overview
+
+This phase improves the authentication and onboarding experience:
+1. Context-aware home page that displays neighborhood welcome or login
+2. Enhanced OAuth login with CSRF protection
+3. Session persistence and automatic token refresh
+4. First-time user onboarding flow
+5. Secure logout with session cleanup
+
+---
+
+### FL-9.1: Context-Aware Home Page
+
+**Description:** Display appropriate home page based on context - use neighborhood welcome page if available, otherwise show login page.
+
+**Requirements:**
+- [x] Check if there's an nbhd-type static site configured as home page
+- [x] If nbhd site exists, display it as the home page
+- [x] If no nbhd site exists, fall back to login page
+- [x] Add route resolution logic to App.jsx
+- [x] Query `GET /app/app/api/nbhds/{id}/content/welcome` for nbhd content
+- [x] Handle loading state while checking for nbhd site
+- [x] Handle missing/404 nbhd gracefully
+- [x] Add configuration option to neighborhood settings to designate home page site
+- [x] Display appropriate redirect logic based on user auth state
+
+**Acceptance Criteria:**
+- [x] Unauthenticated users see home page (nbhd welcome or login)
+- [x] Authenticated users see their personal dashboard or nbhd home if configured
+- [x] No error if no nbhd is designated as home page
+- [x] Loading state displays while checking for home page content
+- [x] Navigation handles both logged-in and logged-out states correctly
+- [x] Home page context switches work without full page reload
+
+**Type:** Frontend + Backend
+**Estimate:** M
+**Status:** COMPLETED
+**Merged:** PR #105 on 2026-02-08
+**Tests:** `tickets/integration-tickets/PHASE-10/TEST-LOGIN-CONTEXT-001.md`
+
+---
+
+gs
+
+**Description:** Improve the BlueSky OAuth login experience with clear prompts, error handling, and redirect logic.
+
+**Requirements:**
+- [ ] Create `LoginPage.jsx` component with clear OAuth sign-in button
+- [ ] Add helpful messaging explaining the OAuth flow ("Sign in with your BlueSky account")
+- [ ] Display loading state while OAuth request is being processed
+- [ ] Handle OAuth callback with `code` and `state` parameters
+- [ ] Validate OAuth state parameter to prevent CSRF
+- [ ] Extract and store BlueSky DID from OAuth response
+- [ ] Store session token securely (localStorage or HTTP-only cookie)
+- [ ] Redirect to home page or dashboard on successful login
+- [ ] Display user's BlueSky profile picture and handle after login
+- [ ] Add logout endpoint: `POST /app/app/api/auth/logout` ✅ (already exists)
+- [ ] Clear session on logout and redirect to login page
+
+**Known Issues to Fix:**
+- [x] **`/auth/test-login` endpoint is broken for actual BlueSky credentials** ✅ FIXED
+  - **Problem:** The endpoint only accepts hardcoded test credentials (checks if username/password match BSKY_USERNAME/BSKY_PASSWORD env vars)
+  - **Error:** When using valid BlueSky credentials, returns 401 but frontend gets "Failed to execute 'json' on 'Response': Unexpected end of JSON input"
+  - **Root Cause:** Endpoint was designed only for development/test use, not for actual users
+  - **Solution Applied:**
+    1. ✅ Removed hardcoded test credential validation (line 194 in main.py)
+    2. ✅ Updated endpoint to accept any valid BlueSky credentials
+    3. ✅ Integrated with BlueSky's com.atproto.server.createSession API
+    4. ✅ Added comprehensive error handling for BlueSky API failures and invalid credentials
+    5. ✅ Return proper error response format with meaningful error messages (400, 401, 503, 500)
+    6. ✅ Use proper Pydantic models (Token, User) instead of plain dicts
+    7. ✅ Extract actual user handle and DID from BlueSky response
+    8. ✅ Add error logging for debugging
+  - **Changes Made:** `app/api/main.py:178-239` completely refactored
+- [x] **Error response handling** ✅ FIXED
+  - [x] Return structured error responses with clear messages
+  - [x] All error paths return valid JSON (no empty bodies)
+  - [x] Added logging to debug BlueSky API failures
+
+**Acceptance Criteria:**
+- [ ] OAuth sign-in button displays and functions correctly
+- [ ] User can click button and be redirected to BlueSky OAuth
+- [ ] After OAuth callback, user is logged in with valid session
+- [ ] CSRF token validation prevents unauthorized access
+- [ ] User profile displays correct BlueSky handle
+- [ ] Logout clears session and redirects to login page
+- [ ] Loading states show during OAuth flow
+- [ ] Error messages display for failed OAuth attempts
+- [ ] Session persists across page refreshes
+- [ ] **Test-login endpoint accepts actual BlueSky credentials** (or OAuth flow is properly implemented)
+- [ ] **Error responses are always valid JSON with meaningful messages**
+
+**Type:** Frontend + Backend
+**Estimate:** M
+**Status:** IN PROGRESS - test-login endpoint fixed, ready for manual testing
+**Tests:** `app/api/tests/test_auth.py` (4/4 passing)
+**Commit:** d4365f3 - "fix(FL-9.2): Fix test-login endpoint to accept real BlueSky credentials"
+
+**Implementation Notes:**
+- The `/auth/test-login` endpoint at `app/api/main.py:178-239` needs to be refactored
+- Line 194: Remove the test credential check that rejects actual BlueSky users
+- Line 206-218: BlueSky API call logic is correct, but error handling needs improvement
+- Consider whether test-login should support any BlueSky credentials or if it should be removed in favor of proper OAuth
+
+---
+
+### FL-9.3: Persistent Sessions & Token Refresh
+
+**Description:** Implement session persistence and BlueSky OAuth token refresh to keep users logged in across browser sessions.
+
+**Requirements:**
+- [ ] Implement token refresh endpoint: `POST /app/app/api/auth/refresh`
+- [ ] Store BlueSky OAuth refresh token securely in backend (encrypted in DynamoDB)
+- [ ] Detect session expiration and automatically attempt refresh
+- [ ] Create `useAuth()` hook that checks session validity on app load
+- [ ] Implement token refresh logic before API calls (check expiry, refresh if needed)
+- [ ] Add "remember me" option during login (30-day persistence)
+- [ ] Store session metadata (expires_at, last_activity) in DynamoDB
+- [ ] Clear expired sessions from DynamoDB
+- [ ] Add session timeout warning before logout (15 min inactivity)
+- [ ] Graceful degradation if refresh fails (redirect to login)
+
+**Acceptance Criteria:**
+- [ ] User stays logged in after browser restart if "remember me" was checked
+- [ ] Expired tokens are refreshed automatically without user action
+- [ ] Session timeout warning appears after 15 minutes of inactivity
+- [ ] Token refresh only happens once per expiration (no duplicate requests)
+- [ ] Refresh fails gracefully and redirects to login
+- [ ] Session metadata stored correctly in DynamoDB
+- [ ] Old sessions cleaned up from database
+
+**Type:** Frontend + Backend
+**Estimate:** M
+**Depends On:** FL-9.2
+**Status:** PENDING
+**Tests:** `tickets/integration-tickets/PHASE-10/TEST-LOGIN-SESSIONS-001.md`
+
+---
+
+### FL-9.4: User Onboarding After First Login
+
+**Description:** Create onboarding flow for first-time users after BlueSky OAuth login.
+
+**Requirements:**
+- [ ] Detect first-time login (check if user profile exists in DynamoDB)
+- [ ] Redirect to `OnboardingFlow.jsx` page on first login
+- [ ] Step 1: Welcome message with BlueSky profile summary
+- [ ] Step 2: Create or join neighborhoods (show options)
+- [ ] Step 3: Choose site type preference (personal/project)
+- [ ] Step 4: Invite to template selection (create first site)
+- [ ] Store onboarding completion status in user profile
+- [ ] Allow users to skip onboarding and go to dashboard
+- [ ] Add "view onboarding" link in settings for future reference
+- [ ] Pre-populate user data from BlueSky OAuth response (handle, display_name, avatar)
+
+**Acceptance Criteria:**
+- [ ] First-time users see onboarding flow
+- [ ] Returning users skip onboarding and go to dashboard
+- [ ] All onboarding steps display correctly
+- [ ] Users can skip onboarding and go directly to dashboard
+- [ ] Profile data pre-filled from BlueSky
+- [ ] Onboarding status stored and respected
+- [ ] Users can re-access onboarding from settings
+- [ ] All neighborhoods/sites created during onboarding are functional
+
+**Type:** Frontend + Backend
+**Estimate:** L
+**Depends On:** FL-9.2, Phase 7 (neighborhoods & sites)
+**Status:** PENDING
+**Tests:** `tickets/integration-tickets/PHASE-10/TEST-LOGIN-ONBOARDING-001.md`
+
+---
+
+### FL-9.5: Logout Flow & Session Cleanup
+
+**Description:** Implement secure logout with session cleanup and proper redirect.
+
+**Requirements:**
+- [ ] Add logout button to user menu/navigation
+- [ ] Call `POST /app/app/api/auth/logout` on logout click
+- [ ] Backend invalidates session token in DynamoDB
+- [ ] Backend clears any stored refresh tokens
+- [ ] Frontend clears all stored session data (localStorage, cookies)
+- [ ] Redirect to login page after logout
+- [ ] Optional: Show "logged out successfully" message
+- [ ] Optional: Offer "sign in again" button on login page
+- [ ] Handle logout during inactive session (automatic cleanup)
+- [ ] Prevent API calls after logout
+
+**Acceptance Criteria:**
+- [ ] Logout button visible in navigation
+- [ ] Clicking logout calls backend endpoint
+- [ ] Session invalidated on backend (tokens cleared)
+- [ ] Frontend clears local session storage
+- [ ] User redirected to login page
+- [ ] User cannot access protected pages after logout
+- [ ] API calls rejected after logout (401 Unauthorized)
+- [ ] Automatic logout works after inactivity timeout
+
+**Type:** Frontend + Backend
+**Estimate:** S
+**Depends On:** FL-9.2, FL-9.3
+**Status:** PENDING
+**Tests:** `tickets/integration-tickets/PHASE-10/TEST-LOGIN-LOGOUT-001.md`
+
+---
+
+## Bugfix Tickets: Profile & User Endpoint Issues 🐛
+
+Critical issues blocking user onboarding and profile creation discovered during local development.
+
+### BUGFIX-001: Add nbhd_did to Existing Neighborhoods
+
+**Description:** Old neighborhoods in the database are missing the required `nbhd_did` field, causing ResponseValidationError when fetching neighborhoods.
+
+**Requirements:**
+- [ ] Create migration script: `app/api/migrations/add_nbhd_did_to_existing_neighborhoods.py`
+- [ ] Script should:
+  - [ ] Query all NBHD records from DynamoDB
+  - [ ] For each neighborhood without nbhd_did, generate one using existing DID generation logic
+  - [ ] Update the record with the generated nbhd_did
+  - [ ] Log progress and any errors
+  - [ ] Handle already-migrated records gracefully
+- [ ] Add instruction to DEVELOPMENT.md to run migration after initial setup
+
+**Acceptance Criteria:**
+- [ ] Migration script runs without errors
+- [ ] All neighborhoods have nbhd_did field after running
+- [ ] Fetching neighborhoods no longer returns ResponseValidationError
+- [ ] GET /api/nbhds works and returns proper NbhdResponse objects
+
+**Type:** Backend/Database
+**Estimate:** S
+**Status:** PENDING
+**Root Cause:** Neighborhoods created before nbhd_did field was added
+
+---
+
+### BUGFIX-002: Fix GET /api/users/me Endpoint
+
+**Description:** GET /api/users/me returns 404 Not Found during onboarding - but this is intentional design, not a bug.
+
+**Investigation Result:** The 404 is the correct behavior. It signals to the frontend that the user is authenticated but has no profile yet (needs onboarding). The endpoint is properly implemented and working as designed.
+
+**Type:** Backend
+**Estimate:** S
+**Status:** COMPLETED - BY DESIGN
+**Notes:** Not a bug. 404 is intentional and signals "needs onboarding". The AuthContext correctly interprets this and sets `needsOnboarding=true`.
+
+---
+
+### BUGFIX-003: Fix POST /api/users/me/profile Validation
+
+**Description:** POST /api/users/me/profile returns 422 Unprocessable Entity because empty email strings fail EmailStr validation.
+
+**Root Cause:** UserProfile.jsx sends empty string `""` for optional `email` field, but Pydantic's `EmailStr` type rejects `""` as invalid.
+
+**Solution:** Sanitize form data before sending - convert empty strings to `null` in UserProfile.jsx.
+
+**Requirements:**
+- [x] Identify root cause: empty string validation error
+- [x] Update UserProfile.jsx to sanitize form data
+- [x] Convert empty strings to null before POST/PUT
+- [x] Improve error display so users see the error message
+
+**Acceptance Criteria:**
+- [x] POST /api/users/me/profile returns 201 Created when email is empty (null)
+- [x] User profile is created in DynamoDB
+- [x] Response includes updated User object
+- [x] Error messages display properly when they occur
+- [x] "Create Profile" button works without blank screen
+
+**Type:** Frontend
+**Estimate:** S
+**Status:** COMPLETED (2026-02-08)
+**Changes:** `app/UI/src/pages/UserProfile.jsx` - Added form data sanitization in handleSubmit
+
+---
+
+### BUGFIX-004: Add Empty State to My Neighborhoods Page
+
+**Description:** MyNeighborhoods page was missing an empty state when users have no neighborhood memberships.
+
+**Status Check:** The component already exists at `app/UI/src/pages/MyNeighborhoods.jsx` and ALREADY includes the empty state! The empty state shows:
+- Globe emoji (🌍)
+- "You haven't joined any nbhds yet" message
+- "Browse Nbhds" button to discover neighborhoods
+
+**Requirements:**
+- [x] Component exists with proper structure
+- [x] Empty state displays when nbhds.length === 0
+- [x] Browse button navigates to /nbhds
+- [x] Loading and error states handled
+
+**Acceptance Criteria:**
+- [x] Page loads at /#/my-nbhds
+- [x] If user has no memberships, shows empty state
+- [x] If user has memberships, shows neighborhood grid
+- [x] Browse button works and navigates correctly
+
+**Type:** Frontend
+**Estimate:** S
+**Status:** COMPLETED - NO CHANGES NEEDED
+**Notes:** Component already has the required empty state implementation
+
+---
+
+## Phase 9.2: Full AT Protocol Federation 🌐
 
 **Status:** Pending
 **Timeline:** Weeks 17+
