@@ -35,7 +35,14 @@ async def list_nbhds(limit: int = 100, last_key: Optional[str] = None):
     """
     async with get_table() as table:
         nbhds, next_key = await list_neighborhoods(table, limit, last_key)
-        return nbhds
+        # Transform neighborhoods to ensure nbhd_did field is present
+        return [
+            {
+                **nbhd,
+                "nbhd_did": nbhd.get("nbhd_did", "")
+            }
+            for nbhd in nbhds
+        ]
 
 
 @router.get("/api/nbhds/home", response_model=Optional[NbhdResponse])
