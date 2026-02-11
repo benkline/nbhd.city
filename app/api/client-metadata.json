@@ -3,18 +3,21 @@
   "client_name": "nbhd.city",
   "client_uri": "https://nbhd.city",
   "logo_uri": "https://nbhd.city/logo.png",
+  "application_type": "web",
   "redirect_uris": [
     "https://nbhd.city/callback.html",
     "http://localhost:5173/callback.html"
   ],
-  "scope": "atproto transition:generic",
+  "scope": "atproto",
   "grant_types": [
-    "authorization_code"
+    "authorization_code",
+    "refresh_token"
   ],
   "response_types": [
     "code"
   ],
   "token_endpoint_auth_method": "client_secret_basic",
+  "dpop_bound_access_tokens": true,
   "contacts": [
     "support@nbhd.city"
   ]

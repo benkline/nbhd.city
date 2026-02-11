@@ -16,7 +16,7 @@ load_dotenv(project_root / '.env.local')
 
 from models import Token, User, UserProfile
 from auth import create_access_token, get_current_user, get_bluesky_token, get_bluesky_handle
-from bluesky_oauth import get_oauth_authorize_url, exchange_code_for_token
+from bluesky_oauth import get_oauth_authorize_url, exchange_code_for_token, generate_code_verifier
 from bluesky_api import get_bluesky_profile
 from nbhd import router as nbhds_router
 from users import router as users_router
@@ -79,7 +79,7 @@ def get_client_metadata():
 @app.get("/auth/login")
 async def login(return_url: str = Query(default=None)):
     """
-    Initiate BlueSky OAuth login flow.
+    Initiate BlueSky OAuth login flow with PKCE.
     Redirects user to BlueSky authorization endpoint.
 
     Args:
@@ -87,12 +87,13 @@ async def login(return_url: str = Query(default=None)):
                    Defaults to FRONTEND_URL environment variable or http://localhost:5173
     """
     state = secrets.token_urlsafe(32)
+    code_verifier = generate_code_verifier()
 
-    # Store return URL with the state for later retrieval in callback
+    # Store return URL and PKCE code verifier with the state for later retrieval in callback
     frontend_url = return_url or os.getenv("FRONTEND_URL", "http://localhost:5173")
-    oauth_states[state] = {"frontend_url": frontend_url}
+    oauth_states[state] = {"frontend_url": frontend_url, "code_verifier": code_verifier}
 
-    auth_url = get_oauth_authorize_url(state)
+    auth_url = get_oauth_authorize_url(state, code_verifier)
     return RedirectResponse(url=auth_url)
 
 
@@ -100,7 +101,7 @@ async def login(return_url: str = Query(default=None)):
 async def oauth_callback(code: str = Query(...), state: str = Query(...)):
     """
     Handle BlueSky OAuth callback.
-    Exchanges authorization code for access token.
+    Exchanges authorization code for access token using PKCE.
     """
     # Verify state to prevent CSRF attacks
     if state not in oauth_states:
@@ -113,7 +114,9 @@ async def oauth_callback(code: str = Query(...), state: str = Query(...)):
     del oauth_states[state]
 
     try:
-        token_data = await exchange_code_for_token(code)
+        # Exchange code for token using PKCE code_verifier
+        code_verifier = state_data.get("code_verifier")
+        token_data = await exchange_code_for_token(code, code_verifier)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
