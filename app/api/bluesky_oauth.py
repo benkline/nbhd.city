@@ -14,9 +14,14 @@ import httpx
 import secrets
 import hashlib
 import base64
+import json
+import time
 from urllib.parse import urlencode
 from typing import Optional
 from fastapi import HTTPException, status
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.backends import default_backend
 
 # BlueSky OAuth Configuration
 BLUESKY_OAUTH_AUTHORIZATION_ENDPOINT = os.getenv(
@@ -53,6 +58,70 @@ def generate_code_challenge(code_verifier: str) -> str:
     """
     code_sha = hashlib.sha256(code_verifier.encode()).digest()
     return base64.urlsafe_b64encode(code_sha).decode().rstrip('=')
+
+
+def generate_dpop_proof(http_method: str, http_url: str, access_token: Optional[str] = None) -> tuple[str, dict]:
+    """
+    Generate a DPoP (Demonstrating Proof of Possession) proof JWT.
+
+    DPoP is used to bind tokens to the client and prevent token misuse.
+    It requires a key pair and includes cryptographic proof in the authorization header.
+
+    Args:
+        http_method: HTTP method (POST, GET, etc.)
+        http_url: Full URL of the HTTP request
+        access_token: Optional access token for refresh/reauth flows
+
+    Returns:
+        Tuple of (DPoP JWT string, private key dict for future use)
+    """
+    # Generate EC P-256 key pair
+    private_key = ec.generate_private_key(ec.SECP256R1(), default_backend())
+    public_key = private_key.public_key()
+
+    # Get public key in JWK format
+    public_numbers = public_key.public_numbers()
+    jwk = {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": base64.urlsafe_b64encode(public_numbers.x.to_bytes(32, 'big')).decode().rstrip('='),
+        "y": base64.urlsafe_b64encode(public_numbers.y.to_bytes(32, 'big')).decode().rstrip('='),
+    }
+
+    # Create DPoP proof JWT
+    now = int(time.time())
+    jti = base64.urlsafe_b64encode(secrets.token_bytes(16)).decode().rstrip('=')
+
+    payload = {
+        "typ": "dpop+jwt",
+        "alg": "ES256",
+        "jwk": jwk
+    }
+
+    claims = {
+        "jti": jti,
+        "htm": http_method.upper(),
+        "htu": http_url,
+        "iat": now,
+    }
+
+    if access_token:
+        claims["ath"] = base64.urlsafe_b64encode(
+            hashlib.sha256(access_token.encode()).digest()
+        ).decode().rstrip('=')
+
+    # Sign the JWT (simplified - would normally use proper JWT library)
+    # For this implementation, we'll use a basic JWT structure
+    import jwt
+
+    dpop_jwt = jwt.encode(
+        claims,
+        private_key,
+        algorithm="ES256",
+        headers={"typ": "dpop+jwt", "jwk": jwk}
+    )
+
+    return dpop_jwt, {"private_key": private_key, "public_key": public_key, "jwk": jwk}
 
 
 def get_oauth_authorize_url(state: str, code_verifier: str) -> str:
@@ -125,9 +194,18 @@ async def exchange_code_for_token(code: str, code_verifier: str) -> dict:
             if BLUESKY_OAUTH_CLIENT_SECRET:
                 token_data["client_secret"] = BLUESKY_OAUTH_CLIENT_SECRET
 
+            # Generate DPoP proof for token endpoint (required by BlueSky when dpop_bound_access_tokens is true)
+            dpop_proof, dpop_keys = generate_dpop_proof("POST", BLUESKY_OAUTH_TOKEN_ENDPOINT)
+
+            # Send token request with DPoP proof
+            headers = {
+                "DPoP": dpop_proof,
+            }
+
             response = await client.post(
                 BLUESKY_OAUTH_TOKEN_ENDPOINT,
                 data=token_data,
+                headers=headers,
             )
 
             if response.status_code != 200:
