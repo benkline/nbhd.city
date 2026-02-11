@@ -102,10 +102,19 @@ Core platform foundation
 **Complements:** Phase 9.2 (AT Protocol Federation)
 
 - [x] FL-9.1 (Context-Aware Home Page) - COMPLETED 2026-02-08
-- [ ] FL-9.2 (Enhanced OAuth Login Flow)
+- [x] FL-9.2 (Enhanced OAuth Login Flow) - COMPLETED 2026-02-10
 - [ ] FL-9.3 (Persistent Sessions & Token Refresh)
 - [ ] FL-9.4 (User Onboarding After First Login)
 - [ ] FL-9.5 (Logout Flow & Session Cleanup)
+
+### 🐛 Bugfix Tickets: Critical Profile & Endpoint Issues
+
+**PRIORITY: High** - Blocking user onboarding and profile creation
+
+- [x] BUGFIX-001 (Add nbhd_did to Existing Neighborhoods) - COMPLETED 2026-02-10
+- [x] BUGFIX-002 (Fix GET /api/users/me Endpoint) - COMPLETED BY DESIGN
+- [x] BUGFIX-003 (Fix POST /api/users/me/profile Validation) - COMPLETED 2026-02-08
+- [x] BUGFIX-004 (Create Profile Page Component) - ALREADY IMPLEMENTED
 
 ### 🌐 Phase 9.2: Full AT Protocol Federation (Weeks 17+)
 

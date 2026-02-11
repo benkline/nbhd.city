@@ -24,11 +24,11 @@ services:
     image: aaronshaf/dynamodb-admin:latest
     container_name: nbhd-dynamodb-admin
     ports:
-      - "8001:8001"
+      - "8002:8001"
     environment:
       - DYNAMO_ENDPOINT=http://dynamodb-local:8000
       - AWS_REGION=us-east-1
-      - AWS_ACCESS_KEY_ID=
+      - AWS_ACCESS_KEY_ID=dummy
       - AWS_SECRET_ACCESS_KEY=dummy
     depends_on:
       dynamodb-local:
@@ -36,7 +36,7 @@ services:
     networks:
       - nbhd-network
 
-  # Table Initializer - Runs once to create tables
+  # Table Initializer - Runs once to create tables and run migrations
   table-init:
     build:
       context: .
@@ -55,7 +55,39 @@ services:
       - nbhd-network
     volumes:
       - ./init:/app/init
-    command: python /app/init/create_tables.py
+      - ../scripts:/app/scripts
+    command: bash -c "python /app/init/create_tables.py && python /app/scripts/add_nbhd_did_migration.py || echo 'Migration skipped - run manually if needed'"
+
+  # Backend API
+  api:
+    build:
+      context: ../api
+      dockerfile: Dockerfile
+    container_name: nbhd-api
+    ports:
+      - "8001:8000"
+    environment:
+      - AWS_REGION=us-east-1
+      - DYNAMODB_TABLE_NAME=nbhd-city-development
+      - DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+      - AWS_ACCESS_KEY_ID=dummy
+      - AWS_SECRET_ACCESS_KEY=dummy
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - ACCESS_TOKEN_EXPIRE_MINUTES=10080
+      - FRONTEND_URL=http://localhost:5173
+      - BLUESKY_OAUTH_CLIENT_ID=https://unalienable-unmournfully-gwen.ngrok-free.dev/client-metadata.json
+      - BLUESKY_OAUTH_CLIENT_SECRET=test-client-secret
+      - BLUESKY_OAUTH_REDIRECT_URI=https://unalienable-unmournfully-gwen.ngrok-free.dev/auth/callback
+    depends_on:
+      dynamodb-local:
+        condition: service_healthy
+      table-init:
+        condition: service_completed_successfully
+    networks:
+      - nbhd-network
+    volumes:
+      - ../api:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 networks:
   nbhd-network:

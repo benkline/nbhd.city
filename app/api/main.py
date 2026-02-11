@@ -15,8 +15,8 @@ project_root = pathlib.Path(__file__).parent.parent
 load_dotenv(project_root / '.env.local')
 
 from models import Token, User, UserProfile
-from auth import create_access_token, get_current_user, get_bluesky_token
-from bluesky_oauth import get_oauth_authorize_url, exchange_code_for_token
+from auth import create_access_token, get_current_user, get_bluesky_token, get_bluesky_handle
+from bluesky_oauth import get_oauth_authorize_url, exchange_code_for_token, generate_code_verifier
 from bluesky_api import get_bluesky_profile
 from nbhd import router as nbhds_router
 from users import router as users_router
@@ -71,15 +71,54 @@ def get_client_metadata():
     Serve BlueSky OAuth client metadata.
     This file is required for BlueSky's decentralized OAuth flow.
     The URL to this endpoint becomes the client_id for OAuth.
+    The client_id and redirect_uris are dynamically set to match the current environment.
     """
+    import json
+
     metadata_path = os.path.join(os.path.dirname(__file__), "client-metadata.json")
-    return FileResponse(metadata_path, media_type="application/json")
+
+    # Load the base metadata
+    with open(metadata_path, 'r') as f:
+        metadata = json.load(f)
+
+    # Update client_id to match the current BLUESKY_OAUTH_CLIENT_ID
+    # This ensures BlueSky can validate the metadata matches the URL it was fetched from
+    client_id = os.getenv("BLUESKY_OAUTH_CLIENT_ID")
+    if client_id:
+        metadata["client_id"] = client_id
+
+        # Extract origin from client_id for client_uri
+        # BlueSky requires client_uri to have the same origin as client_id
+        from urllib.parse import urlparse
+        parsed = urlparse(client_id)
+        client_origin = f"{parsed.scheme}://{parsed.netloc}"
+        metadata["client_uri"] = client_origin
+
+    # Update redirect_uri to match the current BLUESKY_OAUTH_REDIRECT_URI
+    # Remove localhost URLs as they're not allowed in OAuth (RFC 8252)
+    redirect_uri = os.getenv("BLUESKY_OAUTH_REDIRECT_URI")
+    if redirect_uri:
+        # Use only the configured redirect URI, remove localhost variants
+        metadata["redirect_uris"] = [redirect_uri]
+
+    return metadata
+
+
+@app.get("/callback.html")
+def get_callback():
+    """
+    Serve the OAuth callback HTML page.
+    This page handles the redirect from BlueSky after successful authorization.
+    It receives the token and stores it in localStorage, then redirects to the app.
+    """
+    callback_path = os.path.join(os.path.dirname(__file__), "static", "callback.html")
+    return FileResponse(callback_path, media_type="text/html")
 
 
 @app.get("/auth/login")
 async def login(return_url: str = Query(default=None)):
     """
-    Initiate BlueSky OAuth login flow.
+    Initiate BlueSky OAuth login flow with PKCE.
     Redirects user to BlueSky authorization endpoint.
 
     Args:
@@ -87,12 +126,13 @@ async def login(return_url: str = Query(default=None)):
                    Defaults to FRONTEND_URL environment variable or http://localhost:5173
     """
     state = secrets.token_urlsafe(32)
+    code_verifier = generate_code_verifier()
 
-    # Store return URL with the state for later retrieval in callback
+    # Store return URL and PKCE code verifier with the state for later retrieval in callback
     frontend_url = return_url or os.getenv("FRONTEND_URL", "http://localhost:5173")
-    oauth_states[state] = {"frontend_url": frontend_url}
+    oauth_states[state] = {"frontend_url": frontend_url, "code_verifier": code_verifier}
 
-    auth_url = get_oauth_authorize_url(state)
+    auth_url = get_oauth_authorize_url(state, code_verifier)
     return RedirectResponse(url=auth_url)
 
 
@@ -100,7 +140,7 @@ async def login(return_url: str = Query(default=None)):
 async def oauth_callback(code: str = Query(...), state: str = Query(...)):
     """
     Handle BlueSky OAuth callback.
-    Exchanges authorization code for access token.
+    Exchanges authorization code for access token using PKCE.
     """
     # Verify state to prevent CSRF attacks
     if state not in oauth_states:
@@ -113,23 +153,46 @@ async def oauth_callback(code: str = Query(...), state: str = Query(...)):
     del oauth_states[state]
 
     try:
-        token_data = await exchange_code_for_token(code)
+        # Exchange code for token using PKCE code_verifier
+        code_verifier = state_data.get("code_verifier")
+        token_data = await exchange_code_for_token(code, code_verifier)
+    except HTTPException:
+        # Pass through HTTPException with detailed error message
+        raise
     except Exception as e:
+        print(f"Callback error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Failed to authenticate with BlueSky"
+            detail=f"Authentication failed: {str(e)}"
         )
 
-    # Create our JWT token with BlueSky access token included
-    access_token = create_access_token(
-        user_id=token_data["did"],
-        bluesky_token=token_data.get("access_token")
-    )
+    # Create our JWT token with BlueSky access token and handle included
+    print(f"Auth callback: Token data keys: {token_data.keys() if isinstance(token_data, dict) else 'not a dict'}")
+    print(f"Auth callback: Token data: {token_data}")
+
+    try:
+        # BlueSky returns 'sub' (Subject) not 'did' in the token response
+        user_id = token_data.get("sub")
+        if not user_id:
+            raise KeyError("sub")
+
+        access_token = create_access_token(
+            user_id=user_id,
+            bluesky_token=token_data.get("access_token"),
+            bsky_handle=None  # Handle is not in token response, would need to fetch from /xrpc/com.atproto.server.getSession
+        )
+        print(f"Auth callback: Successfully created access token for user {user_id}")
+    except KeyError as e:
+        print(f"Auth callback: Missing key in token data: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Token response missing required field: {e}"
+        )
 
     # In production, you'd save the user info and BlueSky tokens to your database
     # For now, we'll just return the token
     frontend_url = state_data.get("frontend_url") or os.getenv("FRONTEND_URL", "http://localhost:5173")
-    # Redirect to callback.html which handles the static SPA redirect with hash routing
+    # Redirect to callback.html which handles storing token and redirecting to hash router
     return RedirectResponse(
         url=f"{frontend_url}/callback.html?token={access_token}",
         status_code=status.HTTP_302_FOUND
@@ -137,13 +200,14 @@ async def oauth_callback(code: str = Query(...), state: str = Query(...)):
 
 
 @app.get("/auth/me", response_model=dict)
-async def get_current_user_info(user_id: str = Depends(get_current_user)):
+async def get_current_user_info(user_id: str = Depends(get_current_user), request: Request = None, bsky_handle: Optional[str] = Depends(get_bluesky_handle)):
     """
     Get the current authenticated user's information.
     Requires valid JWT token in Authorization header.
     """
     return {
         "user_id": user_id,
+        "handle": bsky_handle,
         "authenticated": True
     }
 
@@ -178,62 +242,98 @@ async def logout(user_id: str = Depends(get_current_user)):
 @app.post("/auth/test-login", response_model=Token)
 async def test_login(request: TestLoginRequest):
     """
-    Test login endpoint for development/testing.
-    Authenticates against credentials in BSKY_USERNAME and BSKY_PASSWORD environment variables.
-    For testing purposes, also attempts to get a real BlueSky token.
+    Test login endpoint for development/testing with real BlueSky credentials.
+    Authenticates against BlueSky's production server and returns a JWT token.
+
+    Args:
+        request: TestLoginRequest with username and password (BlueSky credentials)
+
+    Returns:
+        Token with access_token, token_type, and user info
+
+    Raises:
+        HTTPException: If BlueSky authentication fails or credentials are invalid
     """
-    test_username = os.getenv("BSKY_USERNAME")
-    test_password = os.getenv("BSKY_PASSWORD")
-
-    if not test_username or not test_password:
+    if not request.username or not request.password:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Test credentials not configured"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username and password are required"
         )
 
-    if request.username != test_username or request.password != test_password:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials"
-        )
-
-    # Try to get a real BlueSky token using the test credentials
     bluesky_token = None
-    test_user_id = None
+    user_id = None
+    user_handle = None
 
     try:
         async with httpx.AsyncClient() as client:
-            # Use the Bluesky XRPC server.createSession endpoint
+            # Authenticate against BlueSky's production XRPC endpoint
             response = await client.post(
                 "https://bsky.social/xrpc/com.atproto.server.createSession",
                 json={
-                    "identifier": test_username,
-                    "password": test_password,
+                    "identifier": request.username,
+                    "password": request.password,
                 }
             )
 
-            if response.status_code == 200:
-                auth_data = response.json()
-                bluesky_token = auth_data.get("accessJwt")
-                test_user_id = auth_data.get("did")
+            # Check for authentication failures
+            if response.status_code == 401:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid BlueSky credentials. Please check your username/password."
+                )
+            elif response.status_code != 200:
+                error_detail = f"BlueSky authentication failed with status {response.status_code}"
+                try:
+                    error_data = response.json()
+                    if "error" in error_data:
+                        error_detail = error_data.get("error", error_detail)
+                    if "message" in error_data:
+                        error_detail = error_data.get("message", error_detail)
+                except Exception:
+                    pass
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=error_detail
+                )
+
+            # Parse successful response
+            auth_data = response.json()
+            bluesky_token = auth_data.get("accessJwt")
+            user_id = auth_data.get("did")
+            user_handle = auth_data.get("handle")
+
+            if not user_id or not bluesky_token:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Invalid response from BlueSky: missing DID or token"
+                )
+
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Failed to connect to BlueSky: {str(e)}"
+        )
+    except HTTPException:
+        # Re-raise HTTPException as-is
+        raise
     except Exception as e:
-        print(f"Warning: Failed to get BlueSky token: {e}")
+        print(f"Unexpected error during BlueSky authentication: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during authentication"
+        )
 
-    # Fallback to test user if BlueSky auth fails
-    if not test_user_id:
-        test_user_id = "did:plc:test-user"
+    # Create JWT token with BlueSky token and handle
+    access_token = create_access_token(user_id, bluesky_token=bluesky_token, bsky_handle=user_handle)
 
-    # Create JWT token with optional BlueSky token
-    access_token = create_access_token(test_user_id, bluesky_token=bluesky_token)
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": {
-            "id": test_user_id,
-            "handle": request.username,
-            "display_name": "Test User",
-            "avatar": None,
-            "created_at": None
-        }
-    }
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+        user=User(
+            id=user_id,
+            handle=user_handle or request.username,
+            display_name=None,
+            avatar=None,
+            created_at=None
+        )
+    )

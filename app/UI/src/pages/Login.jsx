@@ -4,12 +4,9 @@ import { useAuth } from '../contexts/AuthContext';
 import styles from '../styles/Login.module.css';
 
 export default function Login() {
-  const { isAuthenticated, needsOnboarding, login } = useAuth();
+  const { isAuthenticated, needsOnboarding } = useAuth();
   const navigate = useNavigate();
-  const [username, setUsername] = useState(import.meta.env.BSKY_USERNAME || '');
-  const [password, setPassword] = useState(import.meta.env.BSKY_PASSWORD || '');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -22,42 +19,18 @@ export default function Login() {
     }
   }, [isAuthenticated, needsOnboarding, navigate]);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/test-login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Login failed');
-      }
-
-      const data = await response.json();
-      login(data.access_token);
-    } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+  const handleBlueskyLogin = () => {
+    setIsRedirecting(true);
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+    const frontendUrl = window.location.origin;
+    window.location.href = `${apiUrl}/auth/login?return_url=${encodeURIComponent(frontendUrl)}`;
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <h1>My Nbhd</h1>
+          <h1>🏘️ nbhd.city</h1>
           <p className={styles.tagline}>Your Neighborhood Space</p>
         </div>
 
@@ -65,43 +38,33 @@ export default function Login() {
           Organize, collaborate, and manage your neighborhood community
         </p>
 
-        {error && <div className={styles.error}>{error}</div>}
+        <div className={styles.authSection}>
+          <p className={styles.authInfo}>
+            nbhd.city uses your BlueSky account for sign-in. No new password required.
+          </p>
 
-        <form onSubmit={handleLogin} className={styles.form}>
-          <div className={styles.formGroup}>
-            <label htmlFor="username">BlueSky Username</label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="username"
-              disabled={loading}
-              required
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              disabled={loading}
-              required
-            />
-          </div>
-
-          <button type="submit" className={styles.loginButton} disabled={loading}>
-            {loading ? 'Signing In...' : 'Sign In'}
+          <button
+            onClick={handleBlueskyLogin}
+            className={styles.blueskyButton}
+            disabled={isRedirecting}
+          >
+            {isRedirecting ? (
+              <>
+                <span className={styles.spinner}></span>
+                Redirecting to BlueSky...
+              </>
+            ) : (
+              <>
+                <span className={styles.blueskyIcon}>🦋</span>
+                Sign in with BlueSky
+              </>
+            )}
           </button>
-        </form>
+        </div>
 
         <div className={styles.info}>
           <p>
-            Powered by BlueSky authentication
+            Secure authentication powered by BlueSky
           </p>
         </div>
       </div>
