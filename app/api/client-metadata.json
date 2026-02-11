@@ -5,7 +5,8 @@
   "logo_uri": "https://nbhd.city/logo.png",
   "application_type": "web",
   "redirect_uris": [
-    "https://nbhd.city/callback.html",
+    "https://unalienable-unmournfully-gwen.ngrok-free.dev/auth/callback",
+    "https://nbhd.city/auth/callback",
     "http://localhost:5173/callback.html"
   ],
   "scope": "atproto",
