@@ -171,11 +171,17 @@ async def oauth_callback(code: str = Query(...), state: str = Query(...)):
     print(f"Auth callback: Token data: {token_data}")
 
     try:
+        # BlueSky returns 'sub' (Subject) not 'did' in the token response
+        user_id = token_data.get("sub")
+        if not user_id:
+            raise KeyError("sub")
+
         access_token = create_access_token(
-            user_id=token_data["did"],
+            user_id=user_id,
             bluesky_token=token_data.get("access_token"),
-            bsky_handle=token_data.get("handle")
+            bsky_handle=None  # Handle is not in token response, would need to fetch from /xrpc/com.atproto.server.getSession
         )
+        print(f"Auth callback: Successfully created access token for user {user_id}")
     except KeyError as e:
         print(f"Auth callback: Missing key in token data: {e}")
         raise HTTPException(
