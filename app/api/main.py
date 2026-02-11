@@ -87,6 +87,13 @@ def get_client_metadata():
     if client_id:
         metadata["client_id"] = client_id
 
+        # Extract origin from client_id for client_uri
+        # BlueSky requires client_uri to have the same origin as client_id
+        from urllib.parse import urlparse
+        parsed = urlparse(client_id)
+        client_origin = f"{parsed.scheme}://{parsed.netloc}"
+        metadata["client_uri"] = client_origin
+
     # Update redirect_uri to match the current BLUESKY_OAUTH_REDIRECT_URI
     # Remove localhost URLs as they're not allowed in OAuth (RFC 8252)
     redirect_uri = os.getenv("BLUESKY_OAUTH_REDIRECT_URI")
