@@ -12,13 +12,14 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "10080"))  # 7 days
 
 
-def create_access_token(user_id: str, bluesky_token: Optional[str] = None, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(user_id: str, bluesky_token: Optional[str] = None, bsky_handle: Optional[str] = None, expires_delta: Optional[timedelta] = None) -> str:
     """
     Create a JWT access token for a user.
 
     Args:
         user_id: The BlueSky DID of the user
         bluesky_token: Optional BlueSky access token for API calls
+        bsky_handle: Optional BlueSky handle for display purposes
         expires_delta: Optional custom expiration time
 
     Returns:
@@ -36,6 +37,9 @@ def create_access_token(user_id: str, bluesky_token: Optional[str] = None, expir
 
     if bluesky_token:
         to_encode["bsky_token"] = bluesky_token
+
+    if bsky_handle:
+        to_encode["bsky_handle"] = bsky_handle
 
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -124,5 +128,29 @@ def get_bluesky_token(request: Request) -> Optional[str]:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload.get("bsky_token")
+    except jwt.InvalidTokenError:
+        return None
+
+
+def get_bluesky_handle(request: Request) -> Optional[str]:
+    """
+    Extract BlueSky handle from JWT if available.
+
+    Args:
+        request: HTTP request object
+
+    Returns:
+        BlueSky handle or None
+    """
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+
+    token = auth_header.split(" ")[1]
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload.get("bsky_handle")
     except jwt.InvalidTokenError:
         return None

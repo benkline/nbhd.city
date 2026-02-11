@@ -15,7 +15,7 @@ project_root = pathlib.Path(__file__).parent.parent
 load_dotenv(project_root / '.env.local')
 
 from models import Token, User, UserProfile
-from auth import create_access_token, get_current_user, get_bluesky_token
+from auth import create_access_token, get_current_user, get_bluesky_token, get_bluesky_handle
 from bluesky_oauth import get_oauth_authorize_url, exchange_code_for_token
 from bluesky_api import get_bluesky_profile
 from nbhd import router as nbhds_router
@@ -120,30 +120,32 @@ async def oauth_callback(code: str = Query(...), state: str = Query(...)):
             detail="Failed to authenticate with BlueSky"
         )
 
-    # Create our JWT token with BlueSky access token included
+    # Create our JWT token with BlueSky access token and handle included
     access_token = create_access_token(
         user_id=token_data["did"],
-        bluesky_token=token_data.get("access_token")
+        bluesky_token=token_data.get("access_token"),
+        bsky_handle=token_data.get("handle")
     )
 
     # In production, you'd save the user info and BlueSky tokens to your database
     # For now, we'll just return the token
     frontend_url = state_data.get("frontend_url") or os.getenv("FRONTEND_URL", "http://localhost:5173")
-    # Redirect to callback.html which handles the static SPA redirect with hash routing
+    # Redirect to hash router auth/success route with token as query param
     return RedirectResponse(
-        url=f"{frontend_url}/callback.html?token={access_token}",
+        url=f"{frontend_url}/#/auth/success?token={access_token}",
         status_code=status.HTTP_302_FOUND
     )
 
 
 @app.get("/auth/me", response_model=dict)
-async def get_current_user_info(user_id: str = Depends(get_current_user)):
+async def get_current_user_info(user_id: str = Depends(get_current_user), request: Request = None, bsky_handle: Optional[str] = Depends(get_bluesky_handle)):
     """
     Get the current authenticated user's information.
     Requires valid JWT token in Authorization header.
     """
     return {
         "user_id": user_id,
+        "handle": bsky_handle,
         "authenticated": True
     }
 
@@ -259,8 +261,8 @@ async def test_login(request: TestLoginRequest):
             detail="An unexpected error occurred during authentication"
         )
 
-    # Create JWT token with BlueSky token
-    access_token = create_access_token(user_id, bluesky_token=bluesky_token)
+    # Create JWT token with BlueSky token and handle
+    access_token = create_access_token(user_id, bluesky_token=bluesky_token, bsky_handle=user_handle)
 
     return Token(
         access_token=access_token,

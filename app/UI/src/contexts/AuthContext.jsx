@@ -74,6 +74,8 @@ export function AuthProvider({ children }) {
     setToken(null);
     setUser(null);
     setNeedsOnboarding(false);
+    // Redirect to login page
+    window.location.href = '/#/login';
   };
 
   const value = {
