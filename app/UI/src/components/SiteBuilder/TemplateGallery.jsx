@@ -60,17 +60,9 @@ export function TemplateGallery({ onSelect }) {
         {templates.map((template) => (
           <div key={template.id} className={styles.card}>
             <div className={styles.imageContainer}>
-              {template.preview_url ? (
-                <img
-                  src={template.preview_url}
-                  alt={template.name}
-                  className={styles.image}
-                />
-              ) : (
-                <div className={styles.placeholderImage}>
-                  📄 {template.name}
-                </div>
-              )}
+              <div className={styles.placeholderImage}>
+                📄 {template.name}
+              </div>
             </div>
 
             <div className={styles.content}>
