@@ -74,6 +74,12 @@ def create_table(client, table_name):
                 # GSI3 attributes (user_id + joined_at)
                 {"AttributeName": "user_id", "AttributeType": "S"},
                 {"AttributeName": "joined_at", "AttributeType": "S"},
+
+                # GSI4 attributes (user_id + site_type) for sites
+                {"AttributeName": "site_type", "AttributeType": "S"},
+
+                # GSI9 attributes (nbhd_id + site_type) for sites
+                {"AttributeName": "nbhd_id", "AttributeType": "S"},
             ],
             GlobalSecondaryIndexes=[
                 # GSI1: List all neighborhoods sorted by creation date
@@ -108,6 +114,32 @@ def create_table(client, table_name):
                     "KeySchema": [
                         {"AttributeName": "user_id", "KeyType": "HASH"},
                         {"AttributeName": "joined_at", "KeyType": "RANGE"}
+                    ],
+                    "Projection": {"ProjectionType": "ALL"},
+                    "ProvisionedThroughput": {
+                        "ReadCapacityUnits": 5,
+                        "WriteCapacityUnits": 5
+                    }
+                },
+                # GSI4: Get user's sites by type
+                {
+                    "IndexName": "GSI4",
+                    "KeySchema": [
+                        {"AttributeName": "user_id", "KeyType": "HASH"},
+                        {"AttributeName": "site_type", "KeyType": "RANGE"}
+                    ],
+                    "Projection": {"ProjectionType": "ALL"},
+                    "ProvisionedThroughput": {
+                        "ReadCapacityUnits": 5,
+                        "WriteCapacityUnits": 5
+                    }
+                },
+                # GSI9: Get neighborhood's sites by type
+                {
+                    "IndexName": "GSI9",
+                    "KeySchema": [
+                        {"AttributeName": "nbhd_id", "KeyType": "HASH"},
+                        {"AttributeName": "site_type", "KeyType": "RANGE"}
                     ],
                     "Projection": {"ProjectionType": "ALL"},
                     "ProvisionedThroughput": {
