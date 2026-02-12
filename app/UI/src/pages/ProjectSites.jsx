@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { SiteManagementDashboard } from '../components/SiteBuilder/SiteManagementDashboard';
 import { ProjectSiteSelector } from '../components/ProjectSiteSelector';
+import { BackToDashboardButton } from '../components/BackToDashboardButton';
 import styles from '../styles/ProjectSites.module.css';
 
 export default function ProjectSites() {
@@ -30,6 +31,7 @@ export default function ProjectSites() {
   // Main content
   return (
     <div className={styles.container}>
+      <BackToDashboardButton />
       <h1>Project Sites</h1>
       <p className={styles.subtitle}>
         Project sites represent your neighborhood. Only neighborhood owners can edit them.

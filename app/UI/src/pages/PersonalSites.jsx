@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { SiteManagementDashboard } from '../components/SiteBuilder/SiteManagementDashboard';
+import { BackToDashboardButton } from '../components/BackToDashboardButton';
 import styles from '../styles/PersonalSites.module.css';
 
 /**
@@ -36,6 +37,7 @@ export default function PersonalSites() {
   // Main content
   return (
     <div className={styles.container}>
+      <BackToDashboardButton />
       <h1>Personal Sites</h1>
       <p className={styles.subtitle}>
         Personal sites are your own space and are not associated with any neighborhood.
