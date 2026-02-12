@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BuildTriggerButton } from './BuildTriggerButton';
 import { BuildStatusPoller } from './BuildStatusPoller';
 import { BuildHistory } from './BuildHistory';
+import apiClient from '../../lib/api';
 import styles from './SiteManagementDashboard.module.css';
 
 /**
@@ -185,20 +186,13 @@ export function SiteManagementDashboard({ siteType, nbhdId, onEdit, onDelete: on
       try {
         setLoading(true);
         setError(null);
-        let url = '/api/sites';
         const params = new URLSearchParams();
         if (siteType) params.append('site_type', siteType);
         if (nbhdId) params.append('nbhd_id', nbhdId);
-        if (params.toString()) url += `?${params.toString()}`;
+        const queryString = params.toString() ? `?${params.toString()}` : '';
 
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch sites');
-        }
-
-        const data = await response.json();
-        setSites(data.data || []);
+        const response = await apiClient.get(`/api/sites${queryString}`);
+        setSites(response.data.data || []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -219,13 +213,7 @@ export function SiteManagementDashboard({ siteType, nbhdId, onEdit, onDelete: on
 
   const handleDelete = async (siteId) => {
     try {
-      const response = await fetch(`/api/sites/${siteId}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete site');
-      }
+      await apiClient.delete(`/api/sites/${siteId}`);
 
       // Remove site from local list
       setSites(sites.filter(s => s.site_id !== siteId));
