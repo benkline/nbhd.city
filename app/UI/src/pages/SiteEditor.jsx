@@ -46,14 +46,19 @@ export default function SiteEditor() {
 
   // Update step and select template when templateId changes
   useEffect(() => {
-    if (templateId && templates.length > 0) {
-      const template = templates.find(t => t.id === templateId);
-      if (template) {
-        setSelectedTemplate(template);
-        setStep('config');
-      }
+    if (templateId) {
+      const fetchTemplate = async () => {
+        try {
+          const response = await apiClient.get(`/api/templates/${templateId}`);
+          setSelectedTemplate(response.data.data);
+          setStep('config');
+        } catch (err) {
+          setError(`Failed to load template: ${err.message}`);
+        }
+      };
+      fetchTemplate();
     }
-  }, [templateId, templates]);
+  }, [templateId]);
 
   const handleTemplateSelect = (template) => {
     setSelectedTemplate(template);
@@ -125,7 +130,7 @@ export default function SiteEditor() {
           <h1>Configure {selectedTemplate.name}</h1>
           <SiteConfigForm
             template={selectedTemplate}
-            onSubmit={handleSiteCreate}
+            onDeploy={handleSiteCreate}
             loading={loading}
           />
         </div>
