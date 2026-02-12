@@ -69,6 +69,7 @@ export default function SiteEditor() {
     try {
       setLoading(true);
       setError(null);
+      console.log('Creating site with data:', { title: siteData.title, template: selectedTemplate.id });
 
       // Create the site via API
       const response = await apiClient.post('/api/sites', {
@@ -78,11 +79,14 @@ export default function SiteEditor() {
         site_type: 'personal',
       });
 
+      console.log('Site created successfully:', response.data);
       setCreatedSite(response.data.data);
       setStep('success');
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Failed to create site');
-      console.error('Site creation error:', err);
+      const errorMessage = err.response?.data?.detail || err.message || 'Failed to create site';
+      console.error('Site creation error:', errorMessage, err);
+      setError(errorMessage);
+      setStep('template'); // Go back to template selection on error
     } finally {
       setLoading(false);
     }
@@ -136,27 +140,43 @@ export default function SiteEditor() {
         </div>
       )}
 
-      {step === 'success' && createdSite && (
+      {step === 'success' && (
         <div className={styles.successContainer}>
-          <div className={styles.successIcon}>🎉</div>
-          <h1>Site Created!</h1>
-          <p className={styles.successMessage}>
-            Your site "{createdSite.title}" has been created successfully.
-          </p>
-          <div className={styles.successActions}>
-            <button
-              className={styles.primaryButton}
-              onClick={handleEditSite}
-            >
-              Edit Site Content
-            </button>
-            <button
-              className={styles.secondaryButton}
-              onClick={handleBackToPersonalSites}
-            >
-              Back to Personal Sites
-            </button>
-          </div>
+          {createdSite ? (
+            <>
+              <div className={styles.successIcon}>🎉</div>
+              <h1>Site Created!</h1>
+              <p className={styles.successMessage}>
+                Your site "{createdSite.title}" has been created successfully.
+              </p>
+              <div className={styles.successActions}>
+                <button
+                  className={styles.primaryButton}
+                  onClick={handleEditSite}
+                >
+                  Edit Site Content
+                </button>
+                <button
+                  className={styles.secondaryButton}
+                  onClick={handleBackToPersonalSites}
+                >
+                  Back to Personal Sites
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.successIcon}>⏳</div>
+              <h1>Creating your site...</h1>
+              <p className={styles.successMessage}>Please wait while we set up your site.</p>
+            </>
+          )}
+        </div>
+      )}
+
+      {!step && (
+        <div className={styles.content}>
+          <p>Loading...</p>
         </div>
       )}
     </div>
