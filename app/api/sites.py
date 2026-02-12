@@ -181,8 +181,7 @@ async def list_sites(
 
     try:
         table = await get_dynamodb_table()
-        # Note: GSI1 query would need proper implementation for pagination
-        # For now, get all and apply pagination in-memory
+        # Uses GSI4 (user_id + site_type) for efficient querying
         sites = await list_sites_by_user(table, user_id, site_type)
 
         # Sort by created_at descending
