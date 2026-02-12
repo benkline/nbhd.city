@@ -70,8 +70,6 @@ async def get_dynamodb_table():
     Returns the table object directly without needing to use async context manager.
     This is useful for functions that need to pass the table around.
 
-    Note: This keeps the connection open. For most use cases, prefer using get_table() context manager.
-
     Usage:
         table = await get_dynamodb_table()
         response = await table.get_item(Key={"PK": "...", "SK": "..."})
@@ -84,6 +82,6 @@ async def get_dynamodb_table():
             kwargs["aws_access_key_id"] = "dummy"
             kwargs["aws_secret_access_key"] = "dummy"
 
-    dynamodb = session.resource("dynamodb", **kwargs)
-    table = await dynamodb.Table(TABLE_NAME)
-    return table
+    async with session.resource("dynamodb", **kwargs) as dynamodb:
+        table = dynamodb.Table(TABLE_NAME)
+        return table

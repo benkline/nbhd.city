@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMyNbhds } from '../hooks/useMyNeighborhoods';
 import NbhdCard from '../components/NeighborhoodCard';
+import { BackToDashboardButton } from '../components/BackToDashboardButton';
 import styles from '../styles/MyNbhds.module.css';
 
 export default function MyNbhds() {
@@ -30,6 +31,7 @@ export default function MyNbhds() {
 
   return (
     <div className={styles.container}>
+      <BackToDashboardButton />
       <h1>My Nbhds</h1>
 
       {nbhds.length > 0 ? (

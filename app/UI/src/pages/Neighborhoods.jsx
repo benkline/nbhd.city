@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNbhds } from '../hooks/useNeighborhoods';
 import NbhdCard from '../components/NeighborhoodCard';
+import { BackToDashboardButton } from '../components/BackToDashboardButton';
 import styles from '../styles/Nbhds.module.css';
 
 export default function Nbhds() {
@@ -30,6 +31,7 @@ export default function Nbhds() {
 
   return (
     <div className={styles.container}>
+      <BackToDashboardButton />
       <div className={styles.header}>
         <div>
           <h1>Nbhds</h1>

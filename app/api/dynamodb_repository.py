@@ -1007,16 +1007,16 @@ async def list_sites_by_user(table, user_id: str, site_type: Optional[str] = Non
     """
     List sites for a user, optionally filtered by type.
 
-    Uses GSI1: user_id-site_type
+    Uses GSI4: user_id-site_type
     """
     if site_type:
         response = await table.query(
-            IndexName="GSI1",
+            IndexName="GSI4",
             KeyConditionExpression=Key("user_id").eq(user_id) & Key("site_type").eq(site_type)
         )
     else:
         response = await table.query(
-            IndexName="GSI1",
+            IndexName="GSI4",
             KeyConditionExpression=Key("user_id").eq(user_id)
         )
     return response.get("Items", [])
