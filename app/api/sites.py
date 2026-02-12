@@ -176,33 +176,33 @@ async def list_sites(
 
     Returns list of site objects for the authenticated user.
     """
-    from dynamodb_client import get_dynamodb_table
+    from dynamodb_client import get_table
     from dynamodb_repository import list_sites_by_user
 
     try:
-        table = await get_dynamodb_table()
-        # Uses GSI4 (user_id + site_type) for efficient querying
-        sites = await list_sites_by_user(table, user_id, site_type)
+        async with get_table() as table:
+            # Uses GSI4 (user_id + site_type) for efficient querying
+            sites = await list_sites_by_user(table, user_id, site_type)
 
-        # Sort by created_at descending
-        sites.sort(key=lambda s: s.get("created_at", ""), reverse=True)
+            # Sort by created_at descending
+            sites.sort(key=lambda s: s.get("created_at", ""), reverse=True)
 
-        # Apply pagination
-        total = len(sites)
-        paginated_sites = sites[skip : skip + limit]
+            # Apply pagination
+            total = len(sites)
+            paginated_sites = sites[skip : skip + limit]
 
-        return {
-            "data": paginated_sites,
-            "meta": {
-                "timestamp": datetime.utcnow().isoformat() + "Z",
-                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S"),
-                "pagination": {
-                    "skip": skip,
-                    "limit": limit,
-                    "total": total
+            return {
+                "data": paginated_sites,
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S"),
+                    "pagination": {
+                        "skip": skip,
+                        "limit": limit,
+                        "total": total
+                    }
                 }
             }
-        }
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
