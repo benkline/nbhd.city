@@ -22,6 +22,7 @@ export default function SiteEditor() {
   const [createdSite, setCreatedSite] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [templates, setTemplates] = useState([]);
 
   // Auth redirect
   useEffect(() => {
@@ -29,6 +30,30 @@ export default function SiteEditor() {
       navigate('/login');
     }
   }, [isAuthenticated, isLoading, navigate]);
+
+  // Fetch templates on mount
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const response = await apiClient.get('/api/templates');
+        setTemplates(response.data.data || []);
+      } catch (err) {
+        console.error('Failed to fetch templates:', err);
+      }
+    };
+    fetchTemplates();
+  }, []);
+
+  // Update step and select template when templateId changes
+  useEffect(() => {
+    if (templateId && templates.length > 0) {
+      const template = templates.find(t => t.id === templateId);
+      if (template) {
+        setSelectedTemplate(template);
+        setStep('config');
+      }
+    }
+  }, [templateId, templates]);
 
   const handleTemplateSelect = (template) => {
     setSelectedTemplate(template);
