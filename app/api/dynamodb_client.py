@@ -83,5 +83,5 @@ async def get_dynamodb_table():
             kwargs["aws_secret_access_key"] = "dummy"
 
     async with session.resource("dynamodb", **kwargs) as dynamodb:
-        table = dynamodb.Table(TABLE_NAME)
+        table = await dynamodb.Table(TABLE_NAME)
         return table
