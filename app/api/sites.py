@@ -91,7 +91,7 @@ async def create_site(
     Returns created site object.
     """
     from templates import get_template_by_id
-    from dynamodb_client import get_dynamodb_table
+    from dynamodb_client import get_table
     from dynamodb_repository import create_site as create_site_db, get_neighborhood
 
     # Validate template exists
@@ -111,53 +111,51 @@ async def create_site(
             detail=error_msg or "Invalid configuration"
         )
 
-    # For project and nbhd sites, verify neighborhood exists
-    if site_data.site_type in ['project', 'nbhd'] and site_data.nbhd_id:
-        try:
-            table = await get_dynamodb_table()
-            nbhd = await get_neighborhood(table, site_data.nbhd_id)
-            if not nbhd:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Neighborhood {site_data.nbhd_id} not found"
-                )
-
-            # For nbhd sites, verify user is admin (created the nbhd)
-            if site_data.site_type == 'nbhd' and nbhd.get('created_by') != user_id:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Only neighborhood admins can create nbhd sites"
-                )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to verify neighborhood: {str(e)}"
-            )
-
-    # Create site in DynamoDB
+    # Use context manager to properly manage DynamoDB session
     try:
-        table = await get_dynamodb_table()
-        site = await create_site_db(table, {
-            "user_id": user_id,
-            "title": site_data.title,
-            "template": site_data.template,
-            "config": site_data.config,
-            "site_type": site_data.site_type,
-            "nbhd_id": site_data.nbhd_id,
-            "status": "draft"
-        })
+        async with get_table() as table:
+            # For project and nbhd sites, verify neighborhood exists
+            if site_data.site_type in ['project', 'nbhd'] and site_data.nbhd_id:
+                nbhd = await get_neighborhood(table, site_data.nbhd_id)
+                if not nbhd:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Neighborhood {site_data.nbhd_id} not found"
+                    )
 
-        now = datetime.utcnow().isoformat() + "Z"
-        return {
-            "data": site,
-            "meta": {
-                "timestamp": now,
-                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+                # For nbhd sites, verify user is admin (created the nbhd)
+                if site_data.site_type == 'nbhd' and nbhd.get('created_by') != user_id:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="Only neighborhood admins can create nbhd sites"
+                    )
+
+            # Create site in DynamoDB
+            site = await create_site_db(table, {
+                "user_id": user_id,
+                "title": site_data.title,
+                "template": site_data.template,
+                "config": site_data.config,
+                "site_type": site_data.site_type,
+                "nbhd_id": site_data.nbhd_id,
+                "status": "draft"
+            })
+
+            now = datetime.utcnow().isoformat() + "Z"
+            return {
+                "data": site,
+                "meta": {
+                    "timestamp": now,
+                    "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+                }
             }
-        }
+    except HTTPException:
+        raise
     except Exception as e:
+        import traceback
+        import sys
+        print(f"ERROR creating site: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create site: {str(e)}"

@@ -154,3 +154,31 @@ def get_bluesky_handle(request: Request) -> Optional[str]:
         return payload.get("bsky_handle")
     except jwt.InvalidTokenError:
         return None
+
+
+def verify_token_string(token: str) -> Optional[str]:
+    """
+    Verify a JWT token and return the user ID.
+    Works without a Request object (used by WebSocket Lambda).
+
+    Args:
+        token: JWT token string
+
+    Returns:
+        The user ID (DID) from the token, or None if invalid
+
+    Raises:
+        None - returns None on any error (for WS handler robustness)
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+
+        if user_id is None:
+            return None
+
+        return user_id
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
