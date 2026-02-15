@@ -77,7 +77,7 @@ function SiteCard({ site, onEdit, onDelete, onBuildTriggered }) {
         </div>
         <div className={styles.info}>
           <label>URL:</label>
-          <span className={styles.url}>{site.public_url.replace('https://', '')}</span>
+          <span className={styles.url}>{(site.public_url || site.url)?.replace('https://', '') || 'N/A'}</span>
         </div>
         <div className={styles.info}>
           <label>Subdomain:</label>

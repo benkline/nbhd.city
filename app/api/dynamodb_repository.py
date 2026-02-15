@@ -987,11 +987,14 @@ async def create_site(table, site_data: dict) -> dict:
         "config": site_data['config'],
         "status": site_data.get('status', 'draft'),
         "site_type": site_data.get('site_type', 'personal'),
-        "nbhd_id": site_data.get('nbhd_id'),
-        "url": url,
+        "public_url": url,
         "created_at": now,
         "updated_at": now,
     }
+
+    # Only add nbhd_id if it's not None (optional for personal sites)
+    if site_data.get('nbhd_id'):
+        item["nbhd_id"] = site_data['nbhd_id']
 
     await table.put_item(Item=item)
     return item

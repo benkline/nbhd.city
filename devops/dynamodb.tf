@@ -71,6 +71,39 @@ resource "aws_dynamodb_table" "nbhd_city" {
     type = "S"
   }
 
+  # Chat GSI: Channels by neighborhood
+  attribute {
+    name = "nbhd_id_chat"
+    type = "S"
+  }
+
+  attribute {
+    name = "channel_sort"
+    type = "S"
+  }
+
+  # Chat GSI: DMs by user
+  attribute {
+    name = "dm_participant"
+    type = "S"
+  }
+
+  attribute {
+    name = "dm_created"
+    type = "S"
+  }
+
+  # Chat GSI: WS connections by user
+  attribute {
+    name = "ws_user_did"
+    type = "S"
+  }
+
+  attribute {
+    name = "ws_connected_at"
+    type = "S"
+  }
+
   # Global Secondary Index 1
   global_secondary_index {
     name            = "GSI1"
@@ -122,6 +155,33 @@ resource "aws_dynamodb_table" "nbhd_city" {
     projection_type = "ALL"
   }
 
+  # Chat GSI: Channels by neighborhood (for nbhrs-chat plugin)
+  # Enables efficient querying of channels within a neighborhood
+  global_secondary_index {
+    name            = "ChatChannelsByNbhd"
+    hash_key        = "nbhd_id_chat"
+    range_key       = "channel_sort"
+    projection_type = "ALL"
+  }
+
+  # Chat GSI: DMs by user (for nbhrs-chat plugin)
+  # Enables efficient querying of DM threads for a user
+  global_secondary_index {
+    name            = "ChatDMsByUser"
+    hash_key        = "dm_participant"
+    range_key       = "dm_created"
+    projection_type = "ALL"
+  }
+
+  # Chat GSI: WS connections by user (for nbhrs-chat plugin)
+  # Enables efficient querying of active WebSocket connections for a user
+  global_secondary_index {
+    name            = "ChatWSByUser"
+    hash_key        = "ws_user_did"
+    range_key       = "ws_connected_at"
+    projection_type = "ALL"
+  }
+
   # Enable Point-in-Time Recovery
   point_in_time_recovery {
     enabled = var.enable_point_in_time_recovery
@@ -136,11 +196,12 @@ resource "aws_dynamodb_table" "nbhd_city" {
   stream_enabled   = var.enable_streams
   stream_view_type = var.enable_streams ? "NEW_AND_OLD_IMAGES" : null
 
-  # TTL configuration (optional, for automatic data expiration)
-  # ttl {
-  #   enabled        = true
-  #   attribute_name = "ttl"
-  # }
+  # TTL configuration (for automatic data expiration)
+  # Used by nbhrs-chat for WebSocket connection registry (2h TTL)
+  ttl {
+    enabled        = true
+    attribute_name = "ttl"
+  }
 
   tags = {
     Name = "${var.project_name}-${var.environment}"

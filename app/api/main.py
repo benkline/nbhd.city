@@ -23,6 +23,7 @@ from users import router as users_router
 from templates import router as templates_router
 from sites import router as sites_router
 from nbhd_content import router as nbhd_content_router
+# from nbhrs_chat.api.endpoints import router as chat_router
 
 
 class TestLoginRequest(BaseModel):
@@ -46,6 +47,7 @@ app.include_router(users_router, prefix="/api/users", tags=["users"])
 app.include_router(templates_router, tags=["templates"])
 app.include_router(sites_router, tags=["sites"])
 app.include_router(nbhd_content_router, tags=["nbhd-content"])
+# app.include_router(chat_router, tags=["chat"])
 
 # Store OAuth states (in production, use a database or Redis)
 oauth_states = {}

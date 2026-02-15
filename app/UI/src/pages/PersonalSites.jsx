@@ -38,10 +38,20 @@ export default function PersonalSites() {
   return (
     <div className={styles.container}>
       <BackToDashboardButton />
-      <h1>Personal Sites</h1>
-      <p className={styles.subtitle}>
-        Personal sites are your own space and are not associated with any neighborhood.
-      </p>
+      <div className={styles.header}>
+        <div>
+          <h1>Personal Sites</h1>
+          <p className={styles.subtitle}>
+            Personal sites are your own space and are not associated with any neighborhood.
+          </p>
+        </div>
+        <button
+          className={styles.createButton}
+          onClick={() => navigate('/site-editor')}
+        >
+          + Create Site
+        </button>
+      </div>
 
       <SiteManagementDashboard siteType="personal" />
     </div>

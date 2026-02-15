@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import apiClient from '../../lib/api';
 import styles from './TemplateGallery.module.css';
 
 export function TemplateGallery({ onSelect }) {
@@ -13,14 +14,8 @@ export function TemplateGallery({ onSelect }) {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('/api/templates');
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch templates');
-        }
-
-        const data = await response.json();
-        setTemplates(data.data || []);
+        const response = await apiClient.get('/api/templates');
+        setTemplates(response.data.data || []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -65,11 +60,9 @@ export function TemplateGallery({ onSelect }) {
         {templates.map((template) => (
           <div key={template.id} className={styles.card}>
             <div className={styles.imageContainer}>
-              <img
-                src={template.preview}
-                alt={template.name}
-                className={styles.image}
-              />
+              <div className={styles.placeholderImage}>
+                📄 {template.name}
+              </div>
             </div>
 
             <div className={styles.content}>
