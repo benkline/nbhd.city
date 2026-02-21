@@ -8,9 +8,12 @@
  * - Reading time (read-only)
  * - Word count (read-only)
  * - Comments toggle
+ *
+ * Refactored to use FormField component for checkboxes
  */
 
 import { useState, useRef, useEffect } from 'react';
+import FormField from '../common/FormField';
 import styles from './ContentMetadataManager.module.css';
 
 export function ContentMetadata({
@@ -160,68 +163,46 @@ export function ContentMetadata({
           </small>
         </div>
 
-        {/* Featured Toggle */}
-        <div className={styles.formGroup}>
-          <label className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={data.featured || false}
-              onChange={(e) => onChange('featured', e.target.checked)}
-              disabled={disabled}
-              aria-label="Mark as featured"
-            />
-            <span>Mark as Featured</span>
-          </label>
-          <small className={styles.helperText}>
-            Featured content appears in special sections
-          </small>
-        </div>
+        {/* Featured Toggle using FormField */}
+        <FormField
+          label="Mark as Featured"
+          id="featured"
+          type="checkbox"
+          value={data.featured || false}
+          onChange={(val) => onChange('featured', val)}
+          disabled={disabled}
+          helperText="Featured content appears in special sections"
+        />
 
-        {/* Comments Toggle */}
-        <div className={styles.formGroup}>
-          <label className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={data.comments !== false}
-              onChange={(e) => onChange('comments', e.target.checked)}
-              disabled={disabled}
-              aria-label="Allow comments"
-            />
-            <span>Allow Comments</span>
-          </label>
-        </div>
+        {/* Comments Toggle using FormField */}
+        <FormField
+          label="Allow Comments"
+          id="comments"
+          type="checkbox"
+          value={data.comments !== false}
+          onChange={(val) => onChange('comments', val)}
+          disabled={disabled}
+        />
 
-        {/* Reading Time (Read-only) */}
-        <div className={styles.formGroup}>
-          <label htmlFor="reading-time">Reading Time (minutes)</label>
-          <input
-            id="reading-time"
-            type="number"
-            value={data.readingTime || 0}
-            disabled={true}
-            readOnly={true}
-            className={styles.input}
-          />
-          <small className={styles.helperText}>
-            Auto-calculated (approximately 200 words per minute)
-          </small>
-        </div>
+        {/* Reading Time (Read-only) using FormField */}
+        <FormField
+          label="Reading Time (minutes)"
+          id="reading-time"
+          type="number"
+          value={data.readingTime || 0}
+          disabled={true}
+          helperText="Auto-calculated (approximately 200 words per minute)"
+        />
 
-        {/* Word Count (Read-only) */}
-        <div className={styles.formGroup}>
-          <label htmlFor="word-count">Word Count</label>
-          <input
-            id="word-count"
-            type="number"
-            value={data.wordCount || 0}
-            disabled={true}
-            readOnly={true}
-            className={styles.input}
-          />
-          <small className={styles.helperText}>
-            Total words in your content
-          </small>
-        </div>
+        {/* Word Count (Read-only) using FormField */}
+        <FormField
+          label="Word Count"
+          id="word-count"
+          type="number"
+          value={data.wordCount || 0}
+          disabled={true}
+          helperText="Total words in your content"
+        />
       </div>
     </div>
   );

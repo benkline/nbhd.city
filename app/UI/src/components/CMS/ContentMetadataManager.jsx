@@ -6,9 +6,15 @@
  * - Publishing metadata (date, scheduled time, status, visibility, BlueSky)
  * - Content metadata (categories, tags, featured, reading time, word count)
  * - Mobile responsive tabs and form fields
+ *
+ * Refactored to use shared components:
+ * - TabContainer for tabs management
+ * - PublishingEditor for publishing metadata
+ * - FormField for standard form inputs
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import TabContainer from '../common/TabContainer';
 import SEOMetadata from './SEOMetadata';
 import PublishingMetadata from './PublishingMetadata';
 import ContentMetadata from './ContentMetadata';
@@ -150,6 +156,47 @@ export function ContentMetadataManager({
 
   if (!isOpen) return null;
 
+  // Configure tabs using TabContainer
+  const tabs = [
+    {
+      id: 'seo',
+      label: 'SEO',
+      panel: (
+        <SEOMetadata
+          data={seoMetadata}
+          onChange={handleSeoChange}
+          contentData={contentData}
+          disabled={isSaving}
+        />
+      )
+    },
+    {
+      id: 'publishing',
+      label: 'Publishing',
+      panel: (
+        <PublishingMetadata
+          data={publishingMetadata}
+          onChange={handlePublishingChange}
+          seoMetadata={seoMetadata}
+          disabled={isSaving}
+        />
+      )
+    },
+    {
+      id: 'metadata',
+      label: 'Metadata',
+      panel: (
+        <ContentMetadata
+          data={contentMetadata}
+          onChange={handleMetadataChange}
+          templateConfig={templateConfig}
+          existingTags={existingTags}
+          disabled={isSaving}
+        />
+      )
+    }
+  ];
+
   return (
     <div className={styles.overlay}>
       <div className={styles.modal} role="dialog" aria-labelledby="metadata-title">
@@ -165,70 +212,12 @@ export function ContentMetadataManager({
           </button>
         </div>
 
-        <div className={styles.tabsContainer}>
-          <div className={styles.tabs} role="tablist">
-            <button
-              role="tab"
-              aria-selected={activeTab === 'seo'}
-              aria-controls="seo-panel"
-              onClick={() => setActiveTab('seo')}
-              className={`${styles.tab} ${activeTab === 'seo' ? styles.active : ''}`}
-              disabled={isSaving}
-            >
-              SEO
-            </button>
-            <button
-              role="tab"
-              aria-selected={activeTab === 'publishing'}
-              aria-controls="publishing-panel"
-              onClick={() => setActiveTab('publishing')}
-              className={`${styles.tab} ${activeTab === 'publishing' ? styles.active : ''}`}
-              disabled={isSaving}
-            >
-              Publishing
-            </button>
-            <button
-              role="tab"
-              aria-selected={activeTab === 'metadata'}
-              aria-controls="metadata-panel"
-              onClick={() => setActiveTab('metadata')}
-              className={`${styles.tab} ${activeTab === 'metadata' ? styles.active : ''}`}
-              disabled={isSaving}
-            >
-              Metadata
-            </button>
-          </div>
-        </div>
-
-        <div className={styles.content}>
-          {activeTab === 'seo' && (
-            <SEOMetadata
-              data={seoMetadata}
-              onChange={handleSeoChange}
-              contentData={contentData}
-              disabled={isSaving}
-            />
-          )}
-
-          {activeTab === 'publishing' && (
-            <PublishingMetadata
-              data={publishingMetadata}
-              onChange={handlePublishingChange}
-              seoMetadata={seoMetadata}
-              disabled={isSaving}
-            />
-          )}
-
-          {activeTab === 'metadata' && (
-            <ContentMetadata
-              data={contentMetadata}
-              onChange={handleMetadataChange}
-              templateConfig={templateConfig}
-              existingTags={existingTags}
-              disabled={isSaving}
-            />
-          )}
-        </div>
+        <TabContainer
+          tabs={tabs}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          disabled={isSaving}
+        />
 
         <div className={styles.footer}>
           <button
