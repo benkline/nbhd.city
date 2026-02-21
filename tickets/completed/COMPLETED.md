@@ -1444,6 +1444,40 @@ gs
 
 ---
 
+## Frontend Consolidation & Refactoring
+
+### CMS-006: Site Settings & Metadata Manager Refactoring
+- **Completed:** 2026-02-20
+- **Status:** Merged
+- **PR:** #114
+- **Type:** Frontend Refactoring
+- **Description:** Refactor SiteSettingsManager to use shared components, reducing code duplication from consolidation effort
+
+**Changes:**
+- Replaced inline Toast notification with shared Toast component from `/src/components/common/Toast.jsx`
+- Refactored manual tab structure to use TabContainer component from `/src/components/common/TabContainer.jsx`
+- Updated all form fields (General, SEO, Advanced tabs) to use FormField component from `/src/components/common/FormField.jsx`
+
+**Impact:**
+- **Files Changed:** 4 (SiteSettingsManager, GeneralSettings, SEOSettings, AdvancedSettings)
+- **Net Reduction:** 182 lines of code (214 insertions, 396 deletions)
+- **Functionality:** No changes to API calls or state management - pure refactoring consolidation
+
+**Components Updated:**
+- `app/UI/src/components/CMS/SiteSettingsManager.jsx` - Uses TabContainer and Toast
+- `app/UI/src/components/CMS/GeneralSettings.jsx` - Form fields using FormField component
+- `app/UI/src/components/CMS/SEOSettings.jsx` - Form fields using FormField component
+- `app/UI/src/components/CMS/AdvancedSettings.jsx` - Form fields using FormField component
+
+**Shared Components Integrated:**
+- `/src/components/common/Toast.jsx` - Toast notification component
+- `/src/components/common/TabContainer.jsx` - Reusable tabbed interface
+- `/src/components/common/FormField.jsx` - Reusable form field component
+
+**Tests:** Existing tests remain compatible with refactored components
+
+---
+
 
 
 For detailed specifications of any completed ticket, see the main [tickets.md](../tickets.md) file.

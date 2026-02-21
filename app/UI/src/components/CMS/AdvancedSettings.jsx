@@ -1,3 +1,4 @@
+import { FormField } from '../common/FormField';
 import styles from './SiteSettingsManager.module.css';
 
 /**
@@ -32,107 +33,72 @@ export function AdvancedSettings({ settings, onChange }) {
     'Australia/Brisbane'
   ];
 
+  const timezoneOptions = timezones.map(tz => ({ value: tz, label: tz }));
+  timezoneOptions.unshift({ value: 'UTC', label: 'UTC' });
+
+  const commentOptions = [
+    { value: 'disabled', label: 'Disabled' },
+    { value: 'form-based', label: 'Form-based (email notifications)' },
+    { value: 'disqus', label: 'Disqus' },
+    { value: 'utterances', label: 'Utterances (GitHub)' }
+  ];
+
   return (
     <div className={styles.settingsForm}>
       <h2>Advanced Settings</h2>
 
-      {/* Analytics Code */}
-      <div className={styles.formGroup}>
-        <label htmlFor="analyticsCode" className={styles.label}>
-          Analytics Code
-        </label>
-        <textarea
-          id="analyticsCode"
-          value={settings.analyticsCode || ''}
-          onChange={(e) => handleInputChange('analyticsCode', e.target.value)}
-          placeholder="Paste your Google Analytics or Plausible script here"
-          rows={4}
-          className={styles.textarea}
-        />
-        <small className={styles.hint}>
-          Paste entire script tag from Google Analytics, Plausible, or similar service
-        </small>
-      </div>
+      <FormField
+        label="Analytics Code"
+        id="analyticsCode"
+        type="textarea"
+        value={settings.analyticsCode || ''}
+        onChange={(val) => handleInputChange('analyticsCode', val)}
+        placeholder="Paste your Google Analytics or Plausible script here"
+        rows={4}
+        helperText="Paste entire script tag from Google Analytics, Plausible, or similar service"
+      />
 
-      {/* Custom CSS */}
-      <div className={styles.formGroup}>
-        <label htmlFor="customCss" className={styles.label}>
-          Custom CSS
-        </label>
-        <textarea
-          id="customCss"
-          value={settings.customCss || ''}
-          onChange={(e) => handleInputChange('customCss', e.target.value)}
-          placeholder="body { font-family: serif; }"
-          rows={6}
-          className={styles.textarea}
-          spellCheck="false"
-        />
-        <small className={styles.hint}>
-          Custom CSS rules injected into your site's head
-        </small>
-      </div>
+      <FormField
+        label="Custom CSS"
+        id="customCss"
+        type="textarea"
+        value={settings.customCss || ''}
+        onChange={(val) => handleInputChange('customCss', val)}
+        placeholder="body { font-family: serif; }"
+        rows={6}
+        helperText="Custom CSS rules injected into your site's head"
+      />
 
-      {/* Custom HTML in Footer */}
-      <div className={styles.formGroup}>
-        <label htmlFor="customHtml" className={styles.label}>
-          Custom HTML (Footer)
-        </label>
-        <textarea
-          id="customHtml"
-          value={settings.customHtml || ''}
-          onChange={(e) => handleInputChange('customHtml', e.target.value)}
-          placeholder="Custom HTML injected in footer"
-          rows={4}
-          className={styles.textarea}
-          spellCheck="false"
-        />
-        <small className={styles.hint}>
-          HTML injected before closing &lt;/body&gt; tag (for tracking pixels, etc.)
-        </small>
-      </div>
+      <FormField
+        label="Custom HTML (Footer)"
+        id="customHtml"
+        type="textarea"
+        value={settings.customHtml || ''}
+        onChange={(val) => handleInputChange('customHtml', val)}
+        placeholder="Custom HTML injected in footer"
+        rows={4}
+        helperText="HTML injected before closing &lt;/body&gt; tag (for tracking pixels, etc.)"
+      />
 
-      {/* Timezone */}
-      <div className={styles.formGroup}>
-        <label htmlFor="timezone" className={styles.label}>
-          Timezone
-        </label>
-        <select
-          id="timezone"
-          value={settings.timezone || 'UTC'}
-          onChange={(e) => handleInputChange('timezone', e.target.value)}
-          className={styles.select}
-        >
-          <option value="UTC">UTC</option>
-          {timezones.map(tz => (
-            <option key={tz} value={tz}>{tz}</option>
-          ))}
-        </select>
-        <small className={styles.hint}>
-          Affects post timestamps and scheduling
-        </small>
-      </div>
+      <FormField
+        label="Timezone"
+        id="timezone"
+        type="select"
+        value={settings.timezone || 'UTC'}
+        onChange={(val) => handleInputChange('timezone', val)}
+        options={timezoneOptions}
+        helperText="Affects post timestamps and scheduling"
+      />
 
-      {/* Comments Setting */}
-      <div className={styles.formGroup}>
-        <label htmlFor="comments" className={styles.label}>
-          Comments System
-        </label>
-        <select
-          id="comments"
-          value={settings.commentsEnabled || 'disabled'}
-          onChange={(e) => handleInputChange('commentsEnabled', e.target.value)}
-          className={styles.select}
-        >
-          <option value="disabled">Disabled</option>
-          <option value="form-based">Form-based (email notifications)</option>
-          <option value="disqus">Disqus</option>
-          <option value="utterances">Utterances (GitHub)</option>
-        </select>
-        <small className={styles.hint}>
-          Choose how readers can comment on your posts
-        </small>
-      </div>
+      <FormField
+        label="Comments System"
+        id="comments"
+        type="select"
+        value={settings.commentsEnabled || 'disabled'}
+        onChange={(val) => handleInputChange('commentsEnabled', val)}
+        options={commentOptions}
+        helperText="Choose how readers can comment on your posts"
+      />
 
       {/* Read-only Info Section */}
       <div className={styles.section}>
