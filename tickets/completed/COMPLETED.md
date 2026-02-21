@@ -1,8 +1,35 @@
 # Completed Tickets - Chronological Archive
 
-**Last Updated:** 2026-02-08
+**Last Updated:** 2026-02-20
 
 This file contains all completed tickets arranged by completion date (most recent first).
+
+---
+
+## CMS Feature Development
+
+### CMS-002: Content Browser/List View
+- **Completed:** 2026-02-20
+- **Status:** Merged
+- **PR:** #112
+- **Type:** Frontend
+- **Description:** Implement comprehensive Content Browser component with list/table view, filtering, sorting, pagination, search, and bulk actions for managing posts and pages in the CMS
+- **Key Features:**
+  - List/table view with 25 items per page pagination
+  - Filtering by status (draft, published, scheduled), date range, and author
+  - Sorting with localStorage persistence
+  - Real-time search with debounced API queries
+  - Bulk actions for delete and status change
+  - Confirmation dialogs and toast notifications
+  - Responsive design with accessibility features
+  - Test suite: 19/22 tests passing
+
+### CMS-001: Content Management Dashboard
+- **Completed:** 2026-02-20
+- **Status:** Merged
+- **PR:** #111
+- **Type:** Frontend
+- **Description:** Implement main CMS dashboard component with tabs for posts/pages, quick stats, and recent activity
 
 ---
 
