@@ -131,6 +131,55 @@ Core platform foundation
 - [ ] ATP-009 (PDS Federation Setup)
 - [ ] ATP-010 (Cross-PDS Neighborhood Lists)
 
+### 🎨 Phase 10.1: Custom Template UI Integration & Design System (Weeks TBD)
+
+**Depends on:** Phase 4 (SSG-008, SSG-009, SSG-010 - backend feature complete)
+**Purpose:** Complete UI integration of custom template registration with beautiful, modern design
+
+**Design System & Foundation:**
+- [ ] UI-DESIGN-001 (Harmonic Circle Design System & Animations)
+- [ ] UI-NAV-001 (Navigation Structure with Sidebar & Tab System)
+
+**Template Gallery Integration:**
+- [ ] UI-GALLERY-001 (TemplateGallery Integration with CustomTemplateModal)
+- [ ] UI-GALLERY-002 (Merge Custom + Built-in Templates with Cascade Animation)
+- [ ] UI-GALLERY-003 (Template Status Indicators with Circle Progress)
+- [ ] UI-GALLERY-004 (Template Details & Management Modal)
+
+**Polish & Optimization:**
+- [ ] UI-RESPONSIVE-001 (Mobile Optimization & Responsive Design)
+- [ ] UI-PERF-001 (Animation Performance & Optimization)
+
+**Total Tickets:** 8
+**Estimated Effort:** 10-12 weeks
+**Can Run In Parallel:** Yes - uses git worktrees with 6 subagents
+
+**Design Highlights:**
+- Harmonic circle animations inspired by Chladni plates and standing wave patterns
+- Intersecting circle patterns with CSS animations (no jank, 60fps target)
+- Sidebar navigation (collapsible on mobile) + top tab bar
+- Beautiful fade/cascade animations for template cards
+- Real-time template analysis status indicators
+- Touch-friendly mobile interface
+
+---
+
+### 🔌 Phase 9.3: Plugin Architecture & Infrastructure (Weeks 18-19)
+
+**Depends on:** Phase 8 (Build Pipeline UI) - needed before next major extension
+**Purpose:** Establish formal plugin system to prevent code contamination
+
+- [ ] PLUGIN-ARCH-001 (Define Plugin Architecture Specification)
+- [ ] PLUGIN-ARCH-002 (Create Plugin Loader Utility)
+- [ ] PLUGIN-ARCH-003 (Update Main Application to Use Plugin Loader)
+- [ ] PLUGIN-ARCH-004 (Create Frontend Plugin Registration System)
+- [ ] PLUGIN-ARCH-005 (Document Plugin Development Guide)
+- [ ] PLUGIN-ARCH-006 (Create Template Plugin - Hello World)
+- [ ] PLUGIN-ARCH-007 (Set Up Plugin Testing Infrastructure)
+- [ ] PLUGIN-ARCH-008 (Create Plugin Validation Checklist)
+
+**Why This Phase:** Lessons learned from nbhrs-chat accidental integration. Establishes clean separation of plugin code from main app. Prevents future contamination.
+
 ### 📝 Ongoing (Throughout All Phases)
 
 - [ ] TEST-001 (Integration Tests)

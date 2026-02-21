@@ -1,0 +1,104 @@
+/**
+ * Templates.module.css
+ * Styles for the Templates page
+ */
+
+.contentPanel {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.templateHeader {
+  margin-bottom: 32px;
+  border-bottom: 1px solid #E2E8F0;
+  padding-bottom: 24px;
+}
+
+.templateHeader h2 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1E293B;
+}
+
+.templateHeader p {
+  margin: 0;
+  font-size: 14px;
+  color: #64748B;
+}
+
+.tabContent {
+  margin-top: 24px;
+  animation: fadeIn 300ms ease-in-out;
+}
+
+.tabContent h3 {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.tabContent p {
+  margin: 0;
+  font-size: 14px;
+  color: #64748B;
+}
+
+/* Fade In Animation for Tab Content */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .contentPanel {
+    padding: 16px;
+  }
+
+  .templateHeader {
+    padding-bottom: 16px;
+  }
+
+  .templateHeader h2 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 512px) {
+  .contentPanel {
+    padding: 12px;
+  }
+
+  .templateHeader {
+    padding-bottom: 12px;
+  }
+
+  .templateHeader h2 {
+    font-size: 20px;
+  }
+
+  .tabContent {
+    margin-top: 16px;
+  }
+
+  .tabContent h3 {
+    font-size: 18px;
+  }
+}
+
+/* Accessibility: Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .tabContent {
+    animation: none;
+  }
+}

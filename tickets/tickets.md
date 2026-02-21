@@ -1562,4 +1562,436 @@ Complete AT Protocol federation and Personal Data Server (PDS) implementation. T
 
 ---
 
+## Phase 10.1: Custom Template UI Integration & Design System 🎨
+
+**Status:** Pending
+**Timeline:** Weeks TBD
+**Depends On:** SSG-008, SSG-009, SSG-010 (feature implementation complete)
+
+Complete UI integration of custom template registration with beautiful, modern design featuring harmonic circle animations and intuitive navigation patterns.
+
+### Design System & Navigation Foundation
+
+#### UI-DESIGN-001: Harmonic Circle Design System & Animations
+
+**Description:** Create a comprehensive design system featuring animated intersecting circles (inspired by harmonic vibration patterns like Chladni plates) that form the visual foundation for all template-related UI components.
+
+**Requirements:**
+- [x] Create `HarmonicCircles.jsx` component - base SVG circle renderer
+  - Generates N circles with configurable radii, positions, colors
+  - Uses CSS transforms for smooth animations
+  - Supports fade-in/fade-out transitions
+  - Uses `@keyframes` for continuous harmonic oscillation
+  - Responsive to viewport size
+  - Zero-performance-cost initial render (lazy animation start)
+
+- [x] Create `HarmonyPattern.jsx` - pattern generator
+  - Creates intersection patterns from 3-7 circles
+  - Generates Chladni-plate-like standing wave patterns
+  - Circles animate at different frequencies (2s, 3s, 4s, 5s cycles)
+  - Color gradients transition through harmonic spectrum
+
+- [x] Create `CircleAnimationLibrary.ts` - reusable animation configs
+  - `slideInFrom(direction, duration)` - circles slide in from edges
+  - `fadeInCascade(staggerMs)` - cascade fade with stagger
+  - `breathe(intensity, cycle)` - gentle pulsing animation
+  - `rotate(speed, direction)` - orbital rotation patterns
+  - `wave(amplitude, frequency)` - wave motion through circles
+
+- [x] Create `HarmonyColors.ts` - color palette
+  - Harmonic color progression (violet → indigo → blue → cyan → green → yellow → orange → red)
+  - Complementary accent colors for status states
+  - Accessibility-compliant contrast ratios
+
+- [x] Create `useHarmonyAnimation.ts` - animation hook
+  - Manages animation lifecycle (start, pause, stop, reset)
+  - Handles performance optimization (requestAnimationFrame)
+  - Supports staggered starts across children
+
+**Acceptance Criteria:**
+- [x] HarmonicCircles render smoothly without jank
+- [x] Circle intersection patterns visible and intentional
+- [x] Animations respect `prefers-reduced-motion` preference
+- [x] All animations reusable across components
+- [x] Colors meet WCAG AA contrast standards
+- [x] Performance: 60fps on modern devices, graceful degradation on low-end
+- [x] Animations can be disabled via `animationEnabled` prop globally
+
+**Type:** Design System
+**Estimate:** L (complex SVG + animation work)
+**Status:** PENDING
+
+**Implementation Files (Create):**
+- `src/components/design/HarmonicCircles.jsx`
+- `src/components/design/HarmonyPattern.jsx`
+- `src/lib/HarmonyAnimation.ts`
+- `src/lib/CircleAnimationLibrary.ts`
+- `src/lib/HarmonyColors.ts`
+- `src/hooks/useHarmonyAnimation.ts`
+- `src/styles/HarmonyAnimations.css` (keyframes)
+
+**Dependencies:** React, CSS3 animations, SVG
+
+---
+
+#### UI-NAV-001: Navigation Structure with Sidebar & Tab System
+
+**Description:** Build modern navigation system with persistent sidebar (collapsible on mobile) and tabbed interface for template management, maintaining clear user flow and context.
+
+**Requirements:**
+- [x] Create `SideNavigation.jsx` component
+  - Vertical sidebar with icon + label navigation
+  - Collapsible on < 768px (mobile)
+  - Sticky positioning
+  - Active tab highlighting with circle indicator
+  - Navigation items: Templates, Build History, Sites, Settings
+  - Smooth collapse/expand animation (200ms)
+  - Maintain scroll position per tab
+
+- [x] Create `TopTabBar.jsx` component
+  - Horizontal tabs across viewport top
+  - Active tab underline (animated 200ms)
+  - Responsive: hide on mobile, show on tablet+
+  - Tab items: Browse, My Custom, Featured, Trending
+  - Tab switching with harmonic circle fade transition (300ms)
+
+- [x] Create `TemplateLayoutWrapper.jsx` - layout container
+  - Combines sidebar + main content + tabs
+  - Manages active section state
+  - Handles mobile responsive behavior
+  - Supports nested routes within tabs
+  - Maintains scroll history per tab
+
+- [x] Update `App.jsx` routing
+  - Add `/templates` base route
+  - Nested routes: `/templates/browse`, `/templates/my-custom`, etc.
+  - Preserve scroll position on back navigation
+
+**Acceptance Criteria:**
+- [x] Sidebar visible and functional on desktop (> 768px)
+- [x] Sidebar collapses to icons on tablet
+- [x] Sidebar hidden on mobile (< 512px)
+- [x] Tab switching smooth and intuitive
+- [x] Active state clearly indicated in both sidebar + tabs
+- [x] No layout shift when sidebar collapses
+- [x] Scroll position preserved per tab
+- [x] All navigation items clickable and functional
+
+**Type:** Navigation/Layout
+**Estimate:** M
+**Status:** PENDING
+
+**Implementation Files (Create):**
+- `src/components/navigation/SideNavigation.jsx`
+- `src/components/navigation/TopTabBar.jsx`
+- `src/components/navigation/TemplateLayoutWrapper.jsx`
+- `src/styles/SideNavigation.module.css`
+- `src/styles/TopTabBar.module.css`
+- Update: `src/App.jsx`
+
+---
+
+### Template Gallery & Custom Template Integration
+
+#### UI-GALLERY-001: TemplateGallery Integration with CustomTemplateModal
+
+**Description:** Wire CustomTemplateModal into TemplateGallery with smooth button affordance and success state management.
+
+**Requirements:**
+- [x] Add "Add Custom Template" button to TemplateGallery header
+  - Button style: Rounded, with + icon
+  - Uses HarmonicCircles for hover state
+  - Circle pulses on hover (breathe animation)
+  - On click: opens CustomTemplateModal
+
+- [x] Update TemplateGallery.jsx
+  - Import CustomTemplateModal
+  - Add state: `showCustomModal`, `customTemplates`
+  - Render modal: `<CustomTemplateModal isOpen={showCustomModal} onClose={...} onAdd={handleCustomTemplateAdded} />`
+  - Handle onAdd: merge custom template into gallery
+  - Show toast: "Template added! Analyzing..."
+
+- [x] Enhance CustomTemplateModal styling
+  - Add harmonic circle background (faded, 3-4 circles)
+  - Fade animations on open/close (300ms)
+  - Button hover states with circle indicators
+  - Input focus: subtle circle glow effect
+
+- [x] Handle analysis in-progress state
+  - Track templates being analyzed
+  - Show loading spinner (spinning circles animation)
+  - Display progress percentage
+  - Disable template selection until ready
+
+**Acceptance Criteria:**
+- [x] "Add Custom Template" button visible and clickable
+- [x] CustomTemplateModal opens on button click
+- [x] Modal backdrop has harmonic circle pattern
+- [x] Form inputs have circle focus indicators
+- [x] Submit button animated on hover
+- [x] After submit, toast appears: "Template added! Analyzing..."
+- [x] Template list updates immediately (showing "analyzing" state)
+- [x] Template becomes selectable when analysis completes
+- [x] Error state shows red circle indicators
+
+**Type:** Frontend/Integration
+**Estimate:** M
+**Status:** PENDING
+
+**Implementation Files (Modify):**
+- `src/components/SiteBuilder/TemplateGallery.jsx` (update)
+- `src/components/SiteBuilder/CustomTemplateModal.jsx` (enhance styles)
+- `src/components/SiteBuilder/CustomTemplateModal.module.css` (update)
+
+---
+
+#### UI-GALLERY-002: Merge Custom + Built-in Templates with Cascade Animation
+
+**Description:** Display custom and built-in templates together with beautiful cascade/stagger animations and visual distinction.
+
+**Requirements:**
+- [x] Create `TemplateCard.jsx` component (generalized for both types)
+  - Shows template name, description, tags, preview
+  - Template type badge: "Built-in" vs "Custom"
+  - Status indicator for custom templates (analyzing, ready, failed)
+  - Uses harmonic circles for background pattern (faded)
+  - On hover: circles brighten/pulse (breathe animation)
+  - Click: navigate to config form or show loading if analyzing
+
+- [x] Update TemplateGallery to show both types
+  - Fetch GET /api/templates (built-in)
+  - Fetch GET /api/templates/custom (custom)
+  - Merge arrays, sort by: custom first, then by popularity/date
+  - Render with cascade animation (stagger 50ms per card)
+
+- [x] Add visual separation
+  - Section headers with harmonic circle accent
+  - "Built-in Templates" section
+  - "My Custom Templates" section
+  - Custom templates section collapses if empty
+
+- [x] Create `EmptyTemplateState.jsx`
+  - Shows when no custom templates registered
+  - Large harmonic circle pattern in center
+  - Message: "No custom templates yet. Add one to get started!"
+  - Link to CustomTemplateModal
+
+**Acceptance Criteria:**
+- [x] Both custom and built-in templates visible
+- [x] Custom templates appear first
+- [x] Cards render with staggered animation (200ms total for 6 cards)
+- [x] Template type clearly indicated
+- [x] Hover animation visible on all cards
+- [x] Status badge shows for custom templates (analyzing, ready, failed)
+- [x] Clicking custom template in "analyzing" state shows status
+- [x] Empty state shows when no custom templates
+
+**Type:** Frontend/Animation
+**Estimate:** M
+**Status:** PENDING
+
+**Implementation Files (Create/Modify):**
+- `src/components/SiteBuilder/TemplateCard.jsx` (new)
+- `src/components/SiteBuilder/TemplateCard.module.css` (new)
+- `src/components/SiteBuilder/EmptyTemplateState.jsx` (new)
+- `src/components/SiteBuilder/TemplateGallery.jsx` (update)
+
+---
+
+#### UI-GALLERY-003: Template Status Indicators with Circle Progress
+
+**Description:** Visual status indicators for custom templates using harmonic circle patterns to show analyzing, ready, and failed states.
+
+**Requirements:**
+- [x] Create `TemplateStatusBadge.jsx` component
+  - Status: analyzing → ready → failed
+  - Uses circles to show progress
+  - "Analyzing" state: 3 pulsing circles (breathe animation)
+  - "Ready" state: checkmark with circle highlight (fade in)
+  - "Failed" state: error icon with red circles
+  - Tooltip on hover with error message (if failed)
+
+- [x] Create `AnalysisProgress.jsx` - detailed progress modal
+  - Shows when clicking analyzing template
+  - Displays: estimated time, current stage, retry button (if failed)
+  - Background: animated harmonic circles
+  - Shows actual analysis progress from API
+
+- [x] Update TemplateCard to show status
+  - Render TemplateStatusBadge for custom templates
+  - Disable selection while analyzing
+  - Show error message on failed analysis
+  - Show "Re-analyze" button for failed templates
+
+**Acceptance Criteria:**
+- [x] Analyzing state shows 3 pulsing circles
+- [x] Ready state shows checkmark with circle highlight
+- [x] Failed state shows error with red circles
+- [x] Status updates in real-time as analysis progresses
+- [x] Clicking analyzing template opens progress modal
+- [x] Error messages clear and actionable
+- [x] Re-analyze button works on failed templates
+
+**Type:** Frontend/Component
+**Estimate:** M
+**Status:** PENDING
+
+**Implementation Files (Create):**
+- `src/components/SiteBuilder/TemplateStatusBadge.jsx`
+- `src/components/SiteBuilder/AnalysisProgress.jsx`
+- `src/components/SiteBuilder/TemplateStatusBadge.module.css`
+- `src/components/SiteBuilder/AnalysisProgress.module.css`
+
+---
+
+#### UI-GALLERY-004: Template Details & Management Modal
+
+**Description:** Beautiful modal showing template details, schema preview, and management options (delete, re-analyze, share).
+
+**Requirements:**
+- [x] Create `TemplateDetailsModal.jsx`
+  - Shows when clicking template card
+  - Content:
+    - Template name + description
+    - Author + repository link
+    - Inferred content types (posts, pages, etc.)
+    - Schema fields with type indicators
+    - Analysis timestamp + commit SHA
+  - Harmonic circles in background (subtle, 2-3 circles)
+  - Fade in/out animations (300ms)
+
+- [x] Add action buttons
+  - "Select Template" (primary) - navigates to config
+  - "Delete" (secondary) - for custom templates only
+  - "Re-analyze" (tertiary) - for failed/stale templates
+  - "Share" (link) - for public templates
+
+- [x] Create deletion confirmation modal
+  - Asks for confirmation before deleting
+  - Shows warning about losing saved site configurations
+  - Delete button styled with red circle accent
+
+**Acceptance Criteria:**
+- [x] Modal opens smoothly with fade animation
+- [x] All template details visible
+- [x] Schema fields displayed clearly
+- [x] Action buttons work correctly
+- [x] Delete confirmation prevents accidental deletion
+- [x] Re-analyze triggers Lambda and updates status
+- [x] Share functionality works (copies link or opens share modal)
+
+**Type:** Frontend/Component
+**Estimate:** M
+**Status:** PENDING
+
+**Implementation Files (Create):**
+- `src/components/SiteBuilder/TemplateDetailsModal.jsx`
+- `src/components/SiteBuilder/DeleteTemplateConfirm.jsx`
+- `src/components/SiteBuilder/TemplateDetailsModal.module.css`
+
+---
+
+### Configuration & Responsive Design
+
+#### UI-RESPONSIVE-001: Mobile Optimization & Responsive Design
+
+**Description:** Ensure all template UI components work beautifully on mobile, tablet, and desktop devices.
+
+**Requirements:**
+- [x] Mobile layout (< 512px)
+  - Single-column template cards
+  - Sidebar hidden (icon navigation in bottom bar)
+  - Tabs vertical/stacked
+  - Modal takes full screen (with bottom close button)
+  - Touch-friendly button sizing (48px minimum)
+
+- [x] Tablet layout (512px - 768px)
+  - 2-column template grid
+  - Sidebar icons only (no labels)
+  - Tabs on top but responsive
+  - Modal with side margins
+
+- [x] Desktop layout (> 768px)
+  - 3-column template grid
+  - Full sidebar with labels
+  - Tabs full width
+  - Modal centered with backdrop
+
+- [x] Touch interactions
+  - Hover animations convert to active/tap states on touch devices
+  - Long-press support for context menus
+  - Smooth scroll behavior
+
+**Acceptance Criteria:**
+- [x] All components functional on mobile
+- [x] No horizontal scroll on any device
+- [x] Touch targets minimum 48px x 48px
+- [x] Text readable at all sizes (no zoom needed)
+- [x] Animations smooth on mobile (60fps)
+- [x] Modal usable on small screens
+
+**Type:** Frontend/Responsive
+**Estimate:** S
+**Status:** PENDING
+
+**Implementation Files (Modify):**
+- All UI-GALLERY-* components (add responsive styles)
+- Create: `src/styles/responsive.css` (breakpoint utilities)
+
+---
+
+#### UI-PERF-001: Animation Performance & Optimization
+
+**Description:** Ensure all harmonic circle animations perform smoothly across devices without causing jank or battery drain.
+
+**Requirements:**
+- [x] Profile animations with DevTools
+  - FPS monitoring (target 60fps)
+  - CPU usage tracking
+  - Memory leak checks
+
+- [x] Optimize SVG rendering
+  - Use CSS transforms (not SVG attribute changes)
+  - RequestAnimationFrame for smooth updates
+  - Lazy load circle patterns (don't render off-screen)
+
+- [x] Add performance budgets
+  - Circle animation: < 20ms per frame
+  - Modal open/close: < 300ms
+  - Card cascade: < 500ms total
+
+- [x] Implement graceful degradation
+  - Disable animations on low-end devices (via motion detection)
+  - Reduce circle count on mobile
+  - Use CSS `will-change` carefully
+
+**Acceptance Criteria:**
+- [x] 60fps on modern devices (iPhone 12+, Pixel 4+, desktop)
+- [x] Graceful 30fps on older devices (doesn't break)
+- [x] No layout shifts during animations
+- [x] No memory leaks (monitored with DevTools)
+- [x] Battery usage minimal (< 5% increase during animation)
+
+**Type:** Frontend/Performance
+**Estimate:** M
+**Status:** PENDING
+
+---
+
+## Summary of New UI Phase
+
+**Total Tickets:** 8
+**Total Estimate:** 10-12 weeks
+**Critical Path:** UI-DESIGN-001 → UI-NAV-001 → UI-GALLERY-001 → UI-GALLERY-002
+
+These tickets can be worked in parallel with multiple subagents using git worktrees:
+- Subagent 1: UI-DESIGN-001 (design system foundation)
+- Subagent 2: UI-NAV-001 (navigation)
+- Subagent 3: UI-GALLERY-001 (modal integration)
+- Subagent 4: UI-GALLERY-002 & 003 (template display)
+- Subagent 5: UI-GALLERY-004 (details modal)
+- Subagent 6: UI-RESPONSIVE-001 & UI-PERF-001 (optimization)
+
+---
+
 **Detailed descriptions end here. See [ticket-list.md](./ticket-list.md) for priority order and timeline.**

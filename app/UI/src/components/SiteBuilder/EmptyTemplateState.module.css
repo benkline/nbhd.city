@@ -1,0 +1,260 @@
+/* ============================================================================
+   EmptyTemplateState.module.css
+   Styles for the empty template state with harmonic circle background
+   ============================================================================ */
+
+/* Animation keyframes */
+@keyframes circlePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes circleRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+   Container
+   ============================================================================ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  min-height: 400px;
+  text-align: center;
+  position: relative;
+  background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(58, 12, 163, 0.05) 100%);
+  border-radius: 12px;
+  margin: 2rem 0;
+  border: 1px solid rgba(67, 97, 238, 0.1);
+}
+
+/* ============================================================================
+   Circle Background (Harmonic Circles)
+   ============================================================================ */
+
+.circleBackground {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.circleOuter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  border: 2px solid rgba(67, 97, 238, 0.2);
+  border-radius: 50%;
+  animation: circlePulse 3s ease-in-out infinite;
+}
+
+.circleMiddle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  border: 2px solid rgba(90, 25, 154, 0.2);
+  border-radius: 50%;
+  animation: circlePulse 3s ease-in-out infinite 0.4s;
+}
+
+.circleInner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(67, 97, 238, 0.3), transparent);
+  border-radius: 50%;
+  animation: circlePulse 3s ease-in-out infinite 0.8s;
+}
+
+/* ============================================================================
+   Content
+   ============================================================================ */
+
+.content {
+  position: relative;
+  z-index: 2;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: #333;
+  line-height: 1.2;
+}
+
+.description {
+  font-size: 1rem;
+  color: #666;
+  margin: 0 0 2rem 0;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+/* ============================================================================
+   Add Button
+   ============================================================================ */
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #4361EE 0%, #3A0CA3 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+.addButton:hover {
+  box-shadow: 0 8px 24px rgba(67, 97, 238, 0.4);
+  transform: translateY(-4px);
+}
+
+.addButton:active {
+  transform: translateY(-2px);
+}
+
+.plus {
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .container {
+    min-height: 300px;
+    padding: 2rem 1.5rem;
+    margin: 1rem 0;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .description {
+    font-size: 0.9rem;
+  }
+
+  .circleBackground {
+    width: 200px;
+    height: 200px;
+  }
+
+  .circleOuter {
+    width: 200px;
+    height: 200px;
+  }
+
+  .circleMiddle {
+    width: 130px;
+    height: 130px;
+  }
+
+  .circleInner {
+    width: 70px;
+    height: 70px;
+  }
+
+  .addButton {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    min-height: 280px;
+    padding: 1.5rem 1rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .description {
+    font-size: 0.85rem;
+    max-width: 100%;
+  }
+
+  .addButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================================================================
+   Accessibility
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .circleOuter,
+  .circleMiddle,
+  .circleInner,
+  .content {
+    animation: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .container {
+    border: 2px solid #333;
+  }
+
+  .addButton {
+    border: 2px solid currentColor;
+  }
+}

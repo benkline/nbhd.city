@@ -1,0 +1,478 @@
+/* ============================================================================
+   TemplateCard.module.css
+   Styles for template cards with cascade animations and harmonic circle effects
+   ============================================================================ */
+
+/* Cascade animation keyframes */
+@keyframes cascadeFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Circle pulse/breathe animation */
+@keyframes circleBreathe {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+/* Circle fade in on hover */
+@keyframes circleFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+/* Overlay fade in */
+@keyframes overlayFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   Card Base Styles
+   ============================================================================ */
+
+.card {
+  position: relative;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+
+  /* Apply cascade animation to each card */
+  animation: cascadeFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+}
+
+/* Stagger cards with nth-child delay */
+.card:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.card:nth-child(2) {
+  animation-delay: 50ms;
+}
+
+.card:nth-child(3) {
+  animation-delay: 100ms;
+}
+
+.card:nth-child(4) {
+  animation-delay: 150ms;
+}
+
+.card:nth-child(5) {
+  animation-delay: 200ms;
+}
+
+.card:nth-child(6) {
+  animation-delay: 250ms;
+}
+
+.card:nth-child(n+7) {
+  animation-delay: calc(50ms * (var(--card-index, 6) - 6));
+}
+
+/* Hover state */
+.card:not(.cardDisabled):hover {
+  box-shadow: 0 8px 24px rgba(67, 97, 238, 0.2);
+  transform: translateY(-8px);
+  border-color: #4361EE;
+}
+
+.cardHovered:not(.cardDisabled) {
+  box-shadow: 0 8px 24px rgba(67, 97, 238, 0.2);
+  transform: translateY(-8px);
+  border-color: #4361EE;
+}
+
+/* Disabled state for analyzing templates */
+.cardDisabled {
+  opacity: 0.85;
+  cursor: not-allowed;
+}
+
+.cardDisabled:hover {
+  transform: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================================================
+   Circle Background (Animated Harmonic Circles)
+   ============================================================================ */
+
+.circleBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.circle1,
+.circle2,
+.circle3 {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(67, 97, 238, 0.1), transparent);
+  opacity: 0;
+}
+
+.circle1 {
+  width: 120px;
+  height: 120px;
+  top: -40px;
+  right: -40px;
+  background: radial-gradient(circle, rgba(67, 97, 238, 0.15), transparent);
+}
+
+.circle2 {
+  width: 80px;
+  height: 80px;
+  bottom: -20px;
+  left: -20px;
+  background: radial-gradient(circle, rgba(90, 25, 154, 0.1), transparent);
+}
+
+.circle3 {
+  width: 100px;
+  height: 100px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(88, 204, 242, 0.1), transparent);
+}
+
+/* Animate circles on hover */
+.cardHovered .circle1,
+.cardHovered .circle2,
+.cardHovered .circle3 {
+  animation: circleBreathe 2s ease-in-out infinite;
+}
+
+.cardHovered .circle1 {
+  animation-delay: 0s;
+}
+
+.cardHovered .circle2 {
+  animation-delay: 0.3s;
+}
+
+.cardHovered .circle3 {
+  animation-delay: 0.6s;
+}
+
+/* ============================================================================
+   Image Container
+   ============================================================================ */
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.placeholderImage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.cardHovered .placeholderImage {
+  transform: scale(1.05);
+}
+
+/* Overlay shown on hover */
+.imageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: overlayFadeIn 0.3s ease forwards;
+  z-index: 10;
+}
+
+.overlayText {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ============================================================================
+   Content Section
+   ============================================================================ */
+
+.content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  position: relative;
+  z-index: 2;
+}
+
+/* Header with name and badge */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.name {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+  flex: 1;
+  line-height: 1.2;
+}
+
+/* Type Badge */
+.typeBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.builtInBadge {
+  background: #e8f0ff;
+  color: #4361EE;
+}
+
+.customBadge {
+  background: #fff3e0;
+  color: #FF9800;
+}
+
+/* Description */
+.description {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+}
+
+/* Tags */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tag {
+  display: inline-block;
+  background: #e9ecef;
+  color: #495057;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.cardHovered .tag {
+  background: #4361EE;
+  color: white;
+}
+
+/* Status Container */
+.statusContainer {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ============================================================================
+   Button Styles
+   ============================================================================ */
+
+.selectButton {
+  background: linear-gradient(135deg, #4361EE 0%, #3A0CA3 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.selectButton:not(.selectButtonDisabled):hover {
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
+  transform: translateY(-2px);
+}
+
+.selectButton:not(.selectButtonDisabled):active {
+  transform: translateY(0);
+}
+
+.selectButtonDisabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.selectButtonFailed {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF4757 100%);
+}
+
+.selectButtonFailed:not(.selectButtonDisabled):hover {
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .card {
+    border-radius: 8px;
+  }
+
+  .imageContainer {
+    height: 150px;
+  }
+
+  .placeholderImage {
+    font-size: 1.5rem;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+
+  .name {
+    font-size: 1.1rem;
+  }
+
+  .description {
+    font-size: 0.9rem;
+  }
+
+  /* Reduce stagger on mobile */
+  .card:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  .card:nth-child(2) {
+    animation-delay: 30ms;
+  }
+
+  .card:nth-child(3) {
+    animation-delay: 60ms;
+  }
+
+  .card:nth-child(n+4) {
+    animation-delay: 90ms;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Tablet styles */
+  .card {
+    border-radius: 10px;
+  }
+}
+
+@media (min-width: 1025px) {
+  /* Desktop styles */
+  .card:hover {
+    box-shadow: 0 12px 32px rgba(67, 97, 238, 0.25);
+  }
+}
+
+/* ============================================================================
+   Accessibility
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .placeholderImage,
+  .imageOverlay,
+  .tag,
+  .selectButton,
+  .circle1,
+  .circle2,
+  .circle3 {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  .card {
+    border: 2px solid #333;
+  }
+
+  .typeBadge {
+    border: 1px solid currentColor;
+  }
+
+  .selectButton {
+    border: 2px solid currentColor;
+  }
+}

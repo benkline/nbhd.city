@@ -15,8 +15,9 @@ import PersonalSites from './pages/PersonalSites';
 import SiteEditor from './pages/SiteEditor';
 import UserProfile from './pages/UserProfile';
 import ProjectSites from './pages/ProjectSites';
-import { NbhrsChatPage } from '../../plugins/nbhrs-chat/frontend/pages/NbhrsChatPage';
+import Templates from './pages/Templates';
 import './App.css';
+import './styles/HarmonyAnimations.css';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
           <Route path="/site-editor" element={<SiteEditor />} />
           <Route path="/site-editor/:templateId" element={<SiteEditor />} />
           <Route path="/project-sites" element={<ProjectSites />} />
+          <Route path="/templates/*" element={<Templates />} />
           <Route path="/" element={<HomePage />} />
         </Routes>
       </AuthProvider>

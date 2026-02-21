@@ -197,7 +197,6 @@ resource "aws_dynamodb_table" "nbhd_city" {
   stream_view_type = var.enable_streams ? "NEW_AND_OLD_IMAGES" : null
 
   # TTL configuration (for automatic data expiration)
-  # Used by nbhrs-chat for WebSocket connection registry (2h TTL)
   ttl {
     enabled        = true
     attribute_name = "ttl"

@@ -1,0 +1,621 @@
+/**
+ * HarmonyAnimations.css
+ * Keyframes and animation utilities for harmonic circle design system
+ */
+
+/* ============================================================================
+   Slide In Animations
+   ============================================================================ */
+
+@keyframes slideInTop {
+  from {
+    opacity: 0;
+    transform: translate(0, -100px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes slideInBottom {
+  from {
+    opacity: 0;
+    transform: translate(0, 100px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translate(-100px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translate(100px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+/* ============================================================================
+   Fade In/Out Animations
+   ============================================================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInCascade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+   Breathing/Pulsing Animations
+   ============================================================================ */
+
+@keyframes breathe {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+}
+
+@keyframes breatheSoft {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}
+
+@keyframes breatheIntense {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+}
+
+/* ============================================================================
+   Rotation Animations
+   ============================================================================ */
+
+@keyframes rotateClockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotateCounterclockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   Wave Animations
+   ============================================================================ */
+
+@keyframes wave {
+  0% {
+    transform: translateY(0px);
+  }
+  25% {
+    transform: translateY(-20px);
+  }
+  50% {
+    transform: translateY(0px);
+  }
+  75% {
+    transform: translateY(20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes waveSmall {
+  0% {
+    transform: translateY(0px);
+  }
+  25% {
+    transform: translateY(-10px);
+  }
+  50% {
+    transform: translateY(0px);
+  }
+  75% {
+    transform: translateY(10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes waveLarge {
+  0% {
+    transform: translateY(0px);
+  }
+  25% {
+    transform: translateY(-30px);
+  }
+  50% {
+    transform: translateY(0px);
+  }
+  75% {
+    transform: translateY(30px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* ============================================================================
+   Bounce Animations
+   ============================================================================ */
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes bounceSmall {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes bounceLarge {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-30px);
+  }
+}
+
+/* ============================================================================
+   Glow/Shadow Animations
+   ============================================================================ */
+
+@keyframes glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px #4361EE);
+  }
+  50% {
+    filter: drop-shadow(0 0 15px #4361EE);
+  }
+}
+
+@keyframes glowGreen {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px #2ECC71);
+  }
+  50% {
+    filter: drop-shadow(0 0 15px #2ECC71);
+  }
+}
+
+@keyframes glowRed {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px #FF6B6B);
+  }
+  50% {
+    filter: drop-shadow(0 0 15px #FF6B6B);
+  }
+}
+
+@keyframes glowOrange {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px #FF9800);
+  }
+  50% {
+    filter: drop-shadow(0 0 15px #FF9800);
+  }
+}
+
+/* ============================================================================
+   Scale/Zoom Animations
+   ============================================================================ */
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes scaleUpDown {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* ============================================================================
+   Harmonic Circle Oscillations
+   ============================================================================ */
+
+/* 2-second cycle (fast) */
+@keyframes oscillate2s {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(5px, 5px);
+  }
+  50% {
+    transform: translate(0, 10px);
+  }
+  75% {
+    transform: translate(-5px, 5px);
+  }
+}
+
+/* 3-second cycle (medium-fast) */
+@keyframes oscillate3s {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(7px, 3px);
+  }
+  50% {
+    transform: translate(0, 8px);
+  }
+  75% {
+    transform: translate(-7px, 3px);
+  }
+}
+
+/* 4-second cycle (medium) */
+@keyframes oscillate4s {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(6px, 4px);
+  }
+  50% {
+    transform: translate(0, 6px);
+  }
+  75% {
+    transform: translate(-6px, 4px);
+  }
+}
+
+/* 5-second cycle (slow) */
+@keyframes oscillate5s {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(5px, 3px);
+  }
+  50% {
+    transform: translate(0, 5px);
+  }
+  75% {
+    transform: translate(-5px, 3px);
+  }
+}
+
+/* ============================================================================
+   Color Shift Animations
+   ============================================================================ */
+
+@keyframes colorShift {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes colorShiftSubtle {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    filter: hue-rotate(20deg);
+  }
+  100% {
+    filter: hue-rotate(0deg);
+  }
+}
+
+/* ============================================================================
+   Utility Classes for Animations
+   ============================================================================ */
+
+.animate-slide-in-top {
+  animation: slideInTop 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-slide-in-bottom {
+  animation: slideInBottom 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 300ms ease-out forwards;
+}
+
+.animate-fade-out {
+  animation: fadeOut 300ms ease-in forwards;
+}
+
+.animate-fade-in-cascade {
+  animation: fadeInCascade 500ms ease-out forwards;
+}
+
+.animate-breathe {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+.animate-breathe-soft {
+  animation: breatheSoft 2s ease-in-out infinite;
+}
+
+.animate-breathe-intense {
+  animation: breatheIntense 2s ease-in-out infinite;
+}
+
+.animate-spin {
+  animation: spin 2s linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin 4s linear infinite;
+}
+
+.animate-spin-fast {
+  animation: spin 1s linear infinite;
+}
+
+.animate-rotate-clockwise {
+  animation: rotateClockwise 4s linear infinite;
+}
+
+.animate-rotate-counterclockwise {
+  animation: rotateCounterclockwise 4s linear infinite;
+}
+
+.animate-wave {
+  animation: wave 2s ease-in-out infinite;
+}
+
+.animate-wave-small {
+  animation: waveSmall 2s ease-in-out infinite;
+}
+
+.animate-wave-large {
+  animation: waveLarge 2s ease-in-out infinite;
+}
+
+.animate-bounce {
+  animation: bounce 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+.animate-bounce-small {
+  animation: bounceSmall 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+.animate-bounce-large {
+  animation: bounceLarge 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-glow-green {
+  animation: glowGreen 2s ease-in-out infinite;
+}
+
+.animate-glow-red {
+  animation: glowRed 2s ease-in-out infinite;
+}
+
+.animate-glow-orange {
+  animation: glowOrange 2s ease-in-out infinite;
+}
+
+.animate-scale-in {
+  animation: scaleIn 300ms ease-out forwards;
+}
+
+.animate-scale-out {
+  animation: scaleOut 300ms ease-in forwards;
+}
+
+.animate-scale-up-down {
+  animation: scaleUpDown 2s ease-in-out infinite;
+}
+
+.animate-oscillate-2s {
+  animation: oscillate2s 2s ease-in-out infinite;
+}
+
+.animate-oscillate-3s {
+  animation: oscillate3s 3s ease-in-out infinite;
+}
+
+.animate-oscillate-4s {
+  animation: oscillate4s 4s ease-in-out infinite;
+}
+
+.animate-oscillate-5s {
+  animation: oscillate5s 5s ease-in-out infinite;
+}
+
+.animate-color-shift {
+  animation: colorShift 4s linear infinite;
+}
+
+.animate-color-shift-subtle {
+  animation: colorShiftSubtle 3s ease-in-out infinite;
+}
+
+/* ============================================================================
+   Reduce Motion Support
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-in-top,
+  .animate-slide-in-bottom,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-fade-in-cascade,
+  .animate-breathe,
+  .animate-breathe-soft,
+  .animate-breathe-intense,
+  .animate-spin,
+  .animate-spin-slow,
+  .animate-spin-fast,
+  .animate-rotate-clockwise,
+  .animate-rotate-counterclockwise,
+  .animate-wave,
+  .animate-wave-small,
+  .animate-wave-large,
+  .animate-bounce,
+  .animate-bounce-small,
+  .animate-bounce-large,
+  .animate-glow,
+  .animate-glow-green,
+  .animate-glow-red,
+  .animate-glow-orange,
+  .animate-scale-in,
+  .animate-scale-out,
+  .animate-scale-up-down,
+  .animate-oscillate-2s,
+  .animate-oscillate-3s,
+  .animate-oscillate-4s,
+  .animate-oscillate-5s,
+  .animate-color-shift,
+  .animate-color-shift-subtle {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ============================================================================
+   Performance Optimization
+   ============================================================================ */
+
+/* Use will-change sparingly and only when needed */
+.will-animate {
+  will-change: transform, opacity;
+}
+
+/* Prevent layout shift */
+.prevent-layout-shift {
+  contain: layout style;
+}
