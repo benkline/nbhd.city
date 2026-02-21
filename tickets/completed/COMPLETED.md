@@ -42,6 +42,30 @@ This file contains all completed tickets arranged by completion date (most recen
 - `/src/components/common/FormField.jsx` - Standard form inputs
 
 **Tests:** Build successful, no console errors, all component rendering verified
+## CMS Feature Development
+
+### CMS-002: Content Browser/List View
+- **Completed:** 2026-02-20
+- **Status:** Merged
+- **PR:** #112
+- **Type:** Frontend
+- **Description:** Implement comprehensive Content Browser component with list/table view, filtering, sorting, pagination, search, and bulk actions for managing posts and pages in the CMS
+- **Key Features:**
+  - List/table view with 25 items per page pagination
+  - Filtering by status (draft, published, scheduled), date range, and author
+  - Sorting with localStorage persistence
+  - Real-time search with debounced API queries
+  - Bulk actions for delete and status change
+  - Confirmation dialogs and toast notifications
+  - Responsive design with accessibility features
+  - Test suite: 19/22 tests passing
+
+### CMS-001: Content Management Dashboard
+- **Completed:** 2026-02-20
+- **Status:** Merged
+- **PR:** #111
+- **Type:** Frontend
+- **Description:** Implement main CMS dashboard component with tabs for posts/pages, quick stats, and recent activity
 
 ---
 
@@ -1453,6 +1477,40 @@ gs
 **Tests:**
 - Backend: `app/api/tests/test_auth.py` (4/4 passing)
 - Frontend: Tests running
+
+---
+
+## Frontend Consolidation & Refactoring
+
+### CMS-006: Site Settings & Metadata Manager Refactoring
+- **Completed:** 2026-02-20
+- **Status:** Merged
+- **PR:** #114
+- **Type:** Frontend Refactoring
+- **Description:** Refactor SiteSettingsManager to use shared components, reducing code duplication from consolidation effort
+
+**Changes:**
+- Replaced inline Toast notification with shared Toast component from `/src/components/common/Toast.jsx`
+- Refactored manual tab structure to use TabContainer component from `/src/components/common/TabContainer.jsx`
+- Updated all form fields (General, SEO, Advanced tabs) to use FormField component from `/src/components/common/FormField.jsx`
+
+**Impact:**
+- **Files Changed:** 4 (SiteSettingsManager, GeneralSettings, SEOSettings, AdvancedSettings)
+- **Net Reduction:** 182 lines of code (214 insertions, 396 deletions)
+- **Functionality:** No changes to API calls or state management - pure refactoring consolidation
+
+**Components Updated:**
+- `app/UI/src/components/CMS/SiteSettingsManager.jsx` - Uses TabContainer and Toast
+- `app/UI/src/components/CMS/GeneralSettings.jsx` - Form fields using FormField component
+- `app/UI/src/components/CMS/SEOSettings.jsx` - Form fields using FormField component
+- `app/UI/src/components/CMS/AdvancedSettings.jsx` - Form fields using FormField component
+
+**Shared Components Integrated:**
+- `/src/components/common/Toast.jsx` - Toast notification component
+- `/src/components/common/TabContainer.jsx` - Reusable tabbed interface
+- `/src/components/common/FormField.jsx` - Reusable form field component
+
+**Tests:** Existing tests remain compatible with refactored components
 
 ---
 
