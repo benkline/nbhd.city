@@ -1978,6 +1978,89 @@ Complete UI integration of custom template registration with beautiful, modern d
 
 ---
 
+## Phase 11: Advanced CMS Components
+
+**Status:** In Progress
+**Timeline:** Weeks TBD
+**Depends On:** Phase 7 (Nbhd CMS & Admin Features) and Phase 8 (Build Pipeline UI)
+
+Advanced content management components for rich editing experiences and content metadata management.
+
+#### CMS-002: Content Browser Component
+
+- **Description:** Build a content browsing and filtering component for viewing all published content
+- **Status:** COMPLETED
+- **Type:** Frontend
+- **Estimate:** M
+
+#### CMS-003: Enhanced Content Editor with Markdown Support
+
+- **Description:** Implement a comprehensive editor with three-column layout for markdown editing, frontmatter management, and live preview
+- **Requirements:**
+  - [x] Three-column layout: Editor | Frontmatter | Preview
+  - [x] Markdown editor with toolbar (bold, italic, code, link, list, quote)
+  - [x] Keyboard shortcuts: Cmd/Ctrl+B (bold), Cmd/Ctrl+I (italic), Cmd/Ctrl+K (link)
+  - [x] Live markdown preview with DOMPurify sanitization
+  - [x] Frontmatter form based on template schema
+  - [x] Auto-slug generation from title
+  - [x] Publishing controls sidebar (status, BlueSky toggle, auto-rebuild)
+  - [x] Scheduled publishing support
+  - [x] Auto-save with 30-second interval
+  - [x] Draft recovery from localStorage with key pattern: draft-{siteId}
+  - [x] Character count and reading time display
+  - [x] Unsaved changes warning on page unload
+
+- **Acceptance Criteria:**
+  - [x] AC1: Three-column layout with editor, preview, and controls
+  - [x] AC2: Markdown toolbar with 6+ formatting actions
+  - [x] AC3: Keyboard shortcuts work (Cmd/Ctrl+B, I, K)
+  - [x] AC4: Live preview updates in real-time
+  - [x] AC5: Frontmatter form renders based on template schema
+  - [x] AC6: Auto-save works with 30-second interval
+  - [x] AC7: Drafts recover from localStorage
+  - [x] AC8: Unsaved changes warning on unload
+  - [x] AC9: Character count and reading time display
+  - [x] AC10: Publish button with validation
+
+- **Type:** Frontend
+- **Estimate:** M
+- **Status:** COMPLETED 2026-02-20
+- **PR:** #113 - https://github.com/nbhd-city/nbhd.city/pull/113
+
+- **Implementation Files:**
+  - `app/UI/src/components/CMS/EnhancedContentEditor.jsx` (356 lines) - Main three-column layout component with state management
+  - `app/UI/src/components/CMS/MarkdownEditorToolbar.jsx` (82 lines) - Formatting toolbar with 6 actions
+  - `app/UI/src/components/CMS/FrontmatterForm.jsx` (223 lines) - Dynamic form generator based on JSON schema
+  - `app/UI/src/components/CMS/PublishingControls.jsx` (111 lines) - Publishing options sidebar
+  - `app/UI/src/components/CMS/MarkdownPreview.jsx` (85 lines) - Live preview with frontmatter display
+  - `app/UI/src/components/CMS/EnhancedContentEditor.module.css` - Comprehensive responsive styling
+  - `app/UI/src/__tests__/components/CMS/EnhancedContentEditor.test.jsx` - Test suite with mocks
+
+- **Technical Details:**
+  - Markdown parsing using `marked` library
+  - HTML sanitization using `DOMPurify`
+  - Auto-save interval: 30 seconds
+  - Reading time calculation: wordCount / 200 (words per minute)
+  - Form validation: Required field checking against template schema
+  - Event handling: Keyboard shortcuts with preventDefault
+  - localStorage pattern: draft-{siteId} for recovery
+
+#### CMS-006: Site Settings Manager Component
+
+- **Description:** Component for managing site-wide settings and configuration with tab-based interface
+- **Status:** IN PROGRESS
+- **Type:** Frontend
+- **Estimate:** M
+
+#### CMS-007: Content Metadata Manager Component
+
+- **Description:** Advanced metadata management for content records with publishing workflow
+- **Status:** IN PROGRESS
+- **Type:** Frontend
+- **Estimate:** M
+
+---
+
 ## Summary of New UI Phase
 
 **Total Tickets:** 8

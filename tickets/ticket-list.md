@@ -164,6 +164,23 @@ Core platform foundation
 
 ---
 
+### 📝 Phase 11: Advanced CMS Components (Weeks TBD)
+
+**Depends on:** Phase 7 (Nbhd CMS & Admin Features) and Phase 8 (Build Pipeline UI)
+
+Advanced content management components for rich editing experiences.
+
+- [x] CMS-002 (Content Browser Component)
+- [x] CMS-003 (Enhanced Content Editor with Markdown Support) - COMPLETED 2026-02-20
+- [ ] CMS-006 (Site Settings Manager Component)
+- [ ] CMS-007 (Content Metadata Manager Component)
+
+**Total Tickets:** 4
+**Estimated Effort:** 4-6 weeks
+**Can Run In Parallel:** Yes, with separate subagents for each component
+
+---
+
 ### 🔌 Phase 9.3: Plugin Architecture & Infrastructure (Weeks 18-19)
 
 **Depends on:** Phase 8 (Build Pipeline UI) - needed before next major extension
