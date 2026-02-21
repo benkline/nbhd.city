@@ -1,0 +1,229 @@
+/* DeleteTemplateConfirm.module.css */
+/* Confirmation modal for template deletion with warning styling */
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: fadeIn 0.3s ease;
+  padding: 1rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 400px;
+  animation: slideUp 0.3s ease;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Icon container */
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background: linear-gradient(135deg, #ff6b6b 0%, #dc3545 100%);
+}
+
+.warningIcon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+/* Content section */
+.content {
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 1rem 0;
+}
+
+.message {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+.message strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Warning section */
+.warning {
+  background: #fff3cd;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0;
+}
+
+.warningTitle {
+  display: block;
+  color: #856404;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.warningText {
+  color: #856404;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Actions section */
+.actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.button {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.buttonCancel {
+  background: white;
+  color: #333;
+  border: 1px solid #dee2e6;
+}
+
+.buttonCancel:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+  transform: translateY(-2px);
+}
+
+.buttonCancel:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.buttonCancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.buttonDelete {
+  background: #dc3545;
+  color: white;
+  border: 2px solid #dc3545;
+  position: relative;
+  overflow: hidden;
+}
+
+.buttonDelete::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%);
+}
+
+.buttonDelete:hover:not(:disabled) {
+  background: #c82333;
+  border-color: #bd2130;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  transform: translateY(-2px);
+}
+
+.buttonDelete:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.buttonDelete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile responsive */
+@media (max-width: 512px) {
+  .modal {
+    max-width: 90vw;
+  }
+
+  .content {
+    padding: 1.5rem 1rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .iconContainer {
+    padding: 1.5rem;
+  }
+
+  .warningIcon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.75rem;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .button {
+    width: 100%;
+  }
+}

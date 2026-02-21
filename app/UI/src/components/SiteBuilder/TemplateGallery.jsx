@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/api';
 import { CustomTemplateModal } from './CustomTemplateModal';
 import { TemplateDetailsModal } from './TemplateDetailsModal';
+import { TemplateCard } from './TemplateCard';
+import { EmptyTemplateState } from './EmptyTemplateState';
+import { AnalysisProgress } from './AnalysisProgress';
 import styles from './TemplateGallery.module.css';
 
 export function TemplateGallery({ onSelect }) {
@@ -12,6 +15,7 @@ export function TemplateGallery({ onSelect }) {
   const [error, setError] = useState(null);
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showProgressModal, setShowProgressModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [toast, setToast] = useState(null);
   const navigate = useNavigate();
@@ -36,6 +40,24 @@ export function TemplateGallery({ onSelect }) {
   const handleViewDetails = (template) => {
     setSelectedTemplate(template);
     setShowDetailsModal(true);
+  };
+
+  const handleTemplateCardSelect = (template) => {
+    // Don't allow selection while analyzing
+    if (template.is_custom && template.status === 'analyzing') {
+      setSelectedTemplate(template);
+      setShowProgressModal(true);
+      return;
+    }
+
+    // For custom templates, show details modal
+    // For built-in templates, proceed with selection
+    if (template.is_custom) {
+      setSelectedTemplate(template);
+      setShowDetailsModal(true);
+    } else {
+      handleSelectTemplate(template);
+    }
   };
 
   const handleSelectTemplate = (template) => {
@@ -176,7 +198,18 @@ export function TemplateGallery({ onSelect }) {
 
       <div className={styles.gallery} data-testid="template-gallery">
         {customTemplates.map((template) => (
-          <div key={template.id} className={`${styles.card} ${styles.customCard}`}>
+          <div
+            key={template.id}
+            className={`${styles.card} ${styles.customCard}`}
+            onClick={() => handleViewDetails(template)}
+            role="button"
+            tabIndex={0}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleViewDetails(template);
+              }
+            }}
+          >
             <div className={styles.imageContainer}>
               <div className={styles.placeholderImage}>
                 ✨ {template.name}
@@ -200,7 +233,10 @@ export function TemplateGallery({ onSelect }) {
                 </div>
               ) : (
                 <button
-                  onClick={() => handleSelectTemplate(template)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectTemplate(template);
+                  }}
                   className={styles.selectButton}
                 >
                   Select Template
@@ -211,7 +247,18 @@ export function TemplateGallery({ onSelect }) {
         ))}
 
         {templates.map((template) => (
-          <div key={template.id} className={styles.card}>
+          <div
+            key={template.id}
+            className={styles.card}
+            onClick={() => handleViewDetails(template)}
+            role="button"
+            tabIndex={0}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleViewDetails(template);
+              }
+            }}
+          >
             <div className={styles.imageContainer}>
               <div className={styles.placeholderImage}>
                 📄 {template.name}
@@ -233,7 +280,10 @@ export function TemplateGallery({ onSelect }) {
               )}
 
               <button
-                onClick={() => handleSelectTemplate(template)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectTemplate(template);
+                }}
                 className={styles.selectButton}
               >
                 Select Template
@@ -247,6 +297,16 @@ export function TemplateGallery({ onSelect }) {
         isOpen={showCustomModal}
         onClose={handleCloseModal}
         onAdd={handleCustomTemplateAdded}
+      />
+
+      <TemplateDetailsModal
+        isOpen={showDetailsModal}
+        template={selectedTemplate}
+        onClose={() => setShowDetailsModal(false)}
+        onSelect={handleSelectTemplate}
+        onDelete={handleDeleteTemplate}
+        onReanalyze={handleReanalyzeTemplate}
+        onShare={handleShareTemplate}
       />
     </div>
   );
