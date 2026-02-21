@@ -1,0 +1,279 @@
+/* PublishingEditor Styles - Tab variant */
+
+.tabPanel {
+  padding: 0;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formSection h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text, #333);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--color-text, #333);
+}
+
+.input,
+.select {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border, #ddd);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  background-color: var(--color-background, #fff);
+  color: var(--color-text, #333);
+  transition: all 0.2s ease;
+}
+
+.input:hover,
+.select:hover {
+  border-color: var(--color-border-hover, #999);
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary, #0066cc);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.input:disabled,
+.select:disabled {
+  background-color: var(--color-background-disabled, #f5f5f5);
+  color: var(--color-text-disabled, #999);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.helperText {
+  color: var(--color-text-secondary, #666);
+  font-size: 12px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: normal;
+  user-select: none;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--color-primary, #0066cc);
+}
+
+.checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* BlueSky Preview */
+.blueSkyPreview {
+  padding: 12px;
+  background-color: var(--color-background-secondary, #f5f5f5);
+  border-left: 3px solid var(--color-primary, #0066cc);
+  border-radius: 4px;
+}
+
+.blueSkyPreview h4 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text, #333);
+}
+
+.previewContent {
+  padding: 10px;
+  background-color: var(--color-background, #fff);
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text, #333);
+  word-break: break-word;
+  min-height: 40px;
+  max-height: 120px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border, #ddd);
+}
+
+.charCount {
+  display: block;
+  margin-top: 6px;
+  color: var(--color-text-secondary, #666);
+  font-size: 11px;
+}
+
+/* ============================= */
+/* PublishingEditor Styles - Sidebar variant */
+/* ============================= */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background-color: var(--color-background-secondary, #f9f9f9);
+  border-left: 1px solid var(--color-border, #ddd);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text, #333);
+}
+
+.sidebarSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebarSection .label {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--color-text, #333);
+}
+
+.sidebarSection .input,
+.sidebarSection .select {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border, #ddd);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  background-color: var(--color-background, #fff);
+  color: var(--color-text, #333);
+  transition: all 0.2s ease;
+}
+
+.sidebarSection .input:focus,
+.sidebarSection .select:focus {
+  outline: none;
+  border-color: var(--color-primary, #0066cc);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+/* Sidebar checkbox */
+.sidebarSection .checkboxLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: normal;
+  font-size: 13px;
+  user-select: none;
+}
+
+.sidebarSection .checkbox {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: var(--color-primary, #0066cc);
+}
+
+/* Action buttons */
+.sidebarActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border, #ddd);
+}
+
+.publishButton,
+.saveDraftButton {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.publishButton {
+  background-color: var(--color-success, #4caf50);
+  color: white;
+}
+
+.publishButton:hover:not(:disabled) {
+  background-color: var(--color-success-dark, #45a049);
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+.saveDraftButton {
+  background-color: var(--color-border, #ddd);
+  color: var(--color-text, #333);
+}
+
+.saveDraftButton:hover:not(:disabled) {
+  background-color: var(--color-background, #ccc);
+}
+
+.publishButton:disabled,
+.saveDraftButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Unsaved indicator */
+.unsavedIndicator {
+  padding: 10px 12px;
+  background-color: var(--color-warning, #fff3cd);
+  border: 1px solid var(--color-warning-border, #ffc107);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--color-text, #333);
+  margin-top: 8px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    padding: 16px;
+    gap: 12px;
+    border-left: none;
+    border-top: 1px solid var(--color-border, #ddd);
+  }
+
+  .sidebarSection .input,
+  .sidebarSection .select {
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+
+  .sidebarActions {
+    flex-direction: row;
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  .publishButton,
+  .saveDraftButton {
+    flex: 1;
+    min-width: 0;
+  }
+}
