@@ -19,7 +19,7 @@ export default defineConfig({
       VITE_API_URL: 'http://localhost:8000'
     },
     deps: {
-      inline: ['@testing-library']
+      inline: ['@testing-library', 'firebase']
     }
   },
 });
