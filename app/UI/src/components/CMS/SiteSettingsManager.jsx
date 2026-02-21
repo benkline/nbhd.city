@@ -2,23 +2,9 @@ import { useState, useEffect } from 'react';
 import { GeneralSettings } from './GeneralSettings';
 import { SEOSettings } from './SEOSettings';
 import { AdvancedSettings } from './AdvancedSettings';
+import Toast from '../common/Toast';
+import { TabContainer } from '../common/TabContainer';
 import styles from './SiteSettingsManager.module.css';
-
-/**
- * Toast notification component
- */
-function Toast({ message, type = 'success', onClose }) {
-  useEffect(() => {
-    const timer = setTimeout(onClose, 3000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
-  return (
-    <div className={`${styles.toast} ${styles[`toast-${type}`]}`}>
-      {message}
-    </div>
-  );
-}
 
 /**
  * SiteSettingsManager - Tabbed interface for managing site-wide settings
@@ -100,6 +86,24 @@ export function SiteSettingsManager({ siteId, onSave }) {
     return <div className={styles.container}>Error: {error}</div>;
   }
 
+  const tabs = [
+    {
+      id: 'general',
+      label: 'General',
+      panel: <GeneralSettings settings={settings} onChange={handleSettingsChange} />
+    },
+    {
+      id: 'seo',
+      label: 'SEO',
+      panel: <SEOSettings settings={settings} onChange={handleSettingsChange} />
+    },
+    {
+      id: 'advanced',
+      label: 'Advanced',
+      panel: <AdvancedSettings settings={settings} onChange={handleSettingsChange} />
+    }
+  ];
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -107,58 +111,8 @@ export function SiteSettingsManager({ siteId, onSave }) {
         <p>Configure your site's metadata, SEO, and advanced options</p>
       </div>
 
-      {/* Tabs */}
-      <div className={styles.tabsContainer} data-testid="tabs-container">
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === 'general' ? styles.active : ''}`}
-            onClick={() => setActiveTab('general')}
-            role="tab"
-            aria-selected={activeTab === 'general'}
-          >
-            General
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'seo' ? styles.active : ''}`}
-            onClick={() => setActiveTab('seo')}
-            role="tab"
-            aria-selected={activeTab === 'seo'}
-          >
-            SEO
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'advanced' ? styles.active : ''}`}
-            onClick={() => setActiveTab('advanced')}
-            role="tab"
-            aria-selected={activeTab === 'advanced'}
-          >
-            Advanced
-          </button>
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className={styles.tabContent}>
-        {activeTab === 'general' && (
-          <GeneralSettings
-            settings={settings}
-            onChange={handleSettingsChange}
-          />
-        )}
-
-        {activeTab === 'seo' && (
-          <SEOSettings
-            settings={settings}
-            onChange={handleSettingsChange}
-          />
-        )}
-
-        {activeTab === 'advanced' && (
-          <AdvancedSettings
-            settings={settings}
-            onChange={handleSettingsChange}
-          />
-        )}
+      <div data-testid="tabs-container">
+        <TabContainer tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
       </div>
 
       {/* Save Button */}
@@ -188,9 +142,10 @@ export function SiteSettingsManager({ siteId, onSave }) {
       {/* Toast */}
       {showToast && (
         <Toast
-          message={showToast.message}
           type={showToast.type}
+          message={showToast.message}
           onClose={() => setShowToast(null)}
+          duration={3000}
         />
       )}
     </div>

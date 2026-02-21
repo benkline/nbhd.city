@@ -1,3 +1,4 @@
+import { FormField } from '../common/FormField';
 import styles from './SiteSettingsManager.module.css';
 
 /**
@@ -15,94 +16,58 @@ export function GeneralSettings({ settings, onChange }) {
     <div className={styles.settingsForm}>
       <h2>General Settings</h2>
 
-      {/* Site Title */}
-      <div className={styles.formGroup}>
-        <label htmlFor="title" className={styles.label}>
-          Site Title <span className={styles.required}>*</span>
-        </label>
-        <input
-          id="title"
-          type="text"
-          value={settings.title || ''}
-          onChange={(e) => handleInputChange('title', e.target.value)}
-          placeholder="Enter your site title"
-          maxLength={100}
-          className={styles.input}
-          required
-        />
-        <small className={styles.hint}>
-          {(settings.title || '').length} / 100 characters
-        </small>
-      </div>
+      <FormField
+        label="Site Title"
+        id="title"
+        type="text"
+        value={settings.title || ''}
+        onChange={(val) => handleInputChange('title', val)}
+        placeholder="Enter your site title"
+        maxLength={100}
+        helperText={`${(settings.title || '').length} / 100 characters`}
+        required
+      />
 
-      {/* Site Description */}
-      <div className={styles.formGroup}>
-        <label htmlFor="description" className={styles.label}>
-          Site Description
-        </label>
-        <textarea
-          id="description"
-          value={settings.description || ''}
-          onChange={(e) => handleInputChange('description', e.target.value)}
-          placeholder="Brief description of your site"
-          maxLength={500}
-          rows={4}
-          className={styles.textarea}
-        />
-        <small className={styles.hint}>
-          {(settings.description || '').length} / 500 characters
-        </small>
-      </div>
+      <FormField
+        label="Site Description"
+        id="description"
+        type="textarea"
+        value={settings.description || ''}
+        onChange={(val) => handleInputChange('description', val)}
+        placeholder="Brief description of your site"
+        maxLength={500}
+        rows={4}
+        helperText={`${(settings.description || '').length} / 500 characters`}
+      />
 
-      {/* Author Name */}
-      <div className={styles.formGroup}>
-        <label htmlFor="author" className={styles.label}>
-          Author Name
-        </label>
-        <input
-          id="author"
-          type="text"
-          value={settings.author || ''}
-          onChange={(e) => handleInputChange('author', e.target.value)}
-          placeholder="Your name"
-          className={styles.input}
-        />
-      </div>
+      <FormField
+        label="Author Name"
+        id="author"
+        type="text"
+        value={settings.author || ''}
+        onChange={(val) => handleInputChange('author', val)}
+        placeholder="Your name"
+      />
 
-      {/* Site URL (read-only) */}
-      <div className={styles.formGroup}>
-        <label htmlFor="siteUrl" className={styles.label}>
-          Site URL
-        </label>
-        <input
-          id="siteUrl"
-          type="text"
-          value={settings.siteUrl || ''}
-          disabled
-          className={styles.input}
-          title="This URL is generated from your site's subdomain"
-        />
-        <small className={styles.hint}>
-          Generated from your site's subdomain (read-only)
-        </small>
-      </div>
+      <FormField
+        label="Site URL"
+        id="siteUrl"
+        type="text"
+        value={settings.siteUrl || ''}
+        disabled
+        helperText="Generated from your site's subdomain (read-only)"
+      />
 
-      {/* Logo URL */}
-      <div className={styles.formGroup}>
-        <label htmlFor="logo" className={styles.label}>
-          Logo URL
-        </label>
-        <input
+      <div>
+        <FormField
+          label="Logo URL"
           id="logo"
           type="url"
           value={settings.logo || ''}
-          onChange={(e) => handleInputChange('logo', e.target.value)}
+          onChange={(val) => handleInputChange('logo', val)}
           placeholder="https://example.com/logo.png"
-          className={styles.input}
+          helperText="Full URL to your site's logo image"
         />
-        <small className={styles.hint}>
-          Full URL to your site's logo image
-        </small>
         {settings.logo && (
           <div className={styles.preview}>
             <img
@@ -117,23 +82,15 @@ export function GeneralSettings({ settings, onChange }) {
         )}
       </div>
 
-      {/* Favicon */}
-      <div className={styles.formGroup}>
-        <label htmlFor="favicon" className={styles.label}>
-          Favicon URL
-        </label>
-        <input
-          id="favicon"
-          type="url"
-          value={settings.favicon || ''}
-          onChange={(e) => handleInputChange('favicon', e.target.value)}
-          placeholder="https://example.com/favicon.ico"
-          className={styles.input}
-        />
-        <small className={styles.hint}>
-          Full URL to your site's favicon (16x16 or 32x32 PNG/ICO)
-        </small>
-      </div>
+      <FormField
+        label="Favicon URL"
+        id="favicon"
+        type="url"
+        value={settings.favicon || ''}
+        onChange={(val) => handleInputChange('favicon', val)}
+        placeholder="https://example.com/favicon.ico"
+        helperText="Full URL to your site's favicon (16x16 or 32x32 PNG/ICO)"
+      />
     </div>
   );
 }
