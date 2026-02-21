@@ -9,9 +9,12 @@
  * - OG image
  * - Focus keyword
  * - Readability score
+ *
+ * Refactored to use FormField component for standard inputs
  */
 
 import { useState } from 'react';
+import FormField from '../common/FormField';
 import styles from './ContentMetadataManager.module.css';
 
 export function SEOMetadata({
@@ -57,81 +60,62 @@ export function SEOMetadata({
       <div className={styles.formSection}>
         <h3>SEO Metadata</h3>
 
-        {/* Meta Title */}
-        <div className={styles.formGroup}>
-          <label htmlFor="meta-title">Meta Title</label>
-          <input
-            id="meta-title"
-            type="text"
-            value={data.metaTitle || ''}
-            onChange={(e) => onChange('metaTitle', e.target.value)}
-            placeholder="Title that appears in search results"
-            maxLength={60}
-            disabled={disabled}
-            className={styles.input}
-          />
-          <small className={styles.helperText}>
-            {data.metaTitle?.length || 0}/60 characters
-          </small>
-        </div>
+        {/* Meta Title using FormField */}
+        <FormField
+          label="Meta Title"
+          id="meta-title"
+          type="text"
+          value={data.metaTitle || ''}
+          onChange={(val) => onChange('metaTitle', val)}
+          placeholder="Title that appears in search results"
+          maxLength={60}
+          helperText={`${data.metaTitle?.length || 0}/60 characters`}
+          disabled={disabled}
+        />
 
-        {/* Meta Description */}
-        <div className={styles.formGroup}>
-          <label htmlFor="meta-description">Meta Description</label>
-          <textarea
-            id="meta-description"
-            value={data.metaDescription || ''}
-            onChange={(e) => onChange('metaDescription', e.target.value)}
-            placeholder="Description shown in search results"
-            maxLength={160}
-            rows={3}
-            disabled={disabled}
-            className={styles.textarea}
-          />
-          <small className={styles.helperText}>
-            {data.metaDescription?.length || 0}/160 characters
-          </small>
-        </div>
+        {/* Meta Description using FormField */}
+        <FormField
+          label="Meta Description"
+          id="meta-description"
+          type="textarea"
+          value={data.metaDescription || ''}
+          onChange={(val) => onChange('metaDescription', val)}
+          placeholder="Description shown in search results"
+          maxLength={160}
+          helperText={`${data.metaDescription?.length || 0}/160 characters`}
+          disabled={disabled}
+          rows={3}
+        />
 
-        {/* SEO Slug */}
-        <div className={styles.formGroup}>
-          <label htmlFor="seo-slug">SEO Slug</label>
-          <input
-            id="seo-slug"
-            type="text"
-            value={data.slug || ''}
-            onChange={(e) => {
-              let slug = e.target.value.toLowerCase();
-              slug = slug.replace(/[^\w\s-]/g, '');
-              slug = slug.replace(/\s+/g, '-');
-              slug = slug.replace(/-+/g, '-');
-              onChange('slug', slug);
-            }}
-            placeholder="url-friendly-slug"
-            disabled={disabled}
-            className={styles.input}
-          />
-          <small className={styles.helperText}>
-            Used in the URL: /blog/{data.slug || 'your-slug'}
-          </small>
-        </div>
+        {/* SEO Slug using FormField */}
+        <FormField
+          label="SEO Slug"
+          id="seo-slug"
+          type="text"
+          value={data.slug || ''}
+          onChange={(val) => {
+            let slug = val.toLowerCase();
+            slug = slug.replace(/[^\w\s-]/g, '');
+            slug = slug.replace(/\s+/g, '-');
+            slug = slug.replace(/-+/g, '-');
+            onChange('slug', slug);
+          }}
+          placeholder="url-friendly-slug"
+          helperText={`Used in the URL: /blog/${data.slug || 'your-slug'}`}
+          disabled={disabled}
+        />
 
-        {/* Canonical URL */}
-        <div className={styles.formGroup}>
-          <label htmlFor="canonical-url">Canonical URL (Optional)</label>
-          <input
-            id="canonical-url"
-            type="url"
-            value={data.canonicalUrl || ''}
-            onChange={(e) => onChange('canonicalUrl', e.target.value)}
-            placeholder="https://example.com/original-article"
-            disabled={disabled}
-            className={styles.input}
-          />
-          <small className={styles.helperText}>
-            Link to original if this is republished content
-          </small>
-        </div>
+        {/* Canonical URL using FormField */}
+        <FormField
+          label="Canonical URL (Optional)"
+          id="canonical-url"
+          type="url"
+          value={data.canonicalUrl || ''}
+          onChange={(val) => onChange('canonicalUrl', val)}
+          placeholder="https://example.com/original-article"
+          helperText="Link to original if this is republished content"
+          disabled={disabled}
+        />
 
         {/* OG Image */}
         <div className={styles.formGroup}>
@@ -156,38 +140,27 @@ export function SEOMetadata({
           </small>
         </div>
 
-        {/* Focus Keyword */}
-        <div className={styles.formGroup}>
-          <label htmlFor="focus-keyword">Focus Keyword (Optional)</label>
-          <input
-            id="focus-keyword"
-            type="text"
-            value={data.focusKeyword || ''}
-            onChange={(e) => onChange('focusKeyword', e.target.value)}
-            placeholder="Main keyword for this content"
-            disabled={disabled}
-            className={styles.input}
-          />
-          <small className={styles.helperText}>
-            Primary keyword for SEO tracking
-          </small>
-        </div>
+        {/* Focus Keyword using FormField */}
+        <FormField
+          label="Focus Keyword (Optional)"
+          id="focus-keyword"
+          type="text"
+          value={data.focusKeyword || ''}
+          onChange={(val) => onChange('focusKeyword', val)}
+          placeholder="Main keyword for this content"
+          helperText="Primary keyword for SEO tracking"
+          disabled={disabled}
+        />
 
-        {/* Readability Score */}
-        <div className={styles.formGroup}>
-          <label htmlFor="readability">Readability Score</label>
-          <input
-            id="readability"
-            type="number"
-            value={data.readability || 0}
-            disabled={true}
-            className={styles.input}
-            readOnly
-          />
-          <small className={styles.helperText}>
-            Auto-calculated from content
-          </small>
-        </div>
+        {/* Readability Score using FormField */}
+        <FormField
+          label="Readability Score"
+          id="readability"
+          type="number"
+          value={data.readability || 0}
+          disabled={true}
+          helperText="Auto-calculated from content"
+        />
       </div>
 
       {/* Google SERP Preview */}
