@@ -33,6 +33,7 @@ function App() {
           <Route path="/nbhds/:id/admin" element={<AdminPage />} />
           <Route path="/nbhds/:id/cms" element={<CMSView />} />
           <Route path="/nbhds/:id/welcome" element={<WelcomePage />} />
+          <Route path="/nbhds/:nbhdId/chat" element={<NbhrsChatPage />} />
           <Route path="/my-nbhds" element={<MyNbhds />} />
           <Route path="/personal-sites" element={<PersonalSites />} />
           <Route path="/site-editor" element={<SiteEditor />} />
