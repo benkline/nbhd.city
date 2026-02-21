@@ -1,0 +1,534 @@
+/* ============================================================================
+   AnalysisProgress.module.css
+   Styles for the analysis progress modal with animated circles
+   ============================================================================ */
+
+/* Animation keyframes */
+@keyframes circleBreathe {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes circleFade {
+  0%, 100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes progressFill {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseRing {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.4;
+  }
+}
+
+@keyframes checkmarkDraw {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-4px, 0);
+  }
+  75% {
+    transform: translate(4px, 0);
+  }
+}
+
+@keyframes backdropFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ============================================================================
+   Backdrop & Modal
+   ============================================================================ */
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: backdropFadeIn 0.3s ease;
+}
+
+.modal {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+  padding: 2rem;
+  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+/* ============================================================================
+   Background Circles (Subtle Decoration)
+   ============================================================================ */
+
+.backgroundCircles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.circle1,
+.circle2,
+.circle3 {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(67, 97, 238, 0.1), transparent);
+}
+
+.circle1 {
+  width: 200px;
+  height: 200px;
+  top: -50px;
+  right: -50px;
+  animation: circleBreathe 4s ease-in-out infinite;
+}
+
+.circle2 {
+  width: 150px;
+  height: 150px;
+  bottom: -30px;
+  left: -30px;
+  animation: circleBreathe 5s ease-in-out infinite 0.5s;
+}
+
+.circle3 {
+  width: 120px;
+  height: 120px;
+  top: 50%;
+  right: 10%;
+  animation: circleFade 3s ease-in-out infinite;
+}
+
+/* ============================================================================
+   Header
+   ============================================================================ */
+
+.header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: #333;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #999;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.3s ease;
+  line-height: 1;
+}
+
+.closeButton:hover:not(:disabled) {
+  color: #333;
+}
+
+.closeButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ============================================================================
+   Content
+   ============================================================================ */
+
+.content {
+  position: relative;
+  z-index: 2;
+  animation: fadeInUp 0.5s ease 0.1s backwards;
+}
+
+/* ============================================================================
+   Progress Section (Analyzing State)
+   ============================================================================ */
+
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stage {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #4361EE;
+  text-align: center;
+}
+
+.progressBar {
+  width: 100%;
+  height: 12px;
+  background: #e9ecef;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #dee2e6;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #4361EE, #3A0CA3);
+  border-radius: 6px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(67, 97, 238, 0.3);
+}
+
+.progressInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.percentage {
+  font-weight: 600;
+  color: #4361EE;
+}
+
+.timeEstimate {
+  color: #666;
+  font-style: italic;
+}
+
+/* Pulse Circles */
+.pulseCircles {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  height: 60px;
+}
+
+.pulseCircle1,
+.pulseCircle2,
+.pulseCircle3 {
+  width: 12px;
+  height: 12px;
+  background: #4361EE;
+  border-radius: 50%;
+  animation: pulseRing 1.5s ease-in-out infinite;
+}
+
+.pulseCircle1 {
+  animation-delay: 0s;
+}
+
+.pulseCircle2 {
+  animation-delay: 0.3s;
+}
+
+.pulseCircle3 {
+  animation-delay: 0.6s;
+}
+
+.message {
+  text-align: center;
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ============================================================================
+   Success Content
+   ============================================================================ */
+
+.successContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.successIcon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #2ECC71, #27AE60);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  animation: checkmarkDraw 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.successContent h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+  color: #333;
+}
+
+.successContent p {
+  color: #666;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.doneButton {
+  background: linear-gradient(135deg, #2ECC71, #27AE60);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.doneButton:hover {
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+  transform: translateY(-2px);
+}
+
+/* ============================================================================
+   Failed Content
+   ============================================================================ */
+
+.failedContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.errorIcon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #FF6B6B, #FF4757);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  animation: shake 0.4s ease;
+}
+
+.failedContent h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+  color: #333;
+}
+
+.errorMessage {
+  background: #fff5f5;
+  color: #c92a2a;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #FF6B6B;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.retryButton {
+  flex: 1;
+  background: linear-gradient(135deg, #FF6B6B, #FF4757);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.retryButton:hover {
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+  transform: translateY(-2px);
+}
+
+.cancelButton {
+  flex: 1;
+  background: #e9ecef;
+  color: #495057;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cancelButton:hover {
+  background: #dee2e6;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .modal {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .header h2 {
+    font-size: 1.25rem;
+  }
+
+  .successIcon,
+  .errorIcon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+
+  .successContent h3,
+  .failedContent h3 {
+    font-size: 1.1rem;
+  }
+
+  .message,
+  .successContent p,
+  .errorMessage {
+    font-size: 0.9rem;
+  }
+}
+
+/* ============================================================================
+   Accessibility
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .modal,
+  .circle1,
+  .circle2,
+  .circle3,
+  .pulseCircle1,
+  .pulseCircle2,
+  .pulseCircle3,
+  .successIcon,
+  .errorIcon {
+    animation: none !important;
+  }
+
+  .progressFill {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .modal {
+    border: 2px solid #333;
+  }
+
+  .progressBar {
+    border-width: 2px;
+  }
+}

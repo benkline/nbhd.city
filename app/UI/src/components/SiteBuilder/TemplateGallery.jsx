@@ -196,102 +196,42 @@ export function TemplateGallery({ onSelect }) {
         </div>
       )}
 
-      <div className={styles.gallery} data-testid="template-gallery">
-        {customTemplates.map((template) => (
-          <div
-            key={template.id}
-            className={`${styles.card} ${styles.customCard}`}
-            onClick={() => handleViewDetails(template)}
-            role="button"
-            tabIndex={0}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleViewDetails(template);
-              }
-            }}
-          >
-            <div className={styles.imageContainer}>
-              <div className={styles.placeholderImage}>
-                ✨ {template.name}
-              </div>
-            </div>
-
-            <div className={styles.content}>
-              <div className={styles.cardBadge}>Custom</div>
-              <h2 className={styles.name}>{template.name}</h2>
-              <p className={styles.description}>{template.github_url}</p>
-
-              {template.status === 'analyzing' ? (
-                <div className={styles.analyzingState}>
-                  <div className={styles.spinner} />
-                  <button
-                    disabled
-                    className={styles.selectButton}
-                  >
-                    Analyzing...
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectTemplate(template);
-                  }}
-                  className={styles.selectButton}
-                >
-                  Select Template
-                </button>
-              )}
-            </div>
+      {/* Custom Templates Section */}
+      {customTemplates.length > 0 && (
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>My Custom Templates</h2>
+          <div className={styles.gallery} data-testid="custom-templates-gallery">
+            {customTemplates.map((template) => (
+              <TemplateCard
+                key={template.id}
+                template={{ ...template, is_custom: true }}
+                onSelect={handleTemplateCardSelect}
+              />
+            ))}
           </div>
-        ))}
+        </div>
+      )}
 
-        {templates.map((template) => (
-          <div
-            key={template.id}
-            className={styles.card}
-            onClick={() => handleViewDetails(template)}
-            role="button"
-            tabIndex={0}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleViewDetails(template);
-              }
-            }}
-          >
-            <div className={styles.imageContainer}>
-              <div className={styles.placeholderImage}>
-                📄 {template.name}
-              </div>
-            </div>
+      {/* Empty State for Custom Templates */}
+      {customTemplates.length === 0 && (
+        <EmptyTemplateState onAddTemplate={() => setShowCustomModal(true)} />
+      )}
 
-            <div className={styles.content}>
-              <h2 className={styles.name}>{template.name}</h2>
-              <p className={styles.description}>{template.description}</p>
-
-              {template.tags && template.tags.length > 0 && (
-                <div className={styles.tags}>
-                  {template.tags.map((tag) => (
-                    <span key={tag} className={styles.tag}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSelectTemplate(template);
-                }}
-                className={styles.selectButton}
-              >
-                Select Template
-              </button>
-            </div>
+      {/* Built-in Templates Section */}
+      {templates.length > 0 && (
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>Built-in Templates</h2>
+          <div className={styles.gallery} data-testid="builtin-templates-gallery">
+            {templates.map((template) => (
+              <TemplateCard
+                key={template.id}
+                template={{ ...template, is_custom: false }}
+                onSelect={handleTemplateCardSelect}
+              />
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       <CustomTemplateModal
         isOpen={showCustomModal}
@@ -308,6 +248,20 @@ export function TemplateGallery({ onSelect }) {
         onReanalyze={handleReanalyzeTemplate}
         onShare={handleShareTemplate}
       />
+
+      {selectedTemplate && (
+        <AnalysisProgress
+          isOpen={showProgressModal}
+          templateId={selectedTemplate.id}
+          status={selectedTemplate.status}
+          error={selectedTemplate.error}
+          onClose={() => {
+            setShowProgressModal(false);
+            setSelectedTemplate(null);
+          }}
+          onRetry={() => handleReanalyzeTemplate(selectedTemplate.id)}
+        />
+      )}
     </div>
   );
 }

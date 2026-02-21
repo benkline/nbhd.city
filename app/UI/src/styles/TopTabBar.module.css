@@ -1,0 +1,152 @@
+/**
+ * TopTabBar.module.css
+ * Styles for the horizontal tab navigation component
+ */
+
+.topTabBar {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 56px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  z-index: 90;
+}
+
+/* Tabs Container */
+.tabsContainer {
+  display: flex;
+  flex: 1;
+  gap: 0;
+  padding: 0 24px;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabsContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* Tab Buttons */
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  height: 56px;
+  background: transparent;
+  border: none;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 150ms ease-in-out;
+  position: relative;
+}
+
+.tab:hover {
+  color: #1E293B;
+}
+
+/* Active Tab */
+.tab.active {
+  color: #4361EE;
+  font-weight: 600;
+}
+
+/* Animated Underline */
+.underline {
+  position: absolute;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4361EE 0%, #3A0CA3 100%);
+  border-radius: 3px 3px 0 0;
+  transition: left 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              width 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Responsive Behavior */
+
+/* Tablet: 768px+ - Show tabs */
+@media (min-width: 769px) {
+  .topTabBar {
+    display: flex;
+  }
+}
+
+/* Mobile/Tablet transition: 512px - 768px - Show tabs but smaller */
+@media (max-width: 768px) and (min-width: 513px) {
+  .topTabBar {
+    display: flex;
+    height: 48px;
+  }
+
+  .tabsContainer {
+    padding: 0 12px;
+  }
+
+  .tab {
+    padding: 0 16px;
+    height: 48px;
+    font-size: 13px;
+  }
+}
+
+/* Mobile: < 512px - Hide tabs */
+@media (max-width: 512px) {
+  .topTabBar {
+    display: none;
+  }
+}
+
+/* Accessibility: Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .tab {
+    transition: color 150ms ease-in-out;
+  }
+
+  .underline {
+    transition: none;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.tab:focus-visible {
+  outline: 2px solid #4361EE;
+  outline-offset: -2px;
+}
+
+/* Tab Content Area Styling */
+.tabContent {
+  display: none;
+  opacity: 0;
+  animation: fadeIn 300ms ease-in-out forwards;
+}
+
+.tabContent.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Tab Fade Transition */
+@keyframes tabFadeTransition {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
