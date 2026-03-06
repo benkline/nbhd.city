@@ -1042,3 +1042,82 @@ async def list_sites_by_nbhd(table, nbhd_id: str, site_type: Optional[str] = Non
             KeyConditionExpression=Key("nbhd_id").eq(nbhd_id)
         )
     return response.get("Items", [])
+
+
+# Template Analysis Operations (SSG-020)
+
+async def create_template_analysis(
+    table,
+    template_id: str,
+    github_url: str,
+    user_did: str
+) -> dict:
+    """
+    Create a new template analysis job in DynamoDB.
+
+    Creates both METADATA record (with URL and user info) and ANALYSIS record
+    (for tracking progress as Lambda processes it).
+
+    Args:
+        table: DynamoDB table resource
+        template_id: UUID of the template
+        github_url: GitHub repository URL
+        user_did: User's DID (who initiated analysis)
+
+    Returns:
+        dict: Created metadata record
+    """
+    timestamp = now_iso()
+
+    # Create METADATA record (stores static info)
+    metadata = {
+        "PK": f"TEMPLATE#{template_id}",
+        "SK": "METADATA",
+        "template_id": template_id,
+        "github_url": github_url,
+        "user_did": user_did,
+        "status": "analyzing",
+        "created_at": timestamp,
+        "entity_type": "template_analysis"
+    }
+    await table.put_item(Item=metadata)
+
+    # Create ANALYSIS record (Lambda will update progress/status)
+    analysis = {
+        "PK": f"TEMPLATE#{template_id}",
+        "SK": "ANALYSIS",
+        "template_id": template_id,
+        "status": "analyzing",
+        "progress": 0.0,
+        "message": "Analysis queued",
+        "content_types": None,
+        "schema": None,
+        "error": None,
+        "started_at": timestamp,
+        "completed_at": None
+    }
+    await table.put_item(Item=analysis)
+
+    return metadata
+
+
+async def get_template_analysis_status(
+    table,
+    template_id: str
+) -> Optional[dict]:
+    """
+    Get the analysis status for a template.
+
+    Retrieves the ANALYSIS record which contains progress, message, and results.
+
+    Args:
+        table: DynamoDB table resource
+        template_id: UUID of the template
+
+    Returns:
+        dict or None: Analysis status record if found
+    """
+    response = await table.get_item(
+        Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"}
+    )
+    return response.get("Item")

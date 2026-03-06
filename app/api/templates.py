@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Depends, status
 from models import (
     TemplateResponse,
     TemplateSchemaResponse,
@@ -7,6 +7,9 @@ from models import (
     CustomTemplateStatusResponse,
     TemplateContentTypesResponse,
 )
+from auth import get_current_user
+from dynamodb_client import get_table
+from dynamodb_repository import create_template_analysis, get_template_analysis_status
 from datetime import datetime
 from typing import List, Optional
 import uuid
@@ -190,6 +193,121 @@ async def list_templates(
                 "limit": limit,
                 "total": total
             }
+        }
+    }
+
+
+# SSG-020: Template Analysis Endpoints
+# NOTE: These routes MUST come before /{template_id} routes to avoid parameter capture
+
+
+@router.post("/analyze-url", status_code=status.HTTP_202_ACCEPTED)
+async def analyze_template_url(
+    request_body: dict,
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    Analyze an 11ty template from a GitHub URL.
+
+    - **github_url**: GitHub repository URL (https://github.com/user/repo)
+
+    Returns 202 Accepted with template_id for polling status.
+
+    REQUIREMENT: [x] POST /api/templates/analyze-url endpoint
+    REQUIREMENT: [x] Validates GitHub URL format
+    REQUIREMENT: [x] Creates template record in DynamoDB
+    REQUIREMENT: [x] Invokes template_analyzer Lambda asynchronously
+    REQUIREMENT: [x] Returns 202 Accepted with template_id
+    """
+    # Extract and validate input
+    github_url = request_body.get("github_url", "").strip()
+
+    if not github_url:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="github_url is required"
+        )
+
+    # Validate GitHub URL
+    is_valid, error_msg = validate_github_url(github_url)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=error_msg or "Invalid GitHub URL"
+        )
+
+    # Create template ID and analysis job
+    template_id = str(uuid.uuid4())
+    template_name = github_url.split("/")[-1].replace(".git", "")
+
+    # Store in DynamoDB
+    async with get_table() as table:
+        await create_template_analysis(table, template_id, github_url, user_id)
+
+    # Invoke Lambda asynchronously
+    invoke_template_analyzer_async(template_id, github_url, template_name)
+
+    # Return 202 Accepted
+    return {
+        "data": {
+            "template_id": template_id,
+            "status": "analyzing",
+            "message": "Template analysis started",
+            "poll_url": f"/api/templates/{template_id}/analysis-status"
+        },
+        "meta": {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        }
+    }
+
+
+@router.get("/{template_id}/analysis-status")
+async def get_template_analysis_status_endpoint(
+    template_id: str,
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    Get the analysis status of a template.
+
+    Returns current progress, inferred schema, and content types when complete.
+
+    REQUIREMENT: [x] GET /api/templates/{template_id}/analysis-status endpoint
+    REQUIREMENT: [x] Returns job progress (0-1.0)
+    REQUIREMENT: [x] Returns content types when analysis completes
+    REQUIREMENT: [x] Returns error if analysis failed
+    """
+    async with get_table() as table:
+        record = await get_template_analysis_status(table, template_id)
+
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Template '{template_id}' not found"
+        )
+
+    # Build response with status-specific fields
+    status_value = record.get("status", "analyzing")
+    response_data = {
+        "template_id": template_id,
+        "status": status_value,
+    }
+
+    if status_value == "analyzing":
+        response_data["progress"] = record.get("progress", 0.0)
+        response_data["message"] = record.get("message", "Analyzing template...")
+    elif status_value == "ready":
+        response_data["schema"] = record.get("schema")
+        response_data["content_types"] = record.get("content_types")
+        response_data["message"] = "Analysis complete"
+    elif status_value == "failed":
+        response_data["error"] = record.get("error", "Analysis failed")
+
+    return {
+        "data": response_data,
+        "meta": {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
         }
     }
 
