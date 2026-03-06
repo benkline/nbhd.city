@@ -16,6 +16,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import { validateContent } from '../../services/dynamicSchemaService';
 import styles from './EnhancedContentEditor.module.css';
 import MarkdownEditorToolbar from './MarkdownEditorToolbar';
 import FrontmatterForm from './FrontmatterForm';
@@ -196,20 +197,14 @@ export function EnhancedContentEditor({
   };
 
   const validateForm = () => {
-    const errors = {};
-
-    if (!templateSchema || !templateSchema.required) {
-      return errors;
+    if (!templateSchema || !templateSchema.properties) {
+      return {};
     }
 
-    templateSchema.required.forEach((field) => {
-      if (!frontmatter[field]) {
-        errors[field] = `${field} is required`;
-      }
-    });
-
-    setValidationErrors(errors);
-    return errors;
+    // Use dynamicSchemaService for comprehensive validation
+    const validationResult = validateContent(frontmatter, templateSchema);
+    setValidationErrors(validationResult.errors);
+    return validationResult.errors;
   };
 
   const handlePublish = async () => {

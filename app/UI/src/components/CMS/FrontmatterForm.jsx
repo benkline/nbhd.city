@@ -6,9 +6,13 @@
  * - Handles required field validation
  * - Auto-generates slug from title
  * - Defaults date to today
+ * - Uses dynamicSchemaService for field type mapping
+ * - Displays help text and constraints
+ * - Shows field descriptions
  */
 
 import React, { useEffect } from 'react';
+import { getFieldType } from '../../services/dynamicSchemaService';
 import styles from './EnhancedContentEditor.module.css';
 
 export function FrontmatterForm({
@@ -58,6 +62,9 @@ export function FrontmatterForm({
     const isRequired = requiredFields.includes(fieldName);
     const value = values[fieldName] || '';
     const error = errors[fieldName];
+    const fieldType = getFieldType(fieldSchema);
+    const label = fieldSchema.title || fieldName.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+    const helpText = fieldSchema.description || '';
 
     const fieldProps = {
       id: `field-${fieldName}`,
@@ -66,17 +73,147 @@ export function FrontmatterForm({
       ...(isRequired && { required: true })
     };
 
-    // Determine field type based on schema
-    if (fieldSchema.type === 'array') {
+    // Get constraint info for display
+    const constraints = [];
+    if (fieldSchema.minLength) constraints.push(`min ${fieldSchema.minLength} chars`);
+    if (fieldSchema.maxLength) constraints.push(`max ${fieldSchema.maxLength} chars`);
+    if (fieldSchema.minimum) constraints.push(`min ${fieldSchema.minimum}`);
+    if (fieldSchema.maximum) constraints.push(`max ${fieldSchema.maximum}`);
+
+    const constraintText = constraints.length > 0 ? ` (${constraints.join(', ')})` : '';
+
+    // Render based on field type from dynamicSchemaService
+    if (fieldType === 'select' && fieldSchema.enum) {
       return (
         <div key={fieldName} className={styles.formField}>
           <label htmlFor={fieldProps.id}>
-            {fieldSchema.description || fieldName}
+            {label}
             {isRequired && <span className={styles.required}>*</span>}
           </label>
+          {helpText && <p className={styles.helpText}>{helpText}</p>}
+          <select
+            {...fieldProps}
+            className={`${styles.input} ${error ? styles.error : ''}`}
+          >
+            <option value="">Select {label.toLowerCase()}...</option>
+            {fieldSchema.enum.map(option => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+          {error && <span className={styles.errorMessage}>{error}</span>}
+        </div>
+      );
+    }
+
+    if (fieldType === 'date') {
+      return (
+        <div key={fieldName} className={styles.formField}>
+          <label htmlFor={fieldProps.id}>
+            {label}
+            {isRequired && <span className={styles.required}>*</span>}
+          </label>
+          {helpText && <p className={styles.helpText}>{helpText}</p>}
+          <input
+            {...fieldProps}
+            type="date"
+            className={`${styles.input} ${error ? styles.error : ''}`}
+          />
+          {error && <span className={styles.errorMessage}>{error}</span>}
+        </div>
+      );
+    }
+
+    if (fieldType === 'datetime') {
+      return (
+        <div key={fieldName} className={styles.formField}>
+          <label htmlFor={fieldProps.id}>
+            {label}
+            {isRequired && <span className={styles.required}>*</span>}
+          </label>
+          {helpText && <p className={styles.helpText}>{helpText}</p>}
+          <input
+            {...fieldProps}
+            type="datetime-local"
+            className={`${styles.input} ${error ? styles.error : ''}`}
+          />
+          {error && <span className={styles.errorMessage}>{error}</span>}
+        </div>
+      );
+    }
+
+    if (fieldType === 'url') {
+      return (
+        <div key={fieldName} className={styles.formField}>
+          <label htmlFor={fieldProps.id}>
+            {label}
+            {isRequired && <span className={styles.required}>*</span>}
+          </label>
+          {helpText && <p className={styles.helpText}>{helpText}</p>}
+          <input
+            {...fieldProps}
+            type="url"
+            placeholder="https://example.com"
+            className={`${styles.input} ${error ? styles.error : ''}`}
+          />
+          {error && <span className={styles.errorMessage}>{error}</span>}
+        </div>
+      );
+    }
+
+    if (fieldType === 'number') {
+      return (
+        <div key={fieldName} className={styles.formField}>
+          <label htmlFor={fieldProps.id}>
+            {label}
+            {isRequired && <span className={styles.required}>*</span>}
+            {constraintText && <span className={styles.constraint}>{constraintText}</span>}
+          </label>
+          {helpText && <p className={styles.helpText}>{helpText}</p>}
+          <input
+            {...fieldProps}
+            type="number"
+            {...(fieldSchema.minimum && { min: fieldSchema.minimum })}
+            {...(fieldSchema.maximum && { max: fieldSchema.maximum })}
+            className={`${styles.input} ${error ? styles.error : ''}`}
+          />
+          {error && <span className={styles.errorMessage}>{error}</span>}
+        </div>
+      );
+    }
+
+    if (fieldType === 'checkbox') {
+      return (
+        <div key={fieldName} className={styles.formField}>
+          <label htmlFor={fieldProps.id} className={styles.checkboxLabel}>
+            <input
+              {...fieldProps}
+              type="checkbox"
+              checked={value === true}
+              onChange={(e) => handleFieldChange(fieldName, e.target.checked)}
+              className={styles.checkbox}
+            />
+            {label}
+          </label>
+          {helpText && <p className={styles.helpText}>{helpText}</p>}
+          {error && <span className={styles.errorMessage}>{error}</span>}
+        </div>
+      );
+    }
+
+    if (fieldType === 'tags') {
+      return (
+        <div key={fieldName} className={styles.formField}>
+          <label htmlFor={fieldProps.id}>
+            {label}
+            {isRequired && <span className={styles.required}>*</span>}
+            {fieldSchema.maxItems && <span className={styles.constraint}>(max {fieldSchema.maxItems} items)</span>}
+          </label>
+          {helpText && <p className={styles.helpText}>{helpText}</p>}
           <textarea
             {...fieldProps}
-            placeholder={`Enter ${fieldName} separated by commas`}
+            placeholder={`Enter ${label.toLowerCase()} separated by commas`}
             className={`${styles.input} ${styles.textarea} ${error ? styles.error : ''}`}
             value={Array.isArray(value) ? value.join(', ') : value}
             onChange={(e) => {
@@ -89,121 +226,21 @@ export function FrontmatterForm({
       );
     }
 
-    if (fieldSchema.type === 'string') {
-      if (fieldSchema.format === 'date') {
-        return (
-          <div key={fieldName} className={styles.formField}>
-            <label htmlFor={fieldProps.id}>
-              {fieldSchema.description || fieldName}
-              {isRequired && <span className={styles.required}>*</span>}
-            </label>
-            <input
-              {...fieldProps}
-              type="date"
-              className={`${styles.input} ${error ? styles.error : ''}`}
-            />
-            {error && <span className={styles.errorMessage}>{error}</span>}
-          </div>
-        );
-      }
-
-      if (fieldSchema.format === 'email') {
-        return (
-          <div key={fieldName} className={styles.formField}>
-            <label htmlFor={fieldProps.id}>
-              {fieldSchema.description || fieldName}
-              {isRequired && <span className={styles.required}>*</span>}
-            </label>
-            <input
-              {...fieldProps}
-              type="email"
-              className={`${styles.input} ${error ? styles.error : ''}`}
-            />
-            {error && <span className={styles.errorMessage}>{error}</span>}
-          </div>
-        );
-      }
-
-      if (fieldSchema.format === 'url') {
-        return (
-          <div key={fieldName} className={styles.formField}>
-            <label htmlFor={fieldProps.id}>
-              {fieldSchema.description || fieldName}
-              {isRequired && <span className={styles.required}>*</span>}
-            </label>
-            <input
-              {...fieldProps}
-              type="url"
-              className={`${styles.input} ${error ? styles.error : ''}`}
-            />
-            {error && <span className={styles.errorMessage}>{error}</span>}
-          </div>
-        );
-      }
-
-      // Default: text input
-      return (
-        <div key={fieldName} className={styles.formField}>
-          <label htmlFor={fieldProps.id}>
-            {fieldSchema.description || fieldName}
-            {isRequired && <span className={styles.required}>*</span>}
-          </label>
-          <input
-            {...fieldProps}
-            type="text"
-            placeholder={fieldSchema.description || fieldName}
-            className={`${styles.input} ${error ? styles.error : ''}`}
-          />
-          {error && <span className={styles.errorMessage}>{error}</span>}
-        </div>
-      );
-    }
-
-    if (fieldSchema.type === 'number' || fieldSchema.type === 'integer') {
-      return (
-        <div key={fieldName} className={styles.formField}>
-          <label htmlFor={fieldProps.id}>
-            {fieldSchema.description || fieldName}
-            {isRequired && <span className={styles.required}>*</span>}
-          </label>
-          <input
-            {...fieldProps}
-            type="number"
-            className={`${styles.input} ${error ? styles.error : ''}`}
-          />
-          {error && <span className={styles.errorMessage}>{error}</span>}
-        </div>
-      );
-    }
-
-    if (fieldSchema.type === 'boolean') {
-      return (
-        <div key={fieldName} className={styles.formField}>
-          <label htmlFor={fieldProps.id} className={styles.checkboxLabel}>
-            <input
-              {...fieldProps}
-              type="checkbox"
-              checked={value === true}
-              onChange={(e) => handleFieldChange(fieldName, e.target.checked)}
-              className={styles.checkbox}
-            />
-            {fieldSchema.description || fieldName}
-          </label>
-          {error && <span className={styles.errorMessage}>{error}</span>}
-        </div>
-      );
-    }
-
     // Default: text input
     return (
       <div key={fieldName} className={styles.formField}>
         <label htmlFor={fieldProps.id}>
-          {fieldSchema.description || fieldName}
+          {label}
           {isRequired && <span className={styles.required}>*</span>}
+          {constraintText && <span className={styles.constraint}>{constraintText}</span>}
         </label>
+        {helpText && <p className={styles.helpText}>{helpText}</p>}
         <input
           {...fieldProps}
           type="text"
+          placeholder={helpText || label}
+          {...(fieldSchema.minLength && { minLength: fieldSchema.minLength })}
+          {...(fieldSchema.maxLength && { maxLength: fieldSchema.maxLength })}
           className={`${styles.input} ${error ? styles.error : ''}`}
         />
         {error && <span className={styles.errorMessage}>{error}</span>}
