@@ -12,14 +12,24 @@ import json
 from typing import Dict, Any, Optional
 from datetime import datetime
 
+import boto3
+from botocore.exceptions import ClientError
+import aioboto3
+
 from validator import validate_eleventy_project
 from analyzer import analyze_template
 from clone import clone_repository, cleanup_directory, get_commit_sha
 
 
-# Mock DynamoDB client (would be real boto3 in production)
+# DynamoDB client for persisting analysis results
 class DynamoDBClient:
-    """Mock DynamoDB client for testing."""
+    """DynamoDB client for storing template analysis results."""
+
+    def __init__(self):
+        """Initialize DynamoDB client."""
+        self.table_name = os.getenv('DYNAMODB_TABLE', 'nbhd-city')
+        self.region = os.getenv('AWS_REGION', 'us-east-1')
+        self.session = aioboto3.Session()
 
     async def update_template_status(
         self,
@@ -27,21 +37,120 @@ class DynamoDBClient:
         status: str,
         progress: Optional[float] = None,
         error: Optional[str] = None,
+        message: Optional[str] = None,
         **kwargs
     ) -> bool:
-        """Update template status in DynamoDB."""
-        print(f"[STATUS] Template {template_id}: {status} "
-              f"(progress: {progress}, error: {error})")
-        return True
+        """
+        Update template analysis status in DynamoDB.
+
+        Updates TEMPLATE#{template_id}#ANALYSIS record with progress and status.
+        """
+        try:
+            async with self.session.resource('dynamodb', region_name=self.region) as dynamodb:
+                table = await dynamodb.Table(self.table_name)
+
+                # Build update expression
+                update_expr = "SET #status = :status, updated_at = :updated_at"
+                expr_values = {
+                    ":status": status,
+                    ":updated_at": datetime.utcnow().isoformat() + "Z"
+                }
+                expr_names = {"#status": "status"}
+
+                if progress is not None:
+                    update_expr += ", progress = :progress"
+                    expr_values[":progress"] = progress
+
+                if message is not None:
+                    update_expr += ", message = :message"
+                    expr_values[":message"] = message
+
+                if error is not None:
+                    update_expr += ", error = :error"
+                    expr_values[":error"] = error
+
+                # Update ANALYSIS record
+                await table.update_item(
+                    Key={
+                        "PK": f"TEMPLATE#{template_id}",
+                        "SK": "ANALYSIS"
+                    },
+                    UpdateExpression=update_expr,
+                    ExpressionAttributeNames=expr_names,
+                    ExpressionAttributeValues=expr_values
+                )
+
+                print(f"[DynamoDB] Updated analysis status: {template_id} -> {status}")
+                return True
+
+        except ClientError as e:
+            print(f"[DynamoDB Error] Failed to update status: {str(e)}")
+            return False
 
     async def update_template_record(
         self,
         template_id: str,
         updates: Dict[str, Any]
     ) -> bool:
-        """Update template record in DynamoDB."""
-        print(f"[RECORD] Template {template_id} updated with: {list(updates.keys())}")
-        return True
+        """
+        Update template metadata and analysis results in DynamoDB.
+
+        Stores:
+        - TEMPLATE#{id}#METADATA: github_url, commit_sha, analysis_date
+        - TEMPLATE#{id}#CONTENT_TYPES: inferred schemas for each content type
+        - TEMPLATE#{id}#SAMPLES: example records from each content type
+        """
+        try:
+            async with self.session.resource('dynamodb', region_name=self.region) as dynamodb:
+                table = await dynamodb.Table(self.table_name)
+
+                # Store METADATA
+                if "github_url" in updates or "commit_sha" in updates:
+                    metadata = {
+                        "PK": f"TEMPLATE#{template_id}",
+                        "SK": "METADATA",
+                        "template_id": template_id,
+                        "updated_at": datetime.utcnow().isoformat() + "Z"
+                    }
+                    if "github_url" in updates:
+                        metadata["github_url"] = updates["github_url"]
+                    if "commit_sha" in updates:
+                        metadata["commit_sha"] = updates["commit_sha"]
+                    if "analysis_date" in updates:
+                        metadata["analysis_date"] = updates["analysis_date"]
+
+                    await table.put_item(Item=metadata)
+                    print(f"[DynamoDB] Stored METADATA for {template_id}")
+
+                # Store CONTENT_TYPES
+                if "content_types" in updates:
+                    content_types = {
+                        "PK": f"TEMPLATE#{template_id}",
+                        "SK": "CONTENT_TYPES",
+                        "template_id": template_id,
+                        "content_types": updates["content_types"],
+                        "updated_at": datetime.utcnow().isoformat() + "Z"
+                    }
+                    await table.put_item(Item=content_types)
+                    print(f"[DynamoDB] Stored CONTENT_TYPES for {template_id}")
+
+                # Store SAMPLES
+                if "samples" in updates:
+                    samples = {
+                        "PK": f"TEMPLATE#{template_id}",
+                        "SK": "SAMPLES",
+                        "template_id": template_id,
+                        "samples": updates["samples"],
+                        "updated_at": datetime.utcnow().isoformat() + "Z"
+                    }
+                    await table.put_item(Item=samples)
+                    print(f"[DynamoDB] Stored SAMPLES for {template_id}")
+
+                return True
+
+        except ClientError as e:
+            print(f"[DynamoDB Error] Failed to update records: {str(e)}")
+            return False
 
 
 # Global DynamoDB client
@@ -163,12 +272,13 @@ async def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         # 7. Get commit SHA
         commit_sha = get_commit_sha(build_dir)
 
-        # 8. Update DynamoDB record
+        # 8. Update DynamoDB record with analysis results
         update_data = {
-            "status": "ready",
-            "analyzed_at": datetime.utcnow().isoformat() + "Z",
-            "github_commit_sha": commit_sha,
+            "github_url": github_url,
+            "commit_sha": commit_sha,
+            "analysis_date": datetime.utcnow().isoformat() + "Z",
             "content_types": result.get("content_types", {}),
+            "samples": result.get("samples", {})  # Example records from each content type
         }
 
         await update_template_record(template_id, update_data)
