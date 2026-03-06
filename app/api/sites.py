@@ -375,6 +375,116 @@ async def delete_site(
         )
 
 
+@router.get("/{site_id}/settings")
+async def get_settings(
+    site_id: str,
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    Get site settings.
+
+    Returns settings object for the site if user is the owner.
+    """
+    from dynamodb_client import get_dynamodb_table
+    from dynamodb_repository import get_site as get_site_db
+
+    try:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        # Verify ownership
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this site's settings"
+            )
+
+        settings = site.get("settings", {})
+
+        return {
+            "data": settings,
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get site settings: {str(e)}"
+        )
+
+
+@router.put("/{site_id}/settings")
+async def update_settings(
+    site_id: str,
+    settings_data: dict,
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    Update site settings.
+
+    Saves settings object for the site.
+    """
+    from dynamodb_client import get_dynamodb_table
+    from dynamodb_repository import get_site as get_site_db
+
+    try:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        # Verify ownership
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to update this site's settings"
+            )
+
+        # Update settings in DynamoDB
+        now = datetime.utcnow().isoformat() + "Z"
+        await table.update_item(
+            Key={"PK": f"SITE#{site_id}", "SK": "METADATA"},
+            UpdateExpression="SET settings = :settings, updated_at = :now",
+            ExpressionAttributeValues={
+                ":settings": settings_data,
+                ":now": now
+            }
+        )
+
+        # Fetch updated site
+        updated_site = await get_site_db(table, site_id)
+        updated_settings = updated_site.get("settings", {})
+
+        return {
+            "data": updated_settings,
+            "meta": {
+                "timestamp": now,
+                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update site settings: {str(e)}"
+        )
+
+
 # SSG-011: Content Records API
 
 @router.post("/{site_id}/content", status_code=status.HTTP_201_CREATED)

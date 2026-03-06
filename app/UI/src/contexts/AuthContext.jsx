@@ -8,16 +8,24 @@ export function AuthProvider({ children }) {
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // TODO: Re-enable token verification when ngrok plugin is back up
   // Initialize auth state from localStorage
   useEffect(() => {
-    const storedToken = localStorage.getItem('auth_token');
-    if (storedToken) {
-      setToken(storedToken);
-      // Optionally verify token by calling /auth/me
-      verifyToken(storedToken);
-    } else {
-      setIsLoading(false);
-    }
+    // For development: skip auth verification, just set a dev token
+    setToken('dev-token-no-auth');
+    setUser({ id: 'dev-user', handle: 'dev' });
+    setNeedsOnboarding(false);
+    setIsLoading(false);
+
+    // Original code commented out:
+    // const storedToken = localStorage.getItem('auth_token');
+    // if (storedToken) {
+    //   setToken(storedToken);
+    //   // Optionally verify token by calling /auth/me
+    //   verifyToken(storedToken);
+    // } else {
+    //   setIsLoading(false);
+    // }
   }, []);
 
   const verifyToken = async (authToken) => {

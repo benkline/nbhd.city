@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '../../lib/api';
+import apiClient from '../../lib/api';
 import ContentTableRow from './ContentTableRow';
 import ContentFilters from './ContentFilters';
 import ContentSearch from './ContentSearch';

@@ -207,7 +207,7 @@ export function SiteManagementDashboard({ siteType, nbhdId, onEdit, onDelete: on
     if (onEdit) {
       onEdit(site);
     } else {
-      navigate(`/site-editor/${site.site_id}`);
+      navigate(`/sites/${site.site_id}/cms`);
     }
   };
 

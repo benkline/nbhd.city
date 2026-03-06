@@ -124,7 +124,7 @@ export default function SiteEditor() {
 
   const handleEditSite = () => {
     if (createdSite) {
-      navigate(`/personal-sites?edit=${createdSite.site_id}`);
+      navigate(`/sites/${createdSite.site_id}/cms`);
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useWindowSize } from '../../hooks/useWindowSize';
+import siteContentService from '../../services/siteContentService';
 import PageEditor from './PageEditor';
 import PageTreeView from './PageTreeView';
 import styles from './PageManager.module.css';
@@ -19,16 +20,14 @@ import styles from './PageManager.module.css';
  * - Drag-to-reorder on desktop
  * - Move up/down buttons on mobile
  * - Generate correct URLs for nested pages
- * - Save to app.nbhd.page collection
+ * - Uses DynamoDB API for persistence
  */
 const PageManager = ({
-  siteId,
-  namespace = 'app.nbhd',
-  // Allow injecting a data service for testing
-  dataService = null
+  siteId
 }) => {
   const [pages, setPages] = useState([]);
   const [selectedPageId, setSelectedPageId] = useState(null);
+  const [selectedPageRkey, setSelectedPageRkey] = useState(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,66 +38,39 @@ const PageManager = ({
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
-  // Initialize Firebase data service
-  const [firebaseService, setFirebaseService] = useState(dataService);
-
+  // Load pages from DynamoDB API
   useEffect(() => {
-    if (!firebaseService && !dataService) {
-      // Only initialize Firebase in production (when no test data service provided)
-      const initFirebase = async () => {
-        try {
-          const { initFirebaseService } = await import('../../services/firebaseService');
-          setFirebaseService(initFirebaseService());
-        } catch (err) {
-          console.error('Error initializing Firebase:', err);
-        }
-      };
-      initFirebase();
-    }
-  }, [firebaseService, dataService]);
-
-  // Load pages from data service
-  useEffect(() => {
-    if (!firebaseService) {
-      setIsLoading(true);
-      return;
-    }
-
     const loadPages = async () => {
       try {
         setIsLoading(true);
-        const unsubscribe = firebaseService.subscribeToPagesForSite(
-          siteId,
-          namespace,
-          (loadedPages) => {
-            const sorted = sortPages(loadedPages);
-            setPages(sorted);
-            setError(null);
-          },
-          (err) => {
-            console.error('Error loading pages:', err);
-            setError('Failed to load pages');
-          }
-        );
+        const content = await siteContentService.getContent(siteId, { content_type: 'page' });
 
-        setIsLoading(false);
-        return unsubscribe;
+        // Transform AT Protocol records to page objects
+        const pageList = content.map(record => ({
+          rkey: record.rkey,
+          id: record.rkey,
+          title: record.frontmatter?.title || 'Untitled',
+          slug: record.frontmatter?.slug || '',
+          parent_id: record.frontmatter?.parent_id || null,
+          order: record.frontmatter?.order || 0,
+          content: record.value || ''
+        }));
+
+        const sorted = sortPages(pageList);
+        setPages(sorted);
+        setError(null);
       } catch (err) {
-        console.error('Error setting up page listener:', err);
-        setError('Failed to initialize page manager');
+        console.error('Error loading pages:', err);
+        setError('Failed to load pages');
+      } finally {
         setIsLoading(false);
       }
     };
 
-    let unsubscribe;
-    loadPages().then(fn => {
-      unsubscribe = fn;
-    });
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [firebaseService, siteId, namespace]);
+    if (siteId) {
+      loadPages();
+    }
+  }, [siteId]);
 
   /**
    * Sort pages by parent_id and order
@@ -216,16 +188,17 @@ const PageManager = ({
    * Confirm deletion
    */
   const confirmDelete = useCallback(async () => {
-    if (!deletingPageId || !firebaseService) return;
+    if (!deletingPageId || !siteId) return;
 
     try {
-      await firebaseService.deletePage(deletingPageId, namespace);
+      await siteContentService.deleteContent(siteId, deletingPageId);
+      setPages(pages.filter(p => p.id !== deletingPageId));
       setDeletingPageId(null);
     } catch (err) {
       console.error('Error deleting page:', err);
       setError('Failed to delete page');
     }
-  }, [deletingPageId, firebaseService, namespace]);
+  }, [deletingPageId, siteId, pages]);
 
   /**
    * Handle drag start
@@ -251,7 +224,7 @@ const PageManager = ({
     e.preventDefault();
 
     const draggedId = e.dataTransfer.getData('text/plain') || draggedPageId;
-    if (!draggedId || draggedId === targetPageId || !firebaseService) return;
+    if (!draggedId || draggedId === targetPageId || !siteId) return;
 
     try {
       const draggedPage = pages.find(p => p.id === draggedId);
@@ -259,40 +232,42 @@ const PageManager = ({
 
       if (!draggedPage || !targetPage) return;
 
-      if (draggedPage.parent_id === targetPage.parent_id) {
-        // Reorder
-        await firebaseService.reorderPages(
-          draggedId,
-          targetPageId,
-          draggedPage,
-          targetPage,
-          namespace
-        );
-      } else {
-        // Change parent
-        const childrenOfTarget = getPageChildren(targetPageId);
-        const newOrder = childrenOfTarget.length;
+      // Update the dragged page with new parent and order
+      const updatedFrontmatter = {
+        ...draggedPage,
+        parent_id: targetPage.parent_id,
+        order: (targetPage.order || 0) + 0.5
+      };
 
-        await firebaseService.updatePageParent(
-          draggedId,
-          targetPageId,
-          newOrder,
-          namespace
-        );
-      }
+      await siteContentService.updateContent(siteId, draggedId, {
+        frontmatter: updatedFrontmatter
+      });
+
+      // Reload pages to reflect changes
+      const content = await siteContentService.getContent(siteId, { content_type: 'page' });
+      const pageList = content.map(record => ({
+        rkey: record.rkey,
+        id: record.rkey,
+        title: record.frontmatter?.title || 'Untitled',
+        slug: record.frontmatter?.slug || '',
+        parent_id: record.frontmatter?.parent_id || null,
+        order: record.frontmatter?.order || 0,
+        content: record.value || ''
+      }));
+      setPages(sortPages(pageList));
     } catch (err) {
       console.error('Error reordering pages:', err);
       setError('Failed to reorder pages');
     }
 
     setDraggedPageId(null);
-  }, [pages, draggedPageId, getPageChildren, firebaseService, namespace]);
+  }, [pages, draggedPageId, siteId]);
 
   /**
    * Handle move page on mobile
    */
   const handleMovePageMobile = useCallback(async (pageId, direction) => {
-    if (!firebaseService) return;
+    if (!siteId) return;
 
     try {
       const page = pages.find(p => p.id === pageId);
@@ -303,32 +278,41 @@ const PageManager = ({
       );
 
       siblings.sort((a, b) => (a.order || 0) - (b.order || 0));
-      const currentIndex = siblings.findIndex(s => s.order === page.order);
+      const currentIndex = siblings.findIndex(s => s.id === pageId);
 
       if (direction === 'up' && currentIndex > 0) {
         const sibling = siblings[currentIndex - 1];
-        await firebaseService.reorderPages(
-          pageId,
-          sibling.id,
-          page,
-          sibling,
-          namespace
-        );
+        const newOrder = (sibling.order || 0) - 0.5;
+
+        await siteContentService.updateContent(siteId, pageId, {
+          frontmatter: { ...page, order: newOrder }
+        });
       } else if (direction === 'down' && currentIndex < siblings.length - 1) {
         const sibling = siblings[currentIndex + 1];
-        await firebaseService.reorderPages(
-          pageId,
-          sibling.id,
-          page,
-          sibling,
-          namespace
-        );
+        const newOrder = (sibling.order || 0) + 0.5;
+
+        await siteContentService.updateContent(siteId, pageId, {
+          frontmatter: { ...page, order: newOrder }
+        });
       }
+
+      // Reload pages
+      const content = await siteContentService.getContent(siteId, { content_type: 'page' });
+      const pageList = content.map(record => ({
+        rkey: record.rkey,
+        id: record.rkey,
+        title: record.frontmatter?.title || 'Untitled',
+        slug: record.frontmatter?.slug || '',
+        parent_id: record.frontmatter?.parent_id || null,
+        order: record.frontmatter?.order || 0,
+        content: record.value || ''
+      }));
+      setPages(sortPages(pageList));
     } catch (err) {
       console.error('Error moving page:', err);
       setError('Failed to move page');
     }
-  }, [pages, firebaseService, namespace]);
+  }, [pages, siteId]);
 
   if (isLoading) {
     return (
@@ -456,8 +440,6 @@ const PageManager = ({
           pages={pages}
           onClose={handleCloseEditor}
           onSave={handlePageSaved}
-          namespace={namespace}
-          dataService={firebaseService}
         />
       )}
 

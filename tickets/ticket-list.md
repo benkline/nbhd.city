@@ -1,6 +1,6 @@
 # Ticket Priority Order & Timeline
 
-**Last Updated:** 2026-02-07
+**Last Updated:** 2026-03-06
 
 **NOTE:** Detailed ticket descriptions and acceptance criteria are in [tickets.md](./tickets.md). This document provides the priority order, phase dependencies, and timeline overview.
 
@@ -106,6 +106,36 @@ Core platform foundation
 - [ ] FL-9.3 (Persistent Sessions & Token Refresh)
 - [ ] FL-9.4 (User Onboarding After First Login)
 - [ ] FL-9.5 (Logout Flow & Session Cleanup)
+
+### 🆕 Phase 11: 11ty Project URL Upload & Content Workflow (Weeks TBD)
+
+**Priority: HIGH** - Enables core user workflow of uploading custom 11ty templates
+
+**Depends on:** Phase 2 (AT Protocol), Phase 3-5 (Template/Content APIs), Phase 6 (Build Pipeline)
+
+**Objective:** End-to-end workflow - GitHub URL → Analyze → Infer Schema → Dynamic CMS → Add Content → Deploy
+
+**Implementation Order:**
+1. [ ] SSG-020 (Template Analysis API Endpoint) - Backend foundation
+2. [ ] SSG-021 (Enhanced Template Analyzer Lambda) - Lambda enhancement
+3. [ ] SSG-022 (Dynamic Schema Service) - Frontend service layer
+4. [ ] SSG-019 (Template URL Upload Component) - Frontend input
+5. [ ] SSG-023 (Template Schema to CMS Integration) - Frontend integration
+6. [ ] SSG-024 (Content Save & Retrieval API Integration) - Backend verification
+7. [ ] SSG-025 (Build Trigger and Status UI) - Frontend build UI
+8. [ ] SSG-026 (Build Pipeline & S3 Infrastructure Verification) - DevOps verification
+9. [ ] SSG-027 (End-to-End Workflow Testing) - Integration testing
+
+**Summary:**
+- [ ] SSG-019 (Template URL Upload Component) - User enters GitHub URL, shows analysis progress
+- [ ] SSG-020 (Template Analysis API Endpoint) - Async job endpoint for analysis
+- [ ] SSG-021 (Enhanced Template Analyzer Lambda) - Validate 11ty, parse frontmatter, infer schemas
+- [ ] SSG-022 (Dynamic Schema Service) - Transform schema to forms and validators
+- [ ] SSG-023 (Template Schema to CMS Integration) - Connect schema to CMS components
+- [ ] SSG-024 (Content Save & Retrieval API Integration) - Verify content APIs work correctly
+- [ ] SSG-025 (Build Trigger and Status UI) - Show build button and progress
+- [ ] SSG-026 (Build Pipeline & S3 Infrastructure Verification) - Ensure Terraform is configured
+- [ ] SSG-027 (End-to-End Workflow Testing) - Integration tests for full workflow
 
 ### 🐛 Bugfix Tickets: Critical Profile & Endpoint Issues
 
