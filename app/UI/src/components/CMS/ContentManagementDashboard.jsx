@@ -2,6 +2,9 @@ import { useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { ContentStats } from './ContentStats';
 import { RecentActivityFeed } from './RecentActivityFeed';
+import { BuildTriggerButton } from '../SiteBuilder/BuildTriggerButton';
+import { BuildStatusPoller } from '../SiteBuilder/BuildStatusPoller';
+import { BuildHistory } from '../SiteBuilder/BuildHistory';
 import styles from './ContentDashboard.module.css';
 
 export const ContentManagementDashboard = ({
@@ -30,6 +33,9 @@ export const ContentManagementDashboard = ({
 
   const [statusFilter, setStatusFilter] = useState(null);
   const [buildPolling, setBuildPolling] = useState(false);
+  const [activeBuildJobId, setActiveBuildJobId] = useState(null);
+  const [buildResults, setBuildResults] = useState(null);
+  const [showBuildSuccess, setShowBuildSuccess] = useState(false);
 
   // Fetch initial data
   useEffect(() => {
@@ -135,26 +141,6 @@ export const ContentManagementDashboard = ({
     [onNavigate]
   );
 
-  const handleBuildNow = useCallback(() => {
-    setBuildPolling(true);
-    setBuildStatus((prev) => ({
-      ...prev,
-      isBuilding: true,
-    }));
-
-    // In a real app, trigger build via API
-    // POST /api/sites/{siteId}/build
-
-    // Auto-stop polling after 1 minute for demo
-    setTimeout(() => {
-      setBuildPolling(false);
-      setBuildStatus((prev) => ({
-        ...prev,
-        isBuilding: false,
-        lastBuildTime: 'just now',
-      }));
-    }, 60000);
-  }, []);
 
   const handleActivityClick = useCallback((activity) => {
     if (onNavigate) {
@@ -165,6 +151,29 @@ export const ContentManagementDashboard = ({
       onNavigate('edit-content', { id: activity.id, path });
     }
   }, [onNavigate]);
+
+  const handleBuildTriggered = useCallback((jobId) => {
+    setActiveBuildJobId(jobId);
+    setBuildStatus(prev => ({
+      ...prev,
+      isBuilding: true
+    }));
+  }, []);
+
+  const handleBuildComplete = useCallback((result) => {
+    setBuildResults(result);
+    setBuildStatus(prev => ({
+      ...prev,
+      isBuilding: false,
+      lastBuildTime: 'just now'
+    }));
+    setShowBuildSuccess(result.status === 'completed');
+    setActiveBuildJobId(null);
+  }, []);
+
+  const handleBuildPollerClose = useCallback(() => {
+    setActiveBuildJobId(null);
+  }, []);
 
   if (error) {
     return (
@@ -238,8 +247,8 @@ export const ContentManagementDashboard = ({
       </section>
 
       {/* Build Status Section */}
-      <section className={styles.buildStatusContainer} role="region" aria-label="Build Status">
-        <h2 className={styles.sectionTitle}>Build Status</h2>
+      <section className={styles.buildStatusContainer} role="region" aria-label="Build & Deploy">
+        <h2 className={styles.sectionTitle}>Build & Deploy</h2>
         <div className={styles.buildStatus}>
           <div className={styles.buildInfo}>
             <div className={styles.statusIndicator}>
@@ -257,16 +266,52 @@ export const ContentManagementDashboard = ({
               <p className={styles.scheduledBuild}>Next scheduled build: in 1 hour</p>
             )}
           </div>
-          <button
-            className={`${styles.buildButton} ${buildStatus.isBuilding ? styles.disabled : ''}`}
-            onClick={handleBuildNow}
-            disabled={buildStatus.isBuilding}
-            aria-label="Trigger site build"
-          >
-            {buildStatus.isBuilding ? 'Building...' : 'Build Now'}
-          </button>
+          <BuildTriggerButton
+            site={{ site_id: siteId, status: buildStatus.isBuilding ? 'building' : 'ready' }}
+            onBuildTriggered={handleBuildTriggered}
+          />
         </div>
+
+        {/* Build Success Message */}
+        {showBuildSuccess && buildResults && (
+          <div className={styles.successMessage} role="alert">
+            <div className={styles.successContent}>
+              <p className={styles.successIcon}>✅</p>
+              <div className={styles.successText}>
+                <h3>Deployment Successful!</h3>
+                <p>Your site is now live.</p>
+                {buildResults.deployment_url && (
+                  <p className={styles.siteUrl}>
+                    Live at:{' '}
+                    <a
+                      href={buildResults.deployment_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.urlLink}
+                    >
+                      {buildResults.deployment_url}
+                    </a>
+                  </p>
+                )}
+              </div>
+              <button
+                className={styles.closeSuccess}
+                onClick={() => setShowBuildSuccess(false)}
+                aria-label="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
       </section>
+
+      {/* Build History Section */}
+      {siteId && (
+        <section className={styles.buildHistoryContainer} role="region" aria-label="Build History">
+          <BuildHistory siteId={siteId} />
+        </section>
+      )}
 
       {/* Recent Activity Section */}
       <RecentActivityFeed
@@ -280,6 +325,18 @@ export const ContentManagementDashboard = ({
         <div className={styles.loadingOverlay}>
           <div className={styles.spinner} />
           <p>Loading dashboard...</p>
+        </div>
+      )}
+
+      {/* Active Build Status Modal */}
+      {activeBuildJobId && (
+        <div className={styles.buildModal}>
+          <BuildStatusPoller
+            site={{ site_id: siteId, title: siteType === 'neighborhood' ? 'Neighborhood Site' : 'Personal Site' }}
+            jobId={activeBuildJobId}
+            onBuildComplete={handleBuildComplete}
+            onClose={handleBuildPollerClose}
+          />
         </div>
       )}
     </main>
