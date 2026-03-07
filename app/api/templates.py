@@ -382,32 +382,35 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                 import sys
                 import os
 
-                # Log diagnostic info for path resolution
-                logger.info(f"[{template_id}] Path resolution: checking /app/lambda/template_analyzer")
-                logger.info(f"[{template_id}] CWD: {os.getcwd()}")
-                logger.info(f"[{template_id}] __file__: {__file__}")
+                # Use print() for diagnostic output so it shows in Docker logs
+                print(f"\n{'='*60}")
+                print(f"[ANALYZER {template_id}] Starting path resolution")
+                print(f"[ANALYZER {template_id}] CWD: {os.getcwd()}")
+                print(f"[ANALYZER {template_id}] __file__: {__file__}")
+                print(f"{'='*60}")
 
                 # Check if path exists
-                app_lambda_exists = os.path.exists('/app/lambda/template_analyzer')
-                logger.info(f"[{template_id}] /app/lambda/template_analyzer exists: {app_lambda_exists}")
+                docker_path = '/app/lambda/template_analyzer'
+                app_lambda_exists = os.path.exists(docker_path)
+                print(f"[ANALYZER {template_id}] {docker_path} exists: {app_lambda_exists}")
 
                 # Debug: list /app directory contents
                 if os.path.exists('/app'):
                     app_contents = os.listdir('/app')
-                    logger.info(f"[{template_id}] /app contents: {app_contents}")
+                    print(f"[ANALYZER {template_id}] /app contents: {app_contents}")
 
                 if os.path.exists('/app/lambda'):
                     lambda_contents = os.listdir('/app/lambda')
-                    logger.info(f"[{template_id}] /app/lambda contents: {lambda_contents}")
+                    print(f"[ANALYZER {template_id}] /app/lambda contents: {lambda_contents}")
 
                 if app_lambda_exists:
-                    lambda_base = '/app/lambda/template_analyzer'
-                    logger.info(f"[{template_id}] Using Docker path: {lambda_base}")
+                    lambda_base = docker_path
+                    print(f"[ANALYZER {template_id}] ✓ Using Docker path: {lambda_base}")
                 else:
                     # Local development - try relative path
                     lambda_base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'lambda', 'template_analyzer'))
-                    logger.info(f"[{template_id}] Using local path: {lambda_base}")
-                    logger.info(f"[{template_id}] Local path exists: {os.path.exists(lambda_base)}")
+                    print(f"[ANALYZER {template_id}] Using local path: {lambda_base}")
+                    print(f"[ANALYZER {template_id}] Local path exists: {os.path.exists(lambda_base)}")
 
                 # Load analyzer module dynamically
                 analyzer_path = os.path.join(lambda_base, "analyzer.py")
@@ -550,8 +553,11 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                 traceback.print_exc()
 
         # Start in background thread
+        print(f"\n[INVOKE] Starting background analyzer thread for template {template_id}")
+        print(f"[INVOKE] GitHub URL: {github_url}")
         thread = threading.Thread(target=run_analyzer_in_thread, daemon=True)
         thread.start()
+        print(f"[INVOKE] Thread started, returning 202\n")
         return True
     else:
         # Production mode: invoke real AWS Lambda
