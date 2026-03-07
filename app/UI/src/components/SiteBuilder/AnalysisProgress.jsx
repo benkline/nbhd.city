@@ -17,16 +17,30 @@ export function AnalysisProgress({ isOpen, templateId, status, error, onClose, o
   const [estimatedTime, setEstimatedTime] = useState('~1 minute');
   const [currentStatus, setCurrentStatus] = useState(status);
 
+  // Debug logging
+  console.log('[AnalysisProgress] Component mounted/updated:', {
+    isOpen,
+    templateId,
+    status,
+    currentStatus
+  });
+
   // Poll for status updates
   useEffect(() => {
+    console.log('[AnalysisProgress] useEffect triggered with:', { isOpen, templateId, currentStatus });
+
     if (!isOpen || !templateId) {
+      console.log('[AnalysisProgress] Exiting - isOpen:', isOpen, 'templateId:', templateId);
       return;
     }
 
     // Don't poll if already ready or failed
     if (currentStatus === 'ready' || currentStatus === 'failed') {
+      console.log('[AnalysisProgress] Exiting - already done. currentStatus:', currentStatus);
       return;
     }
+
+    console.log('[AnalysisProgress] Starting polling for templateId:', templateId);
 
     const pollStatus = async () => {
       try {

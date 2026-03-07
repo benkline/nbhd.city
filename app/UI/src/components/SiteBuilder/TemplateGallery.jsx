@@ -37,6 +37,58 @@ export function TemplateGallery({ onSelect }) {
     fetchTemplates();
   }, []);
 
+  // Poll for custom template status updates
+  useEffect(() => {
+    if (customTemplates.length === 0) {
+      return;
+    }
+
+    // Check if any template is still analyzing
+    const hasAnalyzing = customTemplates.some(t => t.status === 'analyzing');
+    if (!hasAnalyzing) {
+      return; // Stop polling when all are done
+    }
+
+    const pollCustomTemplateStatus = async () => {
+      try {
+        // Poll each analyzing template
+        const updates = await Promise.all(
+          customTemplates
+            .filter(t => t.status === 'analyzing')
+            .map(t =>
+              fetch(`/api/templates/custom/${t.id}/status`)
+                .then(res => res.ok ? res.json() : null)
+                .then(data => ({
+                  id: t.id,
+                  status: data?.data?.status || t.status,
+                  error: data?.data?.error,
+                  content_types: data?.data?.content_types,
+                  schema: data?.data?.schema
+                }))
+                .catch(() => ({ id: t.id, status: t.status }))
+            )
+        );
+
+        // Update templates that have changed status
+        setCustomTemplates(prev =>
+          prev.map(t => {
+            const update = updates.find(u => u.id === t.id);
+            if (update && update.status !== t.status) {
+              console.log(`[TemplateGallery] Template ${t.id} status updated: ${t.status} → ${update.status}`);
+              return { ...t, ...update };
+            }
+            return t;
+          })
+        );
+      } catch (err) {
+        console.error('[TemplateGallery] Error polling template status:', err);
+      }
+    };
+
+    const interval = setInterval(pollCustomTemplateStatus, 2000);
+    return () => clearInterval(interval);
+  }, [customTemplates]);
+
   const handleViewDetails = (template) => {
     setSelectedTemplate(template);
     setShowDetailsModal(true);
