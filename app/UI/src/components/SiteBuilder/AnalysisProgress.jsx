@@ -15,28 +15,52 @@ export function AnalysisProgress({ isOpen, templateId, status, error, onClose, o
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState('Initializing');
   const [estimatedTime, setEstimatedTime] = useState('~1 minute');
+  const [currentStatus, setCurrentStatus] = useState(status);
 
-  // Poll for progress updates
+  // Poll for status updates
   useEffect(() => {
     if (!isOpen || !templateId || status !== 'analyzing') {
       return;
     }
 
-    const pollProgress = async () => {
+    const pollStatus = async () => {
       try {
-        const response = await fetch(`/api/templates/custom/${templateId}/progress`);
+        const response = await fetch(`/api/templates/custom/${templateId}/status`);
         if (response.ok) {
           const data = await response.json();
-          setProgress(data.progress || 0);
-          setStage(data.stage || 'Processing');
-          setEstimatedTime(data.estimated_time || '~1 minute');
+          const statusData = data.data;
+
+          // Update progress if available
+          if (statusData.progress !== undefined) {
+            const progressValue = typeof statusData.progress === 'number'
+              ? statusData.progress * 100
+              : 0;
+            setProgress(Math.min(progressValue, 99)); // Cap at 99% until complete
+          }
+
+          // Update message
+          if (statusData.message) {
+            setStage(statusData.message);
+          }
+
+          // Update current status and auto-close when analysis is ready
+          if (statusData.status === 'ready') {
+            setProgress(100);
+            setCurrentStatus('ready');
+            setStage('Analysis Complete!');
+            // Auto-close after showing success
+            setTimeout(onClose, 1500);
+          } else if (statusData.status === 'failed') {
+            setCurrentStatus('failed');
+            setStage('Analysis Failed');
+          }
         }
       } catch (err) {
-        console.error('Failed to fetch progress:', err);
+        console.error('Failed to fetch status:', err);
       }
     };
 
-    const interval = setInterval(pollProgress, 1000);
+    const interval = setInterval(pollStatus, 1000);
     return () => clearInterval(interval);
   }, [isOpen, templateId, status]);
 
@@ -61,7 +85,7 @@ export function AnalysisProgress({ isOpen, templateId, status, error, onClose, o
             className={styles.closeButton}
             onClick={onClose}
             aria-label="Close"
-            disabled={status === 'analyzing'}
+            disabled={currentStatus === 'analyzing'}
           >
             ✕
           </button>
@@ -69,7 +93,7 @@ export function AnalysisProgress({ isOpen, templateId, status, error, onClose, o
 
         {/* Content */}
         <div className={styles.content}>
-          {status === 'analyzing' && (
+          {currentStatus === 'analyzing' && (
             <>
               {/* Progress Display */}
               <div className={styles.progressSection}>
@@ -107,7 +131,7 @@ export function AnalysisProgress({ isOpen, templateId, status, error, onClose, o
             </>
           )}
 
-          {status === 'ready' && (
+          {currentStatus === 'ready' && (
             <div className={styles.successContent}>
               <div className={styles.successIcon}>✓</div>
               <h3>Template Ready!</h3>
@@ -118,7 +142,7 @@ export function AnalysisProgress({ isOpen, templateId, status, error, onClose, o
             </div>
           )}
 
-          {status === 'failed' && (
+          {currentStatus === 'failed' && (
             <div className={styles.failedContent}>
               <div className={styles.errorIcon}>!</div>
               <h3>Analysis Failed</h3>
