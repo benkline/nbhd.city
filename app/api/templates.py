@@ -513,7 +513,9 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                         try:
                             # Clone repository
                             elapsed = time.time() - start_time
-                            logger.info(f"[{template_id}] PHASE 1: Clone (elapsed: {elapsed:.1f}s)")
+                            msg = f"[{template_id}] PHASE 1: Clone (elapsed: {elapsed:.1f}s)"
+                            logger.info(msg)
+                            print(msg)
                             success, error = clone_repository(github_url, build_dir)
                             if not success:
                                 elapsed = time.time() - start_time
@@ -531,7 +533,9 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
 
                             # Validate 11ty project
                             elapsed = time.time() - start_time
-                            logger.info(f"[{template_id}] PHASE 2: Validate (elapsed: {elapsed:.1f}s)")
+                            msg = f"[{template_id}] PHASE 2: Validate (elapsed: {elapsed:.1f}s)"
+                            logger.info(msg)
+                            print(msg)
                             is_valid, error = validate_eleventy_project(build_dir)
                             if not is_valid:
                                 elapsed = time.time() - start_time
@@ -549,8 +553,12 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
 
                             # Analyze template
                             elapsed = time.time() - start_time
-                            logger.info(f"[{template_id}] PHASE 3: Analyze (elapsed: {elapsed:.1f}s)")
+                            msg = f"[{template_id}] PHASE 3: Analyze (elapsed: {elapsed:.1f}s)"
+                            logger.info(msg)
+                            print(msg)
+                            print(f"[{template_id}] Calling analyze_template({build_dir})...")
                             result = analyze_template(build_dir)
+                            print(f"[{template_id}] analyze_template returned: {result.get('status')}")
                             if result.get("error"):
                                 elapsed = time.time() - start_time
                                 logger.info(f"[{template_id}] ✗ Analysis FAILED: {result.get('error')} (elapsed: {elapsed:.1f}s)")
