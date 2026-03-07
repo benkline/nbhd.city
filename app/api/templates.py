@@ -589,18 +589,26 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                             logger.info(f"[{template_id}] Content types: {list(result.get('content_types', {}).keys())}")
                             logger.info(f"[{template_id}] ===== ANALYSIS COMPLETE =====\n")
 
-                            await table.update_item(
-                                Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
-                                UpdateExpression="SET #status = :status, progress = :progress, analyzed_at = :analyzed, github_commit_sha = :sha, content_types = :types",
-                                ExpressionAttributeNames={"#status": "status"},
-                                ExpressionAttributeValues={
-                                    ":status": "ready",
-                                    ":progress": Decimal("1.0"),
-                                    ":analyzed": datetime.utcnow().isoformat() + "Z",
-                                    ":sha": commit_sha,
-                                    ":types": result.get("content_types", {})
-                                }
-                            )
+                            print(f"[{template_id}] Updating DynamoDB with final status...")
+                            try:
+                                await table.update_item(
+                                    Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
+                                    UpdateExpression="SET #status = :status, progress = :progress, analyzed_at = :analyzed, github_commit_sha = :sha, content_types = :types",
+                                    ExpressionAttributeNames={"#status": "status"},
+                                    ExpressionAttributeValues={
+                                        ":status": "ready",
+                                        ":progress": Decimal("1.0"),
+                                        ":analyzed": datetime.utcnow().isoformat() + "Z",
+                                        ":sha": commit_sha,
+                                        ":types": result.get("content_types", {})
+                                    }
+                                )
+                                print(f"[{template_id}] ✓ DynamoDB update successful - status now 'ready'")
+                            except Exception as e:
+                                print(f"[{template_id}] ✗ DynamoDB update FAILED: {str(e)}")
+                                import traceback
+                                traceback.print_exc()
+                                raise
                         finally:
                             elapsed = time.time() - start_time
                             logger.info(f"[{template_id}] Cleaning up {build_dir}")
