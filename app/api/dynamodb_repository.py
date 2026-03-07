@@ -1044,28 +1044,32 @@ async def list_sites_by_nbhd(table, nbhd_id: str, site_type: Optional[str] = Non
     return response.get("Items", [])
 
 
-# Template Analysis Operations
+# Template Analysis Operations (SSG-020)
 
-async def create_template_analysis(table, template_id: str, github_url: str, user_did: str) -> dict:
+async def create_template_analysis(
+    table,
+    template_id: str,
+    github_url: str,
+    user_did: str
+) -> dict:
     """
-    Create template analysis records in DynamoDB.
+    Create a new template analysis job in DynamoDB.
 
-    Creates two records:
-    - TEMPLATE#{template_id}#METADATA: Basic info about the analysis
-    - TEMPLATE#{template_id}#ANALYSIS: Status and progress tracking
+    Creates both METADATA record (with URL and user info) and ANALYSIS record
+    (for tracking progress as Lambda processes it).
 
     Args:
         table: DynamoDB table resource
-        template_id: Unique template identifier
-        github_url: GitHub URL being analyzed
-        user_did: User's DID (AT Protocol identifier)
+        template_id: UUID of the template
+        github_url: GitHub repository URL
+        user_did: User's DID (who initiated analysis)
 
     Returns:
-        dict: The metadata record created
+        dict: Created metadata record
     """
     timestamp = now_iso()
 
-    # Create METADATA record
+    # Create METADATA record (stores static info)
     metadata = {
         "PK": f"TEMPLATE#{template_id}",
         "SK": "METADATA",
@@ -1078,7 +1082,7 @@ async def create_template_analysis(table, template_id: str, github_url: str, use
     }
     await table.put_item(Item=metadata)
 
-    # Create ANALYSIS record (Lambda will update this as it progresses)
+    # Create ANALYSIS record (Lambda will update progress/status)
     analysis = {
         "PK": f"TEMPLATE#{template_id}",
         "SK": "ANALYSIS",
@@ -1087,6 +1091,7 @@ async def create_template_analysis(table, template_id: str, github_url: str, use
         "progress": 0.0,
         "message": "Analysis queued",
         "content_types": None,
+        "schema": None,
         "error": None,
         "started_at": timestamp,
         "completed_at": None
@@ -1096,18 +1101,21 @@ async def create_template_analysis(table, template_id: str, github_url: str, use
     return metadata
 
 
-async def get_template_analysis_status(table, template_id: str) -> Optional[dict]:
+async def get_template_analysis_status(
+    table,
+    template_id: str
+) -> Optional[dict]:
     """
-    Get template analysis status.
+    Get the analysis status for a template.
 
-    Retrieves the ANALYSIS record which contains progress, status, and results.
+    Retrieves the ANALYSIS record which contains progress, message, and results.
 
     Args:
         table: DynamoDB table resource
-        template_id: Template identifier
+        template_id: UUID of the template
 
     Returns:
-        dict or None: Analysis record if found
+        dict or None: Analysis status record if found
     """
     response = await table.get_item(
         Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"}
