@@ -413,27 +413,65 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                     print(f"[ANALYZER {template_id}] Local path exists: {os.path.exists(lambda_base)}")
 
                 # Load analyzer module dynamically
+                print(f"\n[ANALYZER {template_id}] Loading modules from {lambda_base}...")
+
                 analyzer_path = os.path.join(lambda_base, "analyzer.py")
-                spec = importlib.util.spec_from_file_location("analyzer", analyzer_path)
-                analyzer_module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(analyzer_module)
-                analyze_template = analyzer_module.analyze_template
+                print(f"[ANALYZER {template_id}] analyzer_path: {analyzer_path}")
+                print(f"[ANALYZER {template_id}] analyzer.py exists: {os.path.exists(analyzer_path)}")
+
+                try:
+                    spec = importlib.util.spec_from_file_location("analyzer", analyzer_path)
+                    print(f"[ANALYZER {template_id}] spec created: {spec is not None}")
+                    if spec is None:
+                        raise Exception(f"spec_from_file_location returned None for {analyzer_path}")
+
+                    analyzer_module = importlib.util.module_from_spec(spec)
+                    print(f"[ANALYZER {template_id}] module from spec created")
+
+                    spec.loader.exec_module(analyzer_module)
+                    print(f"[ANALYZER {template_id}] ✓ analyzer module loaded successfully")
+                    analyze_template = analyzer_module.analyze_template
+                except Exception as e:
+                    print(f"[ANALYZER {template_id}] ✗ ERROR loading analyzer module: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
 
                 # Load clone module
+                print(f"[ANALYZER {template_id}] Loading clone module...")
                 clone_path = os.path.join(lambda_base, "clone.py")
-                spec = importlib.util.spec_from_file_location("clone", clone_path)
-                clone_module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(clone_module)
-                clone_repository = clone_module.clone_repository
-                cleanup_directory = clone_module.cleanup_directory
-                get_commit_sha = clone_module.get_commit_sha
+                print(f"[ANALYZER {template_id}] clone_path: {clone_path}, exists: {os.path.exists(clone_path)}")
+
+                try:
+                    spec = importlib.util.spec_from_file_location("clone", clone_path)
+                    clone_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(clone_module)
+                    clone_repository = clone_module.clone_repository
+                    cleanup_directory = clone_module.cleanup_directory
+                    get_commit_sha = clone_module.get_commit_sha
+                    print(f"[ANALYZER {template_id}] ✓ clone module loaded successfully")
+                except Exception as e:
+                    print(f"[ANALYZER {template_id}] ✗ ERROR loading clone module: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
 
                 # Load validator module
+                print(f"[ANALYZER {template_id}] Loading validator module...")
                 validator_path = os.path.join(lambda_base, "validator.py")
-                spec = importlib.util.spec_from_file_location("validator", validator_path)
-                validator_module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(validator_module)
-                validate_eleventy_project = validator_module.validate_eleventy_project
+                print(f"[ANALYZER {template_id}] validator_path: {validator_path}, exists: {os.path.exists(validator_path)}")
+
+                try:
+                    spec = importlib.util.spec_from_file_location("validator", validator_path)
+                    validator_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(validator_module)
+                    validate_eleventy_project = validator_module.validate_eleventy_project
+                    print(f"[ANALYZER {template_id}] ✓ validator module loaded successfully")
+                except Exception as e:
+                    print(f"[ANALYZER {template_id}] ✗ ERROR loading validator module: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
 
                 from dynamodb_client import get_table
                 from datetime import datetime
@@ -548,9 +586,10 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                 loop.run_until_complete(analyze())
 
             except Exception as e:
-                logger.info(f"[{template_id}] Error in analyzer: {str(e)}")
+                print(f"\n[ANALYZER {template_id}] FATAL ERROR: {str(e)}")
                 import traceback
                 traceback.print_exc()
+                print(f"[ANALYZER {template_id}] Thread stopping due to error\n")
 
         # Start in background thread
         print(f"\n[INVOKE] Starting background analyzer thread for template {template_id}")
