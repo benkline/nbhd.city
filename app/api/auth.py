@@ -69,6 +69,10 @@ def verify_token(request: Request) -> str:
 
     token = auth_header.split(" ")[1]
 
+    # Allow dev tokens for frontend development (bypass JWT verification)
+    if token == "dev-token-no-auth":
+        return "did:plc:dev-user"
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")

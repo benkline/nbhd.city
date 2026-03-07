@@ -12,7 +12,9 @@ export function AuthProvider({ children }) {
   // Initialize auth state from localStorage
   useEffect(() => {
     // For development: skip auth verification, just set a dev token
-    setToken('dev-token-no-auth');
+    const devToken = 'dev-token-no-auth';
+    localStorage.setItem('auth_token', devToken);
+    setToken(devToken);
     setUser({ id: 'dev-user', handle: 'dev' });
     setNeedsOnboarding(false);
     setIsLoading(false);

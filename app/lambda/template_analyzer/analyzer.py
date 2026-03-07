@@ -13,6 +13,10 @@ from typing import Dict, List, Optional, Any
 from collections import defaultdict
 import frontmatter
 from datetime import datetime
+import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def find_content_directory(path: str) -> Optional[str]:
@@ -27,6 +31,8 @@ def find_content_directory(path: str) -> Optional[str]:
 
     Returns: path to content directory or None
     """
+    print(f"[ANALYZER] Finding content directory in: {path}")
+
     candidate_dirs = [
         os.path.join(path, "content"),
         os.path.join(path, "posts"),
@@ -34,12 +40,18 @@ def find_content_directory(path: str) -> Optional[str]:
         os.path.join(path, "src", "posts"),
     ]
 
+    print(f"[ANALYZER] Checking candidates: {candidate_dirs}")
+
     for candidate in candidate_dirs:
-        if os.path.exists(candidate) and os.path.isdir(candidate):
+        exists = os.path.exists(candidate) and os.path.isdir(candidate)
+        print(f"[ANALYZER]   {candidate} - exists: {exists}")
+        if exists:
             # Return first existing directory (even if empty)
+            print(f"[ANALYZER] ✓ Found content directory: {candidate}")
             return candidate
 
     # If no candidate directory found, return None
+    print("[ANALYZER] ✗ No content directory found!")
     return None
 
 
@@ -52,18 +64,28 @@ def scan_frontmatter(content_dir: str) -> Dict[str, List[Dict[str, Any]]]:
 
     Returns: Dict mapping content type to list of frontmatter dictionaries
     """
+    print(f"[ANALYZER] Starting frontmatter scan in: {content_dir}")
     content_types = defaultdict(list)
 
     if not os.path.exists(content_dir):
+        print(f"[ANALYZER] ✗ Content directory does not exist: {content_dir}")
         return {}
+
+    print("[ANALYZER] Walking directory tree...")
+    file_count = 0
+    md_count = 0
 
     # Walk directory tree
     for root, dirs, files in os.walk(content_dir):
+        print(f"[ANALYZER]   Scanning: {root} ({len(files)} files)")
         for file in files:
+            file_count += 1
             if not file.endswith(".md"):
                 continue
 
+            md_count += 1
             filepath = os.path.join(root, file)
+            print(f"[ANALYZER]     Parsing: {file}")
 
             try:
                 # Parse frontmatter
@@ -85,11 +107,17 @@ def scan_frontmatter(content_dir: str) -> Dict[str, List[Dict[str, Any]]]:
                 }
 
                 content_types[content_type].append(metadata)
+                print(f"[ANALYZER]       ✓ Added to '{content_type}' ({len(metadata)} fields)")
 
             except Exception as e:
                 # Skip files with parsing errors
-                print(f"Warning: Failed to parse {filepath}: {str(e)}")
+                print(f"[ANALYZER]     ✗ WARNING: Failed to parse {file}: {str(e)}")
                 continue
+
+    print(f"[ANALYZER] ✓ Scanned {file_count} files, found {md_count} markdown files")
+    print(f"[ANALYZER] Content types: {list(content_types.keys())}")
+    for ctype, items in content_types.items():
+        print(f"[ANALYZER]   {ctype}: {len(items)} files")
 
     return dict(content_types)
 
@@ -205,7 +233,7 @@ def infer_schema(frontmatter_samples: List[Dict[str, Any]]) -> Dict[str, Any]:
     return schema
 
 
-def analyze_template(template_path: str) -> Dict[str, Any]:
+def analyze_template(template_path: str, validate_eleventy_project=None) -> Dict[str, Any]:
     """
     Analyze a complete 11ty template.
 
@@ -215,36 +243,48 @@ def analyze_template(template_path: str) -> Dict[str, Any]:
 
     Returns: Dict with content_types and metadata
     """
-    try:
-        from template_analyzer.validator import validate_eleventy_project
-    except ImportError:
-        from validator import validate_eleventy_project
+    print("\n[ANALYZER] ===== STARTING FULL ANALYSIS =====")
+    print(f"[ANALYZER] Template path: {template_path}")
 
     # Validate project
+    print("[ANALYZER] STEP 1: Validating project...")
+    if validate_eleventy_project is None:
+        raise ValueError("validate_eleventy_project function must be provided")
     is_valid, error = validate_eleventy_project(template_path)
     if not is_valid:
+        print(f"[ANALYZER] ✗ Validation failed: {error}")
         return {"error": error, "status": "failed"}
 
     # Find content directory
+    print("[ANALYZER] STEP 2: Finding content directory...")
     content_dir = find_content_directory(template_path)
     if not content_dir:
-        return {"error": "No content directory found", "status": "failed"}
+        error = "No content directory found"
+        print(f"[ANALYZER] ✗ {error}")
+        return {"error": error, "status": "failed"}
 
     # Scan frontmatter
+    print("[ANALYZER] STEP 3: Scanning frontmatter...")
     content_types_data = scan_frontmatter(content_dir)
     if not content_types_data:
-        return {"error": "No markdown files found", "status": "failed"}
+        error = "No markdown files found"
+        print(f"[ANALYZER] ✗ {error}")
+        return {"error": error, "status": "failed"}
 
     # Generate schemas
+    print("[ANALYZER] STEP 4: Generating schemas...")
     content_types = {}
     for content_type, samples in content_types_data.items():
+        print(f"[ANALYZER]   Inferring schema for '{content_type}' ({len(samples)} samples)...")
         schema = infer_schema(samples)
         content_types[content_type] = {
             "directory": content_dir,
             "schema": schema,
             "count": len(samples)
         }
+        print(f"[ANALYZER]   ✓ Schema has {len(schema.get('properties', {}))} fields")
 
+    print("[ANALYZER] ===== ANALYSIS COMPLETE =====\n")
     return {
         "status": "success",
         "content_types": content_types,

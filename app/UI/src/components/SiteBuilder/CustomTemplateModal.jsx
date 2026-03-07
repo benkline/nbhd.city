@@ -22,8 +22,6 @@ export function CustomTemplateModal({ isOpen, onClose, onAdd }) {
   const pollTimeoutRef = useRef(null);
   const closeTimeoutRef = useRef(null);
 
-  if (!isOpen) return null;
-
   const extractTemplateNameFromUrl = (url) => {
     if (!url) return null;
     try {
@@ -231,6 +229,8 @@ export function CustomTemplateModal({ isOpen, onClose, onAdd }) {
     setNameIsAutoExtracted(false);
     onClose();
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className={styles.backdrop} onClick={handleClose}>

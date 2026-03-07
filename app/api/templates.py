@@ -12,12 +12,16 @@ from dynamodb_client import get_table
 from dynamodb_repository import create_template_analysis, get_template_analysis_status
 from datetime import datetime
 from typing import List, Optional
+from decimal import Decimal
 import uuid
 import re
 from urllib.parse import urlparse
 import boto3
 import os
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/templates", tags=["templates"])
 
@@ -469,6 +473,9 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
     """
     Invoke the template analyzer Lambda function asynchronously.
 
+    In development mode (when using local DynamoDB), runs the analyzer
+    directly. In production, invokes AWS Lambda.
+
     REQUIREMENT: [ ] Async invocation of analyzer Lambda
 
     Args:
@@ -478,30 +485,302 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
 
     Returns:
         bool: True if invocation successful, False otherwise
-
-    Raises:
-        Exception: If Lambda invocation fails
     """
-    try:
-        lambda_client = boto3.client(
-            'lambda',
-            region_name=os.getenv('AWS_REGION', 'us-east-1')
-        )
+    # Check if we're in development mode (using local DynamoDB)
+    is_dev = os.getenv('DYNAMODB_ENDPOINT_URL', '').startswith('http://')
 
-        response = lambda_client.invoke(
-            FunctionName=os.getenv('TEMPLATE_ANALYZER_LAMBDA_NAME', 'nbhd-city-template-analyzer'),
-            InvocationType='Event',  # Async invocation
-            Payload=json.dumps({
-                'template_id': template_id,
-                'github_url': github_url,
-                'template_name': template_name
-            })
-        )
+    if is_dev:
+        # Development mode: run analyzer in background thread
+        import threading
+
+        def run_analyzer_in_thread():
+            try:
+                # Import modules using importlib for dynamic loading
+                import importlib.util
+                import sys
+                import os
+
+                # Use print() for diagnostic output so it shows in Docker logs
+                print(f"\n{'='*60}")
+                print(f"[ANALYZER {template_id}] Starting path resolution")
+                print(f"[ANALYZER {template_id}] CWD: {os.getcwd()}")
+                print(f"[ANALYZER {template_id}] __file__: {__file__}")
+                print(f"{'='*60}")
+
+                # Check if path exists
+                docker_path = '/app/lambda/template_analyzer'
+                app_lambda_exists = os.path.exists(docker_path)
+                print(f"[ANALYZER {template_id}] {docker_path} exists: {app_lambda_exists}")
+
+                # Debug: list /app directory contents
+                if os.path.exists('/app'):
+                    app_contents = os.listdir('/app')
+                    print(f"[ANALYZER {template_id}] /app contents: {app_contents}")
+
+                if os.path.exists('/app/lambda'):
+                    lambda_contents = os.listdir('/app/lambda')
+                    print(f"[ANALYZER {template_id}] /app/lambda contents: {lambda_contents}")
+
+                if app_lambda_exists:
+                    lambda_base = docker_path
+                    print(f"[ANALYZER {template_id}] ✓ Using Docker path: {lambda_base}")
+                else:
+                    # Local development - try relative path
+                    lambda_base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'lambda', 'template_analyzer'))
+                    print(f"[ANALYZER {template_id}] Using local path: {lambda_base}")
+                    print(f"[ANALYZER {template_id}] Local path exists: {os.path.exists(lambda_base)}")
+
+                # Load analyzer module dynamically
+                print(f"\n[ANALYZER {template_id}] Loading modules from {lambda_base}...")
+
+                analyzer_path = os.path.join(lambda_base, "analyzer.py")
+                print(f"[ANALYZER {template_id}] analyzer_path: {analyzer_path}")
+                print(f"[ANALYZER {template_id}] analyzer.py exists: {os.path.exists(analyzer_path)}")
+
+                try:
+                    spec = importlib.util.spec_from_file_location("analyzer", analyzer_path)
+                    print(f"[ANALYZER {template_id}] spec created: {spec is not None}")
+                    if spec is None:
+                        raise Exception(f"spec_from_file_location returned None for {analyzer_path}")
+
+                    analyzer_module = importlib.util.module_from_spec(spec)
+                    print(f"[ANALYZER {template_id}] module from spec created")
+
+                    spec.loader.exec_module(analyzer_module)
+                    print(f"[ANALYZER {template_id}] ✓ analyzer module loaded successfully")
+                    analyze_template = analyzer_module.analyze_template
+                except Exception as e:
+                    print(f"[ANALYZER {template_id}] ✗ ERROR loading analyzer module: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
+
+                # Load clone module
+                print(f"[ANALYZER {template_id}] Loading clone module...")
+                clone_path = os.path.join(lambda_base, "clone.py")
+                print(f"[ANALYZER {template_id}] clone_path: {clone_path}, exists: {os.path.exists(clone_path)}")
+
+                try:
+                    spec = importlib.util.spec_from_file_location("clone", clone_path)
+                    clone_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(clone_module)
+                    clone_repository = clone_module.clone_repository
+                    cleanup_directory = clone_module.cleanup_directory
+                    get_commit_sha = clone_module.get_commit_sha
+                    print(f"[ANALYZER {template_id}] ✓ clone module loaded successfully")
+                except Exception as e:
+                    print(f"[ANALYZER {template_id}] ✗ ERROR loading clone module: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
+
+                # Load validator module
+                print(f"[ANALYZER {template_id}] Loading validator module...")
+                validator_path = os.path.join(lambda_base, "validator.py")
+                print(f"[ANALYZER {template_id}] validator_path: {validator_path}, exists: {os.path.exists(validator_path)}")
+
+                try:
+                    spec = importlib.util.spec_from_file_location("validator", validator_path)
+                    validator_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(validator_module)
+                    validate_eleventy_project = validator_module.validate_eleventy_project
+                    print(f"[ANALYZER {template_id}] ✓ validator module loaded successfully")
+                except Exception as e:
+                    print(f"[ANALYZER {template_id}] ✗ ERROR loading validator module: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
+
+                print(f"[ANALYZER {template_id}] Importing dependencies...")
+                try:
+                    from dynamodb_client import get_table
+                    from datetime import datetime
+                    import tempfile
+                    import uuid
+                    import asyncio
+                    print(f"[ANALYZER {template_id}] ✓ All dependencies imported")
+                except Exception as e:
+                    print(f"[ANALYZER {template_id}] ✗ ERROR importing dependencies: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
+
+                # Now run the analysis
+                build_dir = os.path.join(tempfile.gettempdir(), str(uuid.uuid4()))
+                print(f"[ANALYZER {template_id}] Build dir: {build_dir}")
+
+                async def analyze():
+                    import time
+                    start_time = time.time()
+                    print(f"[ANALYZER {template_id}] Starting async analyze function...")
+
+                    async with get_table() as table:
+                        print(f"[ANALYZER {template_id}] Got DynamoDB table connection")
+                        # Update status: Starting
+                        logger.info(f"\n[{template_id}] ===== STARTING ANALYSIS FLOW =====")
+                        logger.info(f"[{template_id}] GitHub URL: {github_url}")
+                        logger.info(f"[{template_id}] Build dir: {build_dir}")
+
+                        await table.update_item(
+                            Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
+                            UpdateExpression="SET #status = :status, progress = :progress, #message = :message",
+                            ExpressionAttributeNames={"#status": "status", "#message": "message"},
+                            ExpressionAttributeValues={":status": "analyzing", ":progress": Decimal("0.1"), ":message": "Starting analysis..."}
+                        )
+
+                        try:
+                            # Clone repository
+                            elapsed = time.time() - start_time
+                            msg = f"[{template_id}] PHASE 1: Clone (elapsed: {elapsed:.1f}s)"
+                            logger.info(msg)
+                            print(msg)
+                            print(f"[{template_id}] Calling clone_repository({github_url}, {build_dir})...")
+                            success, error = clone_repository(github_url, build_dir)
+                            print(f"[{template_id}] clone_repository returned: success={success}, error={error}")
+                            if not success:
+                                elapsed = time.time() - start_time
+                                err_msg = f"[{template_id}] ✗ Clone FAILED: {error} (elapsed: {elapsed:.1f}s)"
+                                logger.info(err_msg)
+                                print(err_msg)
+                                await table.update_item(
+                                    Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
+                                    UpdateExpression="SET #status = :status, #error = :error",
+                                    ExpressionAttributeNames={"#status": "status", "#error": "error"},
+                                    ExpressionAttributeValues={":status": "failed", ":error": error}
+                                )
+                                return
+
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] ✓ Clone COMPLETE (elapsed: {elapsed:.1f}s)")
+                            print(f"[{template_id}] ✓ Clone COMPLETE (elapsed: {elapsed:.1f}s)")
+
+                            # Validate 11ty project
+                            elapsed = time.time() - start_time
+                            msg = f"[{template_id}] PHASE 2: Validate (elapsed: {elapsed:.1f}s)"
+                            logger.info(msg)
+                            print(msg)
+                            print(f"[{template_id}] Calling validate_eleventy_project({build_dir})...")
+                            is_valid, error = validate_eleventy_project(build_dir)
+                            print(f"[{template_id}] validate_eleventy_project returned: is_valid={is_valid}, error={error}")
+                            if not is_valid:
+                                elapsed = time.time() - start_time
+                                logger.info(f"[{template_id}] ✗ Validation FAILED: {error} (elapsed: {elapsed:.1f}s)")
+                                await table.update_item(
+                                    Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
+                                    UpdateExpression="SET #status = :status, #error = :error",
+                                    ExpressionAttributeNames={"#status": "status", "#error": "error"},
+                                    ExpressionAttributeValues={":status": "failed", ":error": error}
+                                )
+                                return
+
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] ✓ Validation COMPLETE (elapsed: {elapsed:.1f}s)")
+
+                            # Analyze template
+                            elapsed = time.time() - start_time
+                            msg = f"[{template_id}] PHASE 3: Analyze (elapsed: {elapsed:.1f}s)"
+                            logger.info(msg)
+                            print(msg)
+                            print(f"[{template_id}] Calling analyze_template({build_dir})...")
+                            result = analyze_template(build_dir, validate_eleventy_project)
+                            print(f"[{template_id}] analyze_template returned: {result.get('status')}")
+                            if result.get("error"):
+                                elapsed = time.time() - start_time
+                                logger.info(f"[{template_id}] ✗ Analysis FAILED: {result.get('error')} (elapsed: {elapsed:.1f}s)")
+                                await table.update_item(
+                                    Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
+                                    UpdateExpression="SET #status = :status, #error = :error",
+                                    ExpressionAttributeNames={"#status": "status", "#error": "error"},
+                                    ExpressionAttributeValues={":status": "failed", ":error": result.get("error")}
+                                )
+                                return
+
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] ✓ Analysis COMPLETE (elapsed: {elapsed:.1f}s)")
+
+                            # Get commit SHA
+                            commit_sha = get_commit_sha(build_dir)
+
+                            # Update with success
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] ✓✓✓ Analysis SUCCESSFUL (total time: {elapsed:.1f}s)")
+                            logger.info(f"[{template_id}] Content types: {list(result.get('content_types', {}).keys())}")
+                            logger.info(f"[{template_id}] ===== ANALYSIS COMPLETE =====\n")
+
+                            print(f"[{template_id}] Updating DynamoDB with final status...")
+                            try:
+                                await table.update_item(
+                                    Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
+                                    UpdateExpression="SET #status = :status, progress = :progress, analyzed_at = :analyzed, github_commit_sha = :sha, content_types = :types",
+                                    ExpressionAttributeNames={"#status": "status"},
+                                    ExpressionAttributeValues={
+                                        ":status": "ready",
+                                        ":progress": Decimal("1.0"),
+                                        ":analyzed": datetime.utcnow().isoformat() + "Z",
+                                        ":sha": commit_sha,
+                                        ":types": result.get("content_types", {})
+                                    }
+                                )
+                                print(f"[{template_id}] ✓ DynamoDB update successful - status now 'ready'")
+                            except Exception as e:
+                                print(f"[{template_id}] ✗ DynamoDB update FAILED: {str(e)}")
+                                import traceback
+                                traceback.print_exc()
+                                raise
+                        finally:
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] Cleaning up {build_dir}")
+                            cleanup_directory(build_dir)
+                            logger.info(f"[{template_id}] Cleanup complete (total elapsed: {elapsed:.1f}s)")
+
+                print(f"[ANALYZER {template_id}] Creating asyncio event loop...")
+                try:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    print(f"[ANALYZER {template_id}] Event loop created, running analyze()...")
+                    loop.run_until_complete(analyze())
+                    print(f"[ANALYZER {template_id}] ✓ analyze() completed successfully")
+                except Exception as e:
+                    print(f"[ANALYZER {template_id}] ✗ ERROR in event loop: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
+
+            except Exception as e:
+                print(f"\n[ANALYZER {template_id}] FATAL ERROR: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                print(f"[ANALYZER {template_id}] Thread stopping due to error\n")
+
+        # Start in background thread
+        print(f"\n[INVOKE] Starting background analyzer thread for template {template_id}")
+        print(f"[INVOKE] GitHub URL: {github_url}")
+        thread = threading.Thread(target=run_analyzer_in_thread, daemon=True)
+        thread.start()
+        print(f"[INVOKE] Thread started, returning 202\n")
         return True
-    except Exception as e:
-        # Log error but don't fail the request - Lambda will retry
-        print(f"Warning: Failed to invoke template analyzer Lambda: {str(e)}")
-        return False
+    else:
+        # Production mode: invoke real AWS Lambda
+        try:
+            lambda_client = boto3.client(
+                'lambda',
+                region_name=os.getenv('AWS_REGION', 'us-east-1')
+            )
+
+            response = lambda_client.invoke(
+                FunctionName=os.getenv('TEMPLATE_ANALYZER_LAMBDA_NAME', 'nbhd-city-template-analyzer'),
+                InvocationType='Event',  # Async invocation
+                Payload=json.dumps({
+                    'template_id': template_id,
+                    'github_url': github_url,
+                    'template_name': template_name
+                })
+            )
+            return True
+        except Exception as e:
+            # Log error but don't fail the request - Lambda will retry
+            logger.info(f"Warning: Failed to invoke template analyzer Lambda: {str(e)}")
+            return False
 
 
 # Custom Template Endpoints
@@ -604,14 +883,28 @@ async def get_custom_template_status(template_id: str) -> dict:
     Requirement: [ ] `GET /api/templates/custom/{id}/status` - Check analysis status
     Acceptance: [ ] Status polling works correctly
     """
-    # Check if template exists
-    if template_id not in CUSTOM_TEMPLATES:
+    # Try to read from DynamoDB first
+    from dynamodb_client import get_table
+
+    try:
+        async with get_table() as table:
+            response = await table.get_item(
+                Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"}
+            )
+            template = response.get("Item")
+    except Exception:
+        template = None
+
+    # Fall back to in-memory if DynamoDB not available
+    if not template and template_id in CUSTOM_TEMPLATES:
+        template = CUSTOM_TEMPLATES[template_id]
+
+    if not template:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Template '{template_id}' not found"
         )
 
-    template = CUSTOM_TEMPLATES[template_id]
     status_value = template.get("status", "analyzing")
 
     response_data = {
@@ -621,13 +914,18 @@ async def get_custom_template_status(template_id: str) -> dict:
 
     # Add status-specific fields
     if status_value == "analyzing":
-        response_data["progress"] = template.get("progress", 0.0)
+        progress = template.get("progress", Decimal("0.0"))
+        # Convert Decimal to float for JSON serialization
+        response_data["progress"] = float(progress) if isinstance(progress, Decimal) else progress
         response_data["message"] = template.get("message", "Analyzing template...")
     elif status_value == "ready":
+        response_data["progress"] = 1.0  # Return full progress for ready state
+        response_data["message"] = template.get("message", "Analysis complete!")
         response_data["schema"] = template.get("schema")
         response_data["content_types"] = template.get("content_types")
     elif status_value == "failed":
         response_data["error"] = template.get("error", "Analysis failed")
+        response_data["message"] = template.get("error", "Analysis failed")
 
     return {
         "data": response_data,
