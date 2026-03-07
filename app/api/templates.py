@@ -473,20 +473,31 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                     traceback.print_exc()
                     raise
 
-                from dynamodb_client import get_table
-                from datetime import datetime
-                import tempfile
-                import uuid
-                import asyncio
+                print(f"[ANALYZER {template_id}] Importing dependencies...")
+                try:
+                    from dynamodb_client import get_table
+                    from datetime import datetime
+                    import tempfile
+                    import uuid
+                    import asyncio
+                    print(f"[ANALYZER {template_id}] ✓ All dependencies imported")
+                except Exception as e:
+                    print(f"[ANALYZER {template_id}] ✗ ERROR importing dependencies: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
 
                 # Now run the analysis
                 build_dir = os.path.join(tempfile.gettempdir(), str(uuid.uuid4()))
+                print(f"[ANALYZER {template_id}] Build dir: {build_dir}")
 
                 async def analyze():
                     import time
                     start_time = time.time()
+                    print(f"[ANALYZER {template_id}] Starting async analyze function...")
 
                     async with get_table() as table:
+                        print(f"[ANALYZER {template_id}] Got DynamoDB table connection")
                         # Update status: Starting
                         logger.info(f"\n[{template_id}] ===== STARTING ANALYSIS FLOW =====")
                         logger.info(f"[{template_id}] GitHub URL: {github_url}")
@@ -581,9 +592,18 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                             cleanup_directory(build_dir)
                             logger.info(f"[{template_id}] Cleanup complete (total elapsed: {elapsed:.1f}s)")
 
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                loop.run_until_complete(analyze())
+                print(f"[ANALYZER {template_id}] Creating asyncio event loop...")
+                try:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    print(f"[ANALYZER {template_id}] Event loop created, running analyze()...")
+                    loop.run_until_complete(analyze())
+                    print(f"[ANALYZER {template_id}] ✓ analyze() completed successfully")
+                except Exception as e:
+                    print(f"[ANALYZER {template_id}] ✗ ERROR in event loop: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
 
             except Exception as e:
                 print(f"\n[ANALYZER {template_id}] FATAL ERROR: {str(e)}")
