@@ -1042,3 +1042,74 @@ async def list_sites_by_nbhd(table, nbhd_id: str, site_type: Optional[str] = Non
             KeyConditionExpression=Key("nbhd_id").eq(nbhd_id)
         )
     return response.get("Items", [])
+
+
+# Template Analysis Operations
+
+async def create_template_analysis(table, template_id: str, github_url: str, user_did: str) -> dict:
+    """
+    Create template analysis records in DynamoDB.
+
+    Creates two records:
+    - TEMPLATE#{template_id}#METADATA: Basic info about the analysis
+    - TEMPLATE#{template_id}#ANALYSIS: Status and progress tracking
+
+    Args:
+        table: DynamoDB table resource
+        template_id: Unique template identifier
+        github_url: GitHub URL being analyzed
+        user_did: User's DID (AT Protocol identifier)
+
+    Returns:
+        dict: The metadata record created
+    """
+    timestamp = now_iso()
+
+    # Create METADATA record
+    metadata = {
+        "PK": f"TEMPLATE#{template_id}",
+        "SK": "METADATA",
+        "template_id": template_id,
+        "github_url": github_url,
+        "user_did": user_did,
+        "status": "analyzing",
+        "created_at": timestamp,
+        "entity_type": "template_analysis"
+    }
+    await table.put_item(Item=metadata)
+
+    # Create ANALYSIS record (Lambda will update this as it progresses)
+    analysis = {
+        "PK": f"TEMPLATE#{template_id}",
+        "SK": "ANALYSIS",
+        "template_id": template_id,
+        "status": "analyzing",
+        "progress": 0.0,
+        "message": "Analysis queued",
+        "content_types": None,
+        "error": None,
+        "started_at": timestamp,
+        "completed_at": None
+    }
+    await table.put_item(Item=analysis)
+
+    return metadata
+
+
+async def get_template_analysis_status(table, template_id: str) -> Optional[dict]:
+    """
+    Get template analysis status.
+
+    Retrieves the ANALYSIS record which contains progress, status, and results.
+
+    Args:
+        table: DynamoDB table resource
+        template_id: Template identifier
+
+    Returns:
+        dict or None: Analysis record if found
+    """
+    response = await table.get_item(
+        Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"}
+    )
+    return response.get("Item")
