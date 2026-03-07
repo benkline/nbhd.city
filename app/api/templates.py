@@ -793,10 +793,13 @@ async def get_custom_template_status(template_id: str) -> dict:
         response_data["progress"] = float(progress) if isinstance(progress, Decimal) else progress
         response_data["message"] = template.get("message", "Analyzing template...")
     elif status_value == "ready":
+        response_data["progress"] = 1.0  # Return full progress for ready state
+        response_data["message"] = template.get("message", "Analysis complete!")
         response_data["schema"] = template.get("schema")
         response_data["content_types"] = template.get("content_types")
     elif status_value == "failed":
         response_data["error"] = template.get("error", "Analysis failed")
+        response_data["message"] = template.get("error", "Analysis failed")
 
     return {
         "data": response_data,

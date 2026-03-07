@@ -19,7 +19,12 @@ export function AnalysisProgress({ isOpen, templateId, status, error, onClose, o
 
   // Poll for status updates
   useEffect(() => {
-    if (!isOpen || !templateId || status !== 'analyzing') {
+    if (!isOpen || !templateId) {
+      return;
+    }
+
+    // Don't poll if already ready or failed
+    if (currentStatus === 'ready' || currentStatus === 'failed') {
       return;
     }
 
@@ -30,7 +35,7 @@ export function AnalysisProgress({ isOpen, templateId, status, error, onClose, o
           const data = await response.json();
           const statusData = data.data;
 
-          // Update progress if available
+          // Update progress if available (during analyzing state)
           if (statusData.progress !== undefined) {
             const progressValue = typeof statusData.progress === 'number'
               ? statusData.progress * 100
@@ -38,21 +43,30 @@ export function AnalysisProgress({ isOpen, templateId, status, error, onClose, o
             setProgress(Math.min(progressValue, 99)); // Cap at 99% until complete
           }
 
-          // Update message
+          // Update message if available
           if (statusData.message) {
             setStage(statusData.message);
           }
 
-          // Update current status and auto-close when analysis is ready
-          if (statusData.status === 'ready') {
+          // Update current status - this is the critical update
+          const newStatus = statusData.status;
+          if (newStatus === 'ready') {
             setProgress(100);
             setCurrentStatus('ready');
             setStage('Analysis Complete!');
+            console.log('Analysis complete, closing modal in 1.5s');
             // Auto-close after showing success
-            setTimeout(onClose, 1500);
-          } else if (statusData.status === 'failed') {
+            setTimeout(() => {
+              console.log('Closing modal now');
+              if (onClose) onClose();
+            }, 1500);
+          } else if (newStatus === 'failed') {
             setCurrentStatus('failed');
             setStage('Analysis Failed');
+            console.error('Analysis failed:', statusData.error);
+          } else if (newStatus === 'analyzing') {
+            // Stay in analyzing state, update progress/message
+            setCurrentStatus('analyzing');
           }
         }
       } catch (err) {
@@ -60,9 +74,13 @@ export function AnalysisProgress({ isOpen, templateId, status, error, onClose, o
       }
     };
 
+    // Poll immediately first
+    pollStatus();
+
+    // Then poll every 1 second
     const interval = setInterval(pollStatus, 1000);
     return () => clearInterval(interval);
-  }, [isOpen, templateId, status]);
+  }, [isOpen, templateId, currentStatus, onClose]);
 
   if (!isOpen) {
     return null;
