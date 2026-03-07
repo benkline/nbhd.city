@@ -14,8 +14,9 @@ const SEARCH_DEBOUNCE_MS = 300;
 /**
  * ContentBrowser Component
  * Comprehensive list/table view of all posts and pages with filtering, sorting, and search
+ * Displays inferred schema fields when available
  */
-const ContentBrowser = () => {
+const ContentBrowser = ({ templateSchema = null, contentTypes = {} }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('posts');
   const [content, setContent] = useState([]);
@@ -38,6 +39,7 @@ const ContentBrowser = () => {
   const [itemToDelete, setItemToDelete] = useState(null);
   const [toast, setToast] = useState(null);
   const searchTimeoutRef = useRef(null);
+  const [schemaFields, setSchemaFields] = useState([]);
 
   // Load sort preference from localStorage
   useEffect(() => {
@@ -51,6 +53,18 @@ const ContentBrowser = () => {
       }
     }
   }, []);
+
+  // Load inferred schema fields for display
+  useEffect(() => {
+    if (templateSchema && templateSchema.properties) {
+      const fields = Object.keys(templateSchema.properties).filter(
+        f => f !== 'content' && f !== 'slug'
+      );
+      setSchemaFields(fields);
+    } else {
+      setSchemaFields([]);
+    }
+  }, [templateSchema]);
 
   // Fetch content whenever dependencies change
   useEffect(() => {
@@ -257,6 +271,18 @@ const ContentBrowser = () => {
   };
 
   /**
+   * Get preview of inferred schema fields from content item
+   */
+  const getSchemaFieldPreview = (item) => {
+    if (!schemaFields.length) return null;
+    return schemaFields.slice(0, 2).map(field => {
+      const value = item[field] || item.frontmatter?.[field];
+      if (!value) return null;
+      return `${field}: ${typeof value === 'object' ? JSON.stringify(value) : String(value).substring(0, 30)}`;
+    }).filter(Boolean).join(' • ');
+  };
+
+  /**
    * Remove filter chip
    */
   const removeFilter = (filterName) => {
@@ -451,6 +477,7 @@ const ContentBrowser = () => {
                     onEdit={() => handleRowClick(item.id)}
                     onDelete={() => handleDelete(item.id)}
                     onRowClick={() => handleRowClick(item.id)}
+                    schemaFieldPreview={getSchemaFieldPreview(item)}
                   />
                 ))}
               </tbody>

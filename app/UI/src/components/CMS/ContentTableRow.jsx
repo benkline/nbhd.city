@@ -13,6 +13,7 @@ const ContentTableRow = ({
   onEdit,
   onDelete,
   onRowClick,
+  schemaFieldPreview = null,
 }) => {
   const navigate = useNavigate();
   const [showActions, setShowActions] = useState(false);
@@ -111,6 +112,9 @@ const ContentTableRow = ({
         <div className={styles.titleCell}>
           <span className={styles.title}>{item.title}</span>
           {item.excerpt && <span className={styles.excerpt}>{item.excerpt}</span>}
+          {schemaFieldPreview && (
+            <span className={styles.schemaPreview}>{schemaFieldPreview}</span>
+          )}
         </div>
       </td>
 
