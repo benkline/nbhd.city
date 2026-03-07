@@ -16,6 +16,9 @@ from urllib.parse import urlparse
 import boto3
 import os
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/templates", tags=["templates"])
 
@@ -419,8 +422,15 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                 build_dir = os.path.join(tempfile.gettempdir(), str(uuid.uuid4()))
 
                 async def analyze():
+                    import time
+                    start_time = time.time()
+
                     async with get_table() as table:
                         # Update status: Starting
+                        logger.info(f"\n[{template_id}] ===== STARTING ANALYSIS FLOW =====")
+                        logger.info(f"[{template_id}] GitHub URL: {github_url}")
+                        logger.info(f"[{template_id}] Build dir: {build_dir}")
+
                         await table.update_item(
                             Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
                             UpdateExpression="SET #status = :status, progress = :progress, #message = :message",
@@ -430,9 +440,12 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
 
                         try:
                             # Clone repository
-                            print(f"[{template_id}] Cloning {github_url}")
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] PHASE 1: Clone (elapsed: {elapsed:.1f}s)")
                             success, error = clone_repository(github_url, build_dir)
                             if not success:
+                                elapsed = time.time() - start_time
+                                logger.info(f"[{template_id}] ✗ Clone FAILED: {error} (elapsed: {elapsed:.1f}s)")
                                 await table.update_item(
                                     Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
                                     UpdateExpression="SET #status = :status, #error = :error",
@@ -440,11 +453,17 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                                     ExpressionAttributeValues={":status": "failed", ":error": error}
                                 )
                                 return
+
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] ✓ Clone COMPLETE (elapsed: {elapsed:.1f}s)")
 
                             # Validate 11ty project
-                            print(f"[{template_id}] Validating 11ty project")
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] PHASE 2: Validate (elapsed: {elapsed:.1f}s)")
                             is_valid, error = validate_eleventy_project(build_dir)
                             if not is_valid:
+                                elapsed = time.time() - start_time
+                                logger.info(f"[{template_id}] ✗ Validation FAILED: {error} (elapsed: {elapsed:.1f}s)")
                                 await table.update_item(
                                     Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
                                     UpdateExpression="SET #status = :status, #error = :error",
@@ -453,10 +472,16 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                                 )
                                 return
 
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] ✓ Validation COMPLETE (elapsed: {elapsed:.1f}s)")
+
                             # Analyze template
-                            print(f"[{template_id}] Analyzing template")
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] PHASE 3: Analyze (elapsed: {elapsed:.1f}s)")
                             result = analyze_template(build_dir)
                             if result.get("error"):
+                                elapsed = time.time() - start_time
+                                logger.info(f"[{template_id}] ✗ Analysis FAILED: {result.get('error')} (elapsed: {elapsed:.1f}s)")
                                 await table.update_item(
                                     Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
                                     UpdateExpression="SET #status = :status, #error = :error",
@@ -465,11 +490,18 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                                 )
                                 return
 
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] ✓ Analysis COMPLETE (elapsed: {elapsed:.1f}s)")
+
                             # Get commit SHA
                             commit_sha = get_commit_sha(build_dir)
 
                             # Update with success
-                            print(f"[{template_id}] Analysis complete")
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] ✓✓✓ Analysis SUCCESSFUL (total time: {elapsed:.1f}s)")
+                            logger.info(f"[{template_id}] Content types: {list(result.get('content_types', {}).keys())}")
+                            logger.info(f"[{template_id}] ===== ANALYSIS COMPLETE =====\n")
+
                             await table.update_item(
                                 Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
                                 UpdateExpression="SET #status = :status, progress = :progress, analyzed_at = :analyzed, github_commit_sha = :sha, content_types = :types",
@@ -483,14 +515,17 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                                 }
                             )
                         finally:
+                            elapsed = time.time() - start_time
+                            logger.info(f"[{template_id}] Cleaning up {build_dir}")
                             cleanup_directory(build_dir)
+                            logger.info(f"[{template_id}] Cleanup complete (total elapsed: {elapsed:.1f}s)")
 
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 loop.run_until_complete(analyze())
 
             except Exception as e:
-                print(f"[{template_id}] Error in analyzer: {str(e)}")
+                logger.info(f"[{template_id}] Error in analyzer: {str(e)}")
                 import traceback
                 traceback.print_exc()
 
@@ -518,7 +553,7 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
             return True
         except Exception as e:
             # Log error but don't fail the request - Lambda will retry
-            print(f"Warning: Failed to invoke template analyzer Lambda: {str(e)}")
+            logger.info(f"Warning: Failed to invoke template analyzer Lambda: {str(e)}")
             return False
 
 

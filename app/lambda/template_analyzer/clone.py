@@ -8,6 +8,10 @@ import subprocess
 import os
 import tempfile
 from typing import Tuple, Optional
+import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def clone_repository(github_url: str, dest_path: str, depth: int = 1) -> Tuple[bool, Optional[str]]:
@@ -22,8 +26,11 @@ def clone_repository(github_url: str, dest_path: str, depth: int = 1) -> Tuple[b
     Returns: (success, error_message)
     """
     try:
+        logger.info(f"[CLONE] Starting clone of {github_url}")
+
         # Ensure destination directory exists
         os.makedirs(dest_path, exist_ok=True)
+        logger.info(f"[CLONE] Created directory: {dest_path}")
 
         # Use git clone with shallow depth
         cmd = [
@@ -34,6 +41,8 @@ def clone_repository(github_url: str, dest_path: str, depth: int = 1) -> Tuple[b
             dest_path
         ]
 
+        logger.info(f"[CLONE] Running: {' '.join(cmd)}")
+
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -41,17 +50,24 @@ def clone_repository(github_url: str, dest_path: str, depth: int = 1) -> Tuple[b
             timeout=300  # 5 minute timeout
         )
 
+        logger.info(f"[CLONE] Git returned code: {result.returncode}")
+
         if result.returncode != 0:
             error_msg = result.stderr or "Git clone failed"
+            logger.info(f"[CLONE] Error: {error_msg}")
             return False, error_msg
 
+        logger.info(f"[CLONE] Successfully cloned to {dest_path}")
         return True, None
 
     except subprocess.TimeoutExpired:
+        logger.info("[CLONE] TIMEOUT: Clone took too long (>300s)")
         return False, "Template clone timed out (repo too large?)"
     except FileNotFoundError:
+        logger.info("[CLONE] ERROR: Git not found in PATH")
         return False, "Git not installed or not found in PATH"
     except Exception as e:
+        logger.info(f"[CLONE] EXCEPTION: {type(e).__name__}: {str(e)}")
         return False, f"Clone failed: {str(e)}"
 
 
@@ -70,7 +86,7 @@ def cleanup_directory(path: str) -> bool:
             shutil.rmtree(path)
         return True
     except Exception as e:
-        print(f"Warning: Failed to cleanup {path}: {str(e)}")
+        logger.info(f"Warning: Failed to cleanup {path}: {str(e)}")
         return False
 
 
@@ -98,5 +114,5 @@ def get_commit_sha(repo_path: str) -> Optional[str]:
         return None
 
     except Exception as e:
-        print(f"Warning: Failed to get commit SHA: {str(e)}")
+        logger.info(f"Warning: Failed to get commit SHA: {str(e)}")
         return None
