@@ -516,10 +516,14 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                             msg = f"[{template_id}] PHASE 1: Clone (elapsed: {elapsed:.1f}s)"
                             logger.info(msg)
                             print(msg)
+                            print(f"[{template_id}] Calling clone_repository({github_url}, {build_dir})...")
                             success, error = clone_repository(github_url, build_dir)
+                            print(f"[{template_id}] clone_repository returned: success={success}, error={error}")
                             if not success:
                                 elapsed = time.time() - start_time
-                                logger.info(f"[{template_id}] ✗ Clone FAILED: {error} (elapsed: {elapsed:.1f}s)")
+                                err_msg = f"[{template_id}] ✗ Clone FAILED: {error} (elapsed: {elapsed:.1f}s)"
+                                logger.info(err_msg)
+                                print(err_msg)
                                 await table.update_item(
                                     Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
                                     UpdateExpression="SET #status = :status, #error = :error",
@@ -530,13 +534,16 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
 
                             elapsed = time.time() - start_time
                             logger.info(f"[{template_id}] ✓ Clone COMPLETE (elapsed: {elapsed:.1f}s)")
+                            print(f"[{template_id}] ✓ Clone COMPLETE (elapsed: {elapsed:.1f}s)")
 
                             # Validate 11ty project
                             elapsed = time.time() - start_time
                             msg = f"[{template_id}] PHASE 2: Validate (elapsed: {elapsed:.1f}s)"
                             logger.info(msg)
                             print(msg)
+                            print(f"[{template_id}] Calling validate_eleventy_project({build_dir})...")
                             is_valid, error = validate_eleventy_project(build_dir)
+                            print(f"[{template_id}] validate_eleventy_project returned: is_valid={is_valid}, error={error}")
                             if not is_valid:
                                 elapsed = time.time() - start_time
                                 logger.info(f"[{template_id}] ✗ Validation FAILED: {error} (elapsed: {elapsed:.1f}s)")
