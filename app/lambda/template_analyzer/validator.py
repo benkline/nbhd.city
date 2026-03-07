@@ -20,16 +20,16 @@ def validate_eleventy_project(path: str) -> Tuple[bool, Optional[str]]:
 
     Returns: (is_valid, error_message)
     """
-    logger.info(f"[VALIDATE] Starting validation of: {path}")
+    print(f"[VALIDATE] Starting validation of: {path}")
 
     if not os.path.exists(path):
         error = f"Path does not exist: {path}"
-        logger.info(f"[VALIDATE] ERROR: {error}")
+        print(f"[VALIDATE] ERROR: {error}")
         return False, error
 
     if not os.path.isdir(path):
         error = f"Path is not a directory: {path}"
-        logger.info(f"[VALIDATE] ERROR: {error}")
+        print(f"[VALIDATE] ERROR: {error}")
         return False, error
 
     # Check for 11ty config file
@@ -38,28 +38,28 @@ def validate_eleventy_project(path: str) -> Tuple[bool, Optional[str]]:
         os.path.join(path, ".eleventy.js")
     ]
 
-    logger.info(f"[VALIDATE] Checking for config files: {config_paths}")
+    print(f"[VALIDATE] Checking for config files: {config_paths}")
     config_exists = any(os.path.exists(p) for p in config_paths)
     if not config_exists:
         error = "Missing eleventy.config.js or .eleventy.js"
-        logger.info(f"[VALIDATE] ERROR: {error}")
+        print(f"[VALIDATE] ERROR: {error}")
         return False, error
 
-    logger.info("[VALIDATE] Config file found ✓")
+    print("[VALIDATE] Config file found ✓")
 
     # Check for package.json
     package_json_path = os.path.join(path, "package.json")
-    logger.info(f"[VALIDATE] Checking for: {package_json_path}")
+    print(f"[VALIDATE] Checking for: {package_json_path}")
     if not os.path.exists(package_json_path):
         error = "Missing package.json"
-        logger.info(f"[VALIDATE] ERROR: {error}")
+        print(f"[VALIDATE] ERROR: {error}")
         return False, error
 
-    logger.info("[VALIDATE] package.json found ✓")
+    print("[VALIDATE] package.json found ✓")
 
     # Check for @11ty/eleventy dependency
     try:
-        logger.info("[VALIDATE] Reading package.json dependencies...")
+        print("[VALIDATE] Reading package.json dependencies...")
         with open(package_json_path, 'r') as f:
             package_data = json.load(f)
 
@@ -67,23 +67,23 @@ def validate_eleventy_project(path: str) -> Tuple[bool, Optional[str]]:
         dev_deps = package_data.get("devDependencies", {})
         all_deps = {**deps, **dev_deps}
 
-        logger.info(f"[VALIDATE] Found {len(all_deps)} dependencies")
-        logger.info("[VALIDATE] Checking for @11ty/eleventy...")
+        print(f"[VALIDATE] Found {len(all_deps)} dependencies")
+        print("[VALIDATE] Checking for @11ty/eleventy...")
 
         if "@11ty/eleventy" not in all_deps:
             error = "@11ty/eleventy not found in dependencies"
-            logger.info(f"[VALIDATE] ERROR: {error}")
+            print(f"[VALIDATE] ERROR: {error}")
             return False, error
 
-        logger.info("[VALIDATE] ✓ @11ty/eleventy found")
-        logger.info("[VALIDATE] ✓✓✓ Validation PASSED")
+        print("[VALIDATE] ✓ @11ty/eleventy found")
+        print("[VALIDATE] ✓✓✓ Validation PASSED")
         return True, None
 
     except json.JSONDecodeError as e:
         error = f"Invalid package.json: {str(e)}"
-        logger.info(f"[VALIDATE] ERROR: {error}")
+        print(f"[VALIDATE] ERROR: {error}")
         return False, error
     except Exception as e:
         error = f"Error reading package.json: {str(e)}"
-        logger.info(f"[VALIDATE] EXCEPTION: {error}")
+        print(f"[VALIDATE] EXCEPTION: {error}")
         return False, error

@@ -14,6 +14,9 @@ from collections import defaultdict
 import frontmatter
 from datetime import datetime
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def find_content_directory(path: str) -> Optional[str]:
@@ -230,7 +233,7 @@ def infer_schema(frontmatter_samples: List[Dict[str, Any]]) -> Dict[str, Any]:
     return schema
 
 
-def analyze_template(template_path: str) -> Dict[str, Any]:
+def analyze_template(template_path: str, validate_eleventy_project=None) -> Dict[str, Any]:
     """
     Analyze a complete 11ty template.
 
@@ -243,13 +246,10 @@ def analyze_template(template_path: str) -> Dict[str, Any]:
     logger.info("\n[ANALYZER] ===== STARTING FULL ANALYSIS =====")
     logger.info(f"[ANALYZER] Template path: {template_path}")
 
-    try:
-        from template_analyzer.validator import validate_eleventy_project
-    except ImportError:
-        from validator import validate_eleventy_project
-
     # Validate project
     logger.info("[ANALYZER] STEP 1: Validating project...")
+    if validate_eleventy_project is None:
+        raise ValueError("validate_eleventy_project function must be provided")
     is_valid, error = validate_eleventy_project(template_path)
     if not is_valid:
         logger.info(f"[ANALYZER] ✗ Validation failed: {error}")

@@ -564,7 +564,7 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
                             logger.info(msg)
                             print(msg)
                             print(f"[{template_id}] Calling analyze_template({build_dir})...")
-                            result = analyze_template(build_dir)
+                            result = analyze_template(build_dir, validate_eleventy_project)
                             print(f"[{template_id}] analyze_template returned: {result.get('status')}")
                             if result.get("error"):
                                 elapsed = time.time() - start_time
@@ -757,14 +757,28 @@ async def get_custom_template_status(template_id: str) -> dict:
     Requirement: [ ] `GET /api/templates/custom/{id}/status` - Check analysis status
     Acceptance: [ ] Status polling works correctly
     """
-    # Check if template exists
-    if template_id not in CUSTOM_TEMPLATES:
+    # Try to read from DynamoDB first
+    from dynamodb_client import get_table
+
+    try:
+        async with get_table() as table:
+            response = await table.get_item(
+                Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"}
+            )
+            template = response.get("Item")
+    except Exception:
+        template = None
+
+    # Fall back to in-memory if DynamoDB not available
+    if not template and template_id in CUSTOM_TEMPLATES:
+        template = CUSTOM_TEMPLATES[template_id]
+
+    if not template:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Template '{template_id}' not found"
         )
 
-    template = CUSTOM_TEMPLATES[template_id]
     status_value = template.get("status", "analyzing")
 
     response_data = {
