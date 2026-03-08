@@ -7,7 +7,8 @@ replacing the previous SQLAlchemy-based crud.py.
 
 from datetime import datetime, timezone
 from typing import Optional, List, Tuple, Dict
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, Attr
+from decimal import Decimal
 import uuid
 
 
@@ -1050,7 +1051,8 @@ async def create_template_analysis(
     table,
     template_id: str,
     github_url: str,
-    user_did: str
+    user_did: str,
+    template_name: Optional[str] = None
 ) -> dict:
     """
     Create a new template analysis job in DynamoDB.
@@ -1063,6 +1065,7 @@ async def create_template_analysis(
         template_id: UUID of the template
         github_url: GitHub repository URL
         user_did: User's DID (who initiated analysis)
+        template_name: Optional custom name for the template
 
     Returns:
         dict: Created metadata record
@@ -1080,7 +1083,19 @@ async def create_template_analysis(
         "created_at": timestamp,
         "entity_type": "template_analysis"
     }
-    await table.put_item(Item=metadata)
+
+    # Add optional template_name if provided
+    if template_name:
+        metadata["template_name"] = template_name
+    print(f"[CREATE_TEMPLATE] Creating METADATA record for {template_id}")
+    try:
+        await table.put_item(Item=metadata)
+        print(f"[CREATE_TEMPLATE] ✓ METADATA record created successfully")
+    except Exception as e:
+        print(f"[CREATE_TEMPLATE] ✗ METADATA put_item failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
 
     # Create ANALYSIS record (Lambda will update progress/status)
     analysis = {
@@ -1088,7 +1103,7 @@ async def create_template_analysis(
         "SK": "ANALYSIS",
         "template_id": template_id,
         "status": "analyzing",
-        "progress": 0.0,
+        "progress": Decimal("0.0"),
         "message": "Analysis queued",
         "content_types": None,
         "schema": None,
@@ -1096,7 +1111,15 @@ async def create_template_analysis(
         "started_at": timestamp,
         "completed_at": None
     }
-    await table.put_item(Item=analysis)
+    print(f"[CREATE_TEMPLATE] Creating ANALYSIS record for {template_id}")
+    try:
+        await table.put_item(Item=analysis)
+        print(f"[CREATE_TEMPLATE] ✓ ANALYSIS record created successfully")
+    except Exception as e:
+        print(f"[CREATE_TEMPLATE] ✗ ANALYSIS put_item failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
 
     return metadata
 
@@ -1121,3 +1144,68 @@ async def get_template_analysis_status(
         Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"}
     )
     return response.get("Item")
+
+
+async def get_user_custom_templates(
+    table,
+    user_did: str
+) -> List[dict]:
+    """
+    Get all custom templates for a user (analyzing or ready).
+
+    Scans METADATA records for templates where user_did matches and returns
+    templates with their current analysis status.
+
+    Args:
+        table: DynamoDB table resource
+        user_did: User's BlueSky DID
+
+    Returns:
+        List of custom template metadata records (including analyzing and ready templates)
+    """
+    try:
+        response = await table.scan(
+            FilterExpression=Attr("entity_type").eq("template_analysis") & Attr("user_did").eq(user_did)
+        )
+
+        # Get analysis records for all templates (analyzing or ready)
+        templates = []
+        for metadata in response.get("Items", []):
+            template_id = metadata.get("template_id")
+            github_url = metadata.get("github_url")
+
+            if not template_id or not github_url:
+                continue
+
+            try:
+                # Get the ANALYSIS record to include current status, schema, and content_types
+                analysis = await get_template_analysis_status(table, template_id)
+                if analysis:
+                    # Use custom template_name if provided, otherwise extract from github_url
+                    template_name = metadata.get("template_name") or github_url.split("/")[-1].replace(".git", "")
+
+                    templates.append({
+                        "id": template_id,
+                        "name": template_name,
+                        "github_url": github_url,
+                        "description": metadata.get("description"),
+                        "is_custom": True,
+                        "status": analysis.get("status"),
+                        "schema": analysis.get("schema"),
+                        "content_types": analysis.get("content_types"),
+                        "created_at": metadata.get("created_at"),
+                        "error": analysis.get("error")
+                    })
+            except Exception as e:
+                # Skip templates that fail to load analysis
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Failed to load analysis for template {template_id}: {str(e)}")
+                continue
+
+        return templates
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error scanning user templates for {user_did}: {str(e)}")
+        raise

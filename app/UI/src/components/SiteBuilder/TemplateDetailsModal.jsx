@@ -16,6 +16,7 @@ import { DeleteTemplateConfirm } from './DeleteTemplateConfirm';
  * Requirement: [ ] Beautiful harmonic circle background
  * Requirement: [ ] Action buttons with proper styling
  * Requirement: [ ] Deletion confirmation modal
+ * Requirement: [ ] Rename template (SSG-028)
  */
 
 export function TemplateDetailsModal({
@@ -25,11 +26,15 @@ export function TemplateDetailsModal({
   onSelect,
   onDelete,
   onReanalyze,
-  onShare
+  onShare,
+  onRename
 }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showRenameForm, setShowRenameForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isReanalyzing, setIsReanalyzing] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [newName, setNewName] = useState('');
 
   if (!isOpen || !template) return null;
 
@@ -58,6 +63,25 @@ export function TemplateDetailsModal({
         console.error('Error re-analyzing template:', error);
       } finally {
         setIsReanalyzing(false);
+      }
+    }
+  };
+
+  const handleRenameSubmit = async () => {
+    if (!newName.trim()) {
+      return;
+    }
+
+    if (onRename) {
+      setIsRenaming(true);
+      try {
+        await onRename(template.id, newName.trim());
+        setShowRenameForm(false);
+        setNewName('');
+      } catch (error) {
+        console.error('Error renaming template:', error);
+      } finally {
+        setIsRenaming(false);
       }
     }
   };
@@ -270,6 +294,17 @@ export function TemplateDetailsModal({
             {isCustom && (
               <>
                 <button
+                  className={styles.button + ' ' + styles.buttonSecondary}
+                  onClick={() => {
+                    setNewName(template.name);
+                    setShowRenameForm(true);
+                  }}
+                  disabled={isRenaming || showRenameForm}
+                >
+                  {isRenaming ? 'Renaming...' : 'Rename'}
+                </button>
+
+                <button
                   className={styles.button + ' ' + styles.buttonTertiary}
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={isDeleting}
@@ -309,6 +344,59 @@ export function TemplateDetailsModal({
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteConfirm(false)}
       />
+
+      {/* Rename form modal */}
+      {showRenameForm && (
+        <div className={styles.backdrop} onClick={() => !isRenaming && setShowRenameForm(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.header}>
+              <h2>Rename Template</h2>
+              <button
+                className={styles.closeButton}
+                onClick={() => setShowRenameForm(false)}
+                aria-label="Close"
+                disabled={isRenaming}
+              >
+                ✕
+              </button>
+            </div>
+            <div className={styles.form}>
+              <div className={styles.formGroup}>
+                <label htmlFor="template-name">Template Name</label>
+                <input
+                  id="template-name"
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  disabled={isRenaming}
+                  placeholder="Enter new template name"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && newName.trim()) {
+                      handleRenameSubmit();
+                    }
+                  }}
+                />
+              </div>
+              <div className={styles.formActions}>
+                <button
+                  className={styles.button + ' ' + styles.buttonPrimary}
+                  onClick={handleRenameSubmit}
+                  disabled={!newName.trim() || isRenaming}
+                >
+                  {isRenaming ? 'Renaming...' : 'Save'}
+                </button>
+                <button
+                  className={styles.button + ' ' + styles.buttonSecondary}
+                  onClick={() => setShowRenameForm(false)}
+                  disabled={isRenaming}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -4,8 +4,9 @@ Welcome to the nbhd.city documentation. This folder contains quick-reference gui
 
 ## Quick Navigation
 
-### For Everyone
+### Core Concepts
 - **[Soul of nbhd.city](./soul.md)** - Vision, philosophy, and what makes us different
+- **[Social Site Generation](./social-site-generation.md)** - How neighborhoods create and publish distributed websites
 - **[Architecture Overview](./architecture.md)** - High-level system design
 - **[Phases & Roadmap](./phases.md)** - Where we're building and what's next
 
@@ -20,6 +21,12 @@ Welcome to the nbhd.city documentation. This folder contains quick-reference gui
 - **[Site Builder](./site-builder.md)** - 11ty template system and static generation
 - **[Deployment](./deployment.md)** - Self-hosting and AWS infrastructure
 - **[Testing](./testing.md)** - Test strategy and running tests
+
+### Current Phase (12-15): Site Generation
+- **[Phase 12: Template Creation & Analysis](./phase-12-template-creation.md)** - Analyze 11ty repos, infer schemas
+- **[Phase 13: Site Creation](./phase-13-site-creation.md)** - Create sites from templates
+- **[Phase 14: Content Management](./phase-14-content-management.md)** - Dynamic CMS with inferred schema
+- **[Phase 15: Site Deployment](./phase-15-site-deployment.md)** - Build, deploy to S3, serve via CDN
 
 ## Document Structure
 
