@@ -9,7 +9,7 @@ from models import (
 )
 from auth import get_current_user
 from dynamodb_client import get_table
-from dynamodb_repository import create_template_analysis, get_template_analysis_status
+from dynamodb_repository import create_template_analysis, get_template_analysis_status, get_user_custom_templates
 from datetime import datetime
 from typing import List, Optional
 from decimal import Decimal
@@ -786,7 +786,10 @@ def invoke_template_analyzer_async(template_id: str, github_url: str, template_n
 # Custom Template Endpoints
 
 @router.post("/custom", status_code=status.HTTP_202_ACCEPTED)
-async def register_custom_template(template: CustomTemplateCreate) -> dict:
+async def register_custom_template(
+    template: CustomTemplateCreate,
+    user_id: str = None
+) -> dict:
     """
     Register a custom 11ty template from GitHub.
 
@@ -841,22 +844,27 @@ async def register_custom_template(template: CustomTemplateCreate) -> dict:
 
     # Create template record
     template_id = str(uuid.uuid4())
+    # For dev mode: use test user if not authenticated
+    effective_user_id = user_id or "did:plc:devuser"
+    print(f"[REGISTER_CUSTOM] Creating template {template_id}, user_id={effective_user_id}")
 
-    # Store in-memory (would be DynamoDB in production)
+    # Store in DynamoDB
     # Requirement: [x] Store template metadata in DynamoDB
-    CUSTOM_TEMPLATES[template_id] = {
-        "template_id": template_id,
-        "name": template.name,
-        "github_url": template.github_url,
-        "is_public": template.is_public,
-        "status": "analyzing",
-        "created_at": datetime.utcnow().isoformat() + "Z",
-        "owner_did": None,  # Would be set from auth context
-        "is_custom": True
-    }
+    print(f"[REGISTER_CUSTOM] Calling create_template_analysis...")
+    try:
+        async with get_table() as table:
+            await create_template_analysis(table, template_id, template.github_url, effective_user_id, template.name)
+        print(f"[REGISTER_CUSTOM] ✓ create_template_analysis completed successfully")
+    except Exception as e:
+        print(f"[REGISTER_CUSTOM] ✗ create_template_analysis failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
 
     # Requirement: [x] Async invocation of analyzer Lambda
+    print(f"[REGISTER_CUSTOM] Invoking analyzer...")
     invoke_template_analyzer_async(template_id, template.github_url, template.name)
+    print(f"[REGISTER_CUSTOM] ✓ Analyzer invoked")
 
     # Return 202 Accepted
     # Requirement: [ ] Returns 202 Accepted with template_id
@@ -873,6 +881,37 @@ async def register_custom_template(template: CustomTemplateCreate) -> dict:
             "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
         }
     }
+
+
+@router.get("/custom/user/list")
+async def list_user_custom_templates(
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    Get all custom templates for the current user that are ready to use.
+
+    Returns templates where analysis has completed successfully with schema
+    and content types inferred.
+    """
+    # Use the authenticated user ID
+    effective_user_id = user_id
+    try:
+        async with get_table() as table:
+            templates = await get_user_custom_templates(table, effective_user_id)
+
+        return {
+            "data": templates,
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+            }
+        }
+    except Exception as err:
+        logger.error(f"Error listing user custom templates: {str(err)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve custom templates"
+        )
 
 
 @router.get("/custom/{template_id}/status")
@@ -934,6 +973,180 @@ async def get_custom_template_status(template_id: str) -> dict:
             "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
         }
     }
+
+
+@router.delete("/custom/{template_id}")
+async def delete_custom_template(template_id: str) -> dict:
+    """
+    Delete a custom template from user's library.
+
+    Removes the template from DynamoDB and makes it unavailable for site creation.
+
+    Requirement: [ ] Users can delete their templates (SSG-028)
+    """
+    try:
+        async with get_table() as table:
+            # Delete both METADATA and ANALYSIS records
+            await table.delete_item(Key={"PK": f"TEMPLATE#{template_id}", "SK": "METADATA"})
+            await table.delete_item(Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"})
+
+            # Also delete CONTENT_TYPES and SAMPLES if they exist
+            await table.delete_item(Key={"PK": f"TEMPLATE#{template_id}", "SK": "CONTENT_TYPES"})
+            await table.delete_item(Key={"PK": f"TEMPLATE#{template_id}", "SK": "SAMPLES"})
+
+        # Fall back to in-memory if needed
+        if template_id in CUSTOM_TEMPLATES:
+            del CUSTOM_TEMPLATES[template_id]
+
+        return {
+            "data": {
+                "template_id": template_id,
+                "status": "deleted"
+            },
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error deleting template {template_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete template"
+        )
+
+
+@router.post("/custom/{template_id}/reanalyze")
+async def reanalyze_custom_template(template_id: str) -> dict:
+    """
+    Re-analyze a previously analyzed custom template.
+
+    Resets the analysis status to "analyzing" and re-invokes the template analyzer Lambda.
+
+    Requirement: [ ] Users can re-analyze templates
+    """
+    try:
+        async with get_table() as table:
+            # Get the template metadata to retrieve github_url
+            metadata_response = await table.get_item(
+                Key={"PK": f"TEMPLATE#{template_id}", "SK": "METADATA"}
+            )
+            metadata = metadata_response.get("Item")
+
+            if not metadata:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Template not found"
+                )
+
+            github_url = metadata.get("github_url")
+
+            # Reset analysis record to "analyzing"
+            await table.update_item(
+                Key={"PK": f"TEMPLATE#{template_id}", "SK": "ANALYSIS"},
+                UpdateExpression="SET #status = :status, progress = :progress, message = :message, error = :null",
+                ExpressionAttributeNames={"#status": "status"},
+                ExpressionAttributeValues={
+                    ":status": "analyzing",
+                    ":progress": Decimal("0.0"),
+                    ":message": "Re-analysis queued",
+                    ":null": None
+                }
+            )
+
+            # Invoke analyzer again
+            invoke_template_analyzer_async(template_id, github_url, metadata.get("template_id", template_id))
+
+        return {
+            "data": {
+                "template_id": template_id,
+                "status": "analyzing",
+                "message": "Re-analysis started"
+            },
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error re-analyzing template {template_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to re-analyze template"
+        )
+
+
+@router.patch("/custom/{template_id}")
+async def update_custom_template(template_id: str, updates: dict) -> dict:
+    """
+    Update custom template metadata (name, description).
+
+    Allows users to rename and update the description of their templates.
+
+    Requirement: [ ] Users can rename their templates (SSG-028)
+    """
+    try:
+        async with get_table() as table:
+            # Get existing metadata
+            metadata_response = await table.get_item(
+                Key={"PK": f"TEMPLATE#{template_id}", "SK": "METADATA"}
+            )
+            metadata = metadata_response.get("Item")
+
+            if not metadata:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Template not found"
+                )
+
+            # Build update expression for provided fields
+            update_expr_parts = ["updated_at = :updated_at"]
+            expr_values = {":updated_at": datetime.utcnow().isoformat() + "Z"}
+            expr_names = {}
+
+            if "name" in updates and updates["name"]:
+                update_expr_parts.append("template_name = :name")
+                expr_values[":name"] = updates["name"].strip()
+
+            if "description" in updates and updates["description"]:
+                update_expr_parts.append("description = :description")
+                expr_values[":description"] = updates["description"].strip()
+
+            if not (updates.get("name") or updates.get("description")):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="At least one of 'name' or 'description' must be provided"
+                )
+
+            # Update the METADATA record
+            await table.update_item(
+                Key={"PK": f"TEMPLATE#{template_id}", "SK": "METADATA"},
+                UpdateExpression="SET " + ", ".join(update_expr_parts),
+                ExpressionAttributeNames=expr_names if expr_names else None,
+                ExpressionAttributeValues=expr_values
+            )
+
+            return {
+                "data": {
+                    "template_id": template_id,
+                    "updated": updates,
+                    "status": "updated"
+                },
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+                }
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating template {template_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update template"
+        )
 
 
 @router.get("/{template_id}/content-types")

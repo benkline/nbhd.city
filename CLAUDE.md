@@ -17,6 +17,69 @@ All project tickets are located in `/tickets/`:
 - Run commands from `/devops/` directory
 - Always use `terraform plan` before `terraform apply`
 
+## Local Development Setup
+
+### Prerequisites
+- Python 3.11+
+- Node.js / npm
+- Docker & Docker Compose (for local DynamoDB)
+- Git
+
+### Running Locally
+
+**1. Start Local DynamoDB (required for API)**
+```bash
+cd app/dynamodb
+docker-compose up
+# DynamoDB runs on http://localhost:8000
+```
+
+**2. Start API (with auto-reload)**
+```bash
+cd app/api
+# Install dependencies (first time only)
+pip install -r requirements.txt
+
+# Run with auto-reload for development
+uvicorn main:app --reload
+# API runs on http://localhost:8000
+```
+
+**3. Start Frontend (in separate terminal)**
+```bash
+cd app/UI
+# Install dependencies (first time only)
+npm install
+
+# Run dev server with hot reload
+npm start
+# UI runs on http://localhost:3000
+```
+
+### Key Development Facts
+
+- **API Auto-reload**: Uses `uvicorn --reload` flag - changes to Python files are automatically detected
+- **Frontend Hot-reload**: React dev server automatically recompiles on file changes
+- **DynamoDB**: Local Docker container for development/testing
+- **Environment**: Uses `DYNAMODB_ENDPOINT_URL` to point to local DynamoDB
+- **No Docker restart needed**: Python API changes are picked up automatically with `--reload`
+
+### Ports
+- Frontend: `http://localhost:3000`
+- API: `http://localhost:8000`
+- DynamoDB: `http://localhost:8000` (internal)
+- API Docs: `http://localhost:8000/docs`
+
+### Testing
+
+**Run API integration tests:**
+```bash
+cd app/api
+pytest tests/integration/ -v
+# Or specific test:
+pytest tests/integration/test_custom_template_persistence.py -v
+```
+
 ## Skills
 
 ⚠️ **All skills are global** (located at `~/.claude/skills/`)

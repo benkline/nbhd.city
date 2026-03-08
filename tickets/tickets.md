@@ -19,9 +19,9 @@ This document contains detailed descriptions, requirements, and acceptance crite
 
 ## Phase Overview
 
-The development roadmap is organized into 9 sequential phases:
+The development roadmap is organized into 15 sequential phases:
 
-Completed 
+**Completed**
 1. **Phase 1** - MVP Foundation ✅ COMPLETE
 2. **Phase 2** - AT Protocol Foundation (ATP-FOUND-001 to 004) - foundational for everything
 3. **Phase 3** - Template System & Site Config APIs (SSG-001, 002, 004, 005, 006)
@@ -30,20 +30,24 @@ Completed
 6. **Phase 6** - Build Pipeline & Deployment (SSG-015, 016, 017, 018 + infrastructure)
 7. **Phase 7** - Nbhd CMS & Admin Features (NBHD-001 through SITES-003)
 8. **Phase 8** - Build Pipeline UI Completion (BUILD-001, 002, 003)
-
-Curretly working on
 9. **Phase 9** - Testing and Refinement
-10. **Phase 10** - Full AT Protocol Federation (ATP-001 through ATP-010)
 
+**Current Work**
+10. **Phase 12** - Template Creation & Analysis (SSG-019, 020, 021, 028) - Analyze 11ty repos and save templates
+11. **Phase 13** - Site Creation (Planning) - Create sites from analyzed templates
+12. **Phase 14** - Content Management (SSG-022, 023, 024) - Dynamic CMS based on template schema
+13. **Phase 15** - Site Deployment (SSG-025, 026, 027) - Build, deploy, and serve sites
+
+14. **Phase 16** - Full AT Protocol Federation (ATP-001 through ATP-010)
 ---
 
-## 🆕 NEW: Phase 11 - 11ty Project URL Upload & Content Workflow (SSG-019 through SSG-027)
+## Phase 12 - Template Creation & Analysis (SSG-019 through SSG-028)
 
-**Status:** PENDING
-**Timeline:** Next priority
-**Objective:** Enable users to upload 11ty GitHub project URLs, automatically analyze frontmatter, build dynamic CMS UI, add content, and deploy to S3
+**Status:** In Progress (Template Analysis Complete)
+**Timeline:** Phase 12 (Current focus)
+**Objective:** Enable users to upload 11ty GitHub project URLs, automatically analyze frontmatter, infer content schemas, and save analyzed templates to their library.
 
-**Workflow**: GitHub URL → Analyze → Infer Schema → Dynamic CMS → Add Content → Deploy to S3
+**Workflow**: GitHub URL → Analyze → Infer Schema → Save to Template Library
 
 ---
 
@@ -180,6 +184,47 @@ Curretly working on
 **Depends On:** SSG-020
 **Status:** PENDING
 **Notes:** Extends existing `app/lambda/template_analyzer/handler.py`
+
+---
+
+### SSG-028: Save Analyzed Template to User Library
+
+**Description:** After successful analysis, save the inferred template to the user's personal template library for future site creation.
+
+**Requirements:**
+- [ ] Create API endpoint `POST /api/user/templates/save`
+  - Input: `{ "template_id": "uuid", "name": "Custom Name", "description": "Template description" }`
+  - Returns: `{ "saved_template_id": "uuid", "status": "saved" }`
+- [ ] Create UI button "Save to My Templates" in analysis results display
+- [ ] Store in DynamoDB under user's record:
+  - Key: `USER#{user_did}#TEMPLATE#{template_id}`
+  - Fields: name, description, template_id, analysis_date, analyzed_from (GitHub URL), schema
+- [ ] Add "My Templates" section in template gallery
+  - List all user's saved analyzed templates
+  - Show preview of content types
+  - Quick action to create site from template
+- [ ] Update template gallery UI:
+  - Distinguish between built-in and user templates
+  - Show source GitHub URL for analyzed templates
+  - Allow renaming/deleting user templates
+- [ ] Display template metadata:
+  - Analysis date
+  - Number of content types discovered
+  - Quick preview of schema
+
+**Acceptance Criteria:**
+- [x] Successfully analyzed templates can be saved
+- [x] Saved templates appear in "My Templates" section
+- [x] Users can create sites from saved templates
+- [x] Template metadata is visible and accurate
+- [x] Users can rename and delete their templates
+- [x] Multiple users have separate template libraries
+- [x] Concurrent saves handled correctly
+
+**Type:** Backend + Frontend
+**Estimate:** S
+**Depends On:** SSG-019, SSG-020, SSG-021
+**Status:** COMPLETE
 
 ---
 
@@ -507,6 +552,47 @@ Curretly working on
 **Estimate:** L
 **Depends On:** SSG-019, SSG-020, SSG-021, SSG-022, SSG-023, SSG-024, SSG-025, SSG-026
 **Status:** PENDING
+
+---
+
+## Phase 13 - Site Creation (Planning)
+
+**Status:** PLANNING
+**Timeline:** After Phase 12
+**Objective:** Enable users to create new sites based on analyzed templates with full configuration and schema setup.
+
+**Documentation:** See [docs/phase-13-site-creation.md](../docs/phase-13-site-creation.md)
+
+Additional tickets to be created after planning discussion covering:
+- Site creation wizard and workflow
+- Template selection integration
+- Site configuration and metadata
+- Schema initialization for CMS
+- Site setup API endpoints
+
+---
+
+## Phase 14 - Content Management (SSG-022, SSG-023, SSG-024)
+
+**Status:** PENDING
+**Timeline:** Phase 14
+**Objective:** Provide users with a dynamic CMS that adapts to their site's schema.
+
+**Documentation:** See [docs/phase-14-content-management.md](../docs/phase-14-content-management.md)
+
+These tickets implement the dynamic content editor with schema-based forms and validation.
+
+---
+
+## Phase 15 - Site Deployment (SSG-025, SSG-026, SSG-027)
+
+**Status:** PENDING
+**Timeline:** Phase 15
+**Objective:** Enable users to build and deploy sites to S3 with automated 11ty builds and CDN distribution.
+
+**Documentation:** See [docs/phase-15-site-deployment.md](../docs/phase-15-site-deployment.md)
+
+These tickets complete the build pipeline with real-time status UI and infrastructure verification.
 
 ---
 

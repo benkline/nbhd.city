@@ -34,7 +34,18 @@ export function TemplateGallery({ onSelect }) {
       }
     };
 
+    const fetchCustomTemplates = async () => {
+      try {
+        const response = await apiClient.get('/api/templates/custom/user/list');
+        setCustomTemplates(response.data.data || []);
+      } catch (err) {
+        console.error('Failed to fetch custom templates:', err);
+        // Don't fail the entire page if custom templates fail to load
+      }
+    };
+
     fetchTemplates();
+    fetchCustomTemplates();
   }, []);
 
   // Poll for custom template status updates
@@ -177,6 +188,30 @@ export function TemplateGallery({ onSelect }) {
     });
   };
 
+  const handleRenameTemplate = async (templateId, newName) => {
+    try {
+      await apiClient.patch(`/api/templates/custom/${templateId}`, {
+        name: newName
+      });
+      // Update the template in the list
+      setCustomTemplates(customTemplates.map(t =>
+        t.id === templateId ? { ...t, name: newName } : t
+      ));
+      setToast({
+        type: 'success',
+        message: 'Template renamed successfully'
+      });
+      setTimeout(() => {
+        setToast(null);
+      }, 3000);
+    } catch (err) {
+      setToast({
+        type: 'error',
+        message: 'Failed to rename template'
+      });
+    }
+  };
+
   const handleCustomTemplateAdded = (template) => {
     // Add the new custom template to the list
     setCustomTemplates([
@@ -269,21 +304,6 @@ export function TemplateGallery({ onSelect }) {
         <EmptyTemplateState onAddTemplate={() => setShowCustomModal(true)} />
       )}
 
-      {/* Built-in Templates Section */}
-      {templates.length > 0 && (
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Built-in Templates</h2>
-          <div className={styles.gallery} data-testid="builtin-templates-gallery">
-            {templates.map((template) => (
-              <TemplateCard
-                key={template.id}
-                template={{ ...template, is_custom: false }}
-                onSelect={handleTemplateCardSelect}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
       <CustomTemplateModal
         isOpen={showCustomModal}
@@ -299,6 +319,7 @@ export function TemplateGallery({ onSelect }) {
         onDelete={handleDeleteTemplate}
         onReanalyze={handleReanalyzeTemplate}
         onShare={handleShareTemplate}
+        onRename={handleRenameTemplate}
       />
 
       {selectedTemplate && (
