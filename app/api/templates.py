@@ -414,7 +414,7 @@ def validate_github_url(url: str) -> tuple[bool, Optional[str]]:
     """
     Validate GitHub URL format.
 
-    Allowed domains: github.com, gitlab.com, bitbucket.org
+    Allowed domain: github.com (HTTPS only)
     Must be HTTPS or valid git@ format.
 
     Returns: (is_valid, error_message)
@@ -447,17 +447,16 @@ def validate_github_url(url: str) -> tuple[bool, Optional[str]]:
     if parsed.scheme == "http":
         return False, "URL must use https://"
 
-    # Check domain
-    allowed_domains = ["github.com", "gitlab.com", "bitbucket.org"]
+    # Check domain - must be github.com
     domain = parsed.netloc.lower()
 
-    if domain not in allowed_domains:
+    if domain != "github.com":
         # Reject localhost and internal IPs
         if domain.startswith("localhost") or domain.startswith("127."):
             return False, "Localhost URLs are not allowed"
         if re.match(r"^192\.168\.", domain) or re.match(r"^10\.", domain):
             return False, "Internal IP addresses are not allowed"
-        return False, f"Domain must be one of: {', '.join(allowed_domains)}"
+        return False, "URL must be a GitHub repository (github.com)"
 
     # Check path (should have user/repo)
     path_parts = [p for p in parsed.path.split("/") if p]
