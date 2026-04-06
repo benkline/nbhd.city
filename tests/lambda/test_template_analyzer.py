@@ -13,8 +13,8 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock, AsyncMock
 import sys
 
-# Import the handler module (will be created in next step)
-# from template_analyzer import handler
+# Add lambda directory to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../app/lambda/template_analyzer'))
 
 
 class TestValidateEleventyProject:
@@ -38,7 +38,7 @@ class TestValidateEleventyProject:
             }
         }))
 
-        from template_analyzer.validator import validate_eleventy_project
+        from validator import validate_eleventy_project
         is_valid, error = validate_eleventy_project(str(tmp_path))
 
         assert is_valid is True
@@ -51,7 +51,7 @@ class TestValidateEleventyProject:
             "dependencies": {"@11ty/eleventy": "^2.0.0"}
         }))
 
-        from template_analyzer.validator import validate_eleventy_project
+        from validator import validate_eleventy_project
         is_valid, error = validate_eleventy_project(str(tmp_path))
 
         assert is_valid is False
@@ -62,7 +62,7 @@ class TestValidateEleventyProject:
         config_file = tmp_path / "eleventy.config.js"
         config_file.write_text("module.exports = function() {};")
 
-        from template_analyzer.validator import validate_eleventy_project
+        from validator import validate_eleventy_project
         is_valid, error = validate_eleventy_project(str(tmp_path))
 
         assert is_valid is False
@@ -78,7 +78,7 @@ class TestValidateEleventyProject:
             "dependencies": {"other-package": "^1.0.0"}
         }))
 
-        from template_analyzer.validator import validate_eleventy_project
+        from validator import validate_eleventy_project
         is_valid, error = validate_eleventy_project(str(tmp_path))
 
         assert is_valid is False
@@ -96,7 +96,7 @@ class TestFindContentDirectory:
         content_dir = tmp_path / "content"
         content_dir.mkdir()
 
-        from template_analyzer.analyzer import find_content_directory
+        from analyzer import find_content_directory
         found = find_content_directory(str(tmp_path))
 
         assert found == str(content_dir)
@@ -106,7 +106,7 @@ class TestFindContentDirectory:
         posts_dir = tmp_path / "posts"
         posts_dir.mkdir()
 
-        from template_analyzer.analyzer import find_content_directory
+        from analyzer import find_content_directory
         found = find_content_directory(str(tmp_path))
 
         assert found == str(posts_dir)
@@ -116,7 +116,7 @@ class TestFindContentDirectory:
         src_dir = tmp_path / "src"
         src_dir.mkdir()
 
-        from template_analyzer.analyzer import find_content_directory
+        from analyzer import find_content_directory
         found = find_content_directory(str(tmp_path))
 
         # Should find src/ for content
@@ -125,7 +125,7 @@ class TestFindContentDirectory:
 
     def test_no_content_directory_found(self, tmp_path):
         """Test when no content directory exists"""
-        from template_analyzer.analyzer import find_content_directory
+        from analyzer import find_content_directory
         found = find_content_directory(str(tmp_path))
 
         # Should return None or raise exception
@@ -160,7 +160,7 @@ tags:
 ---
 Content here""")
 
-        from template_analyzer.analyzer import scan_frontmatter
+        from analyzer import scan_frontmatter
         result = scan_frontmatter(str(tmp_path))
 
         # Should return dict with frontmatter data
@@ -185,7 +185,7 @@ tags:
 ---
 # Markdown content""")
 
-        from template_analyzer.analyzer import scan_frontmatter
+        from analyzer import scan_frontmatter
         result = scan_frontmatter(str(tmp_path))
 
         # Should parse all fields
@@ -199,7 +199,7 @@ tags:
         post = tmp_path / "post.md"
         post.write_text("# No frontmatter\nJust markdown content")
 
-        from template_analyzer.analyzer import scan_frontmatter
+        from analyzer import scan_frontmatter
         # Should handle gracefully, either skip or include with empty meta
         try:
             result = scan_frontmatter(str(tmp_path))
@@ -235,7 +235,7 @@ title: About
 ---
 Content""")
 
-        from template_analyzer.analyzer import scan_frontmatter
+        from analyzer import scan_frontmatter
         result = scan_frontmatter(str(tmp_path))
 
         # Should group by directory
@@ -254,7 +254,7 @@ title: Blog Entry
 ---
 Content""")
 
-        from template_analyzer.analyzer import scan_frontmatter
+        from analyzer import scan_frontmatter
         result = scan_frontmatter(str(tmp_path))
 
         assert isinstance(result, dict)
@@ -281,7 +281,7 @@ tags:
 ---
 Content""")
 
-        from template_analyzer.analyzer import scan_frontmatter, infer_schema
+        from analyzer import scan_frontmatter, infer_schema
         samples = scan_frontmatter(str(tmp_path))
 
         # Get first content type's samples
@@ -314,7 +314,7 @@ views: 100
 ---
 Content""")
 
-        from template_analyzer.analyzer import scan_frontmatter, infer_schema
+        from analyzer import scan_frontmatter, infer_schema
         samples = scan_frontmatter(str(tmp_path))
 
         if samples:
@@ -347,7 +347,7 @@ date: 2026-01-07
 ---
 Content""")
 
-        from template_analyzer.analyzer import scan_frontmatter, infer_schema
+        from analyzer import scan_frontmatter, infer_schema
         samples = scan_frontmatter(str(tmp_path))
 
         if samples:
@@ -393,7 +393,7 @@ tags:
 ---
 Content""")
 
-        from template_analyzer.analyzer import analyze_template
+        from analyzer import analyze_template
         result = analyze_template(str(tmp_path))
 
         # Should return analysis result
@@ -413,7 +413,7 @@ Content""")
         post = posts_dir / "post.md"
         post.write_text("---\ntitle: Post\ndate: 2026-01-01\n---\nContent")
 
-        from template_analyzer.analyzer import analyze_template
+        from analyzer import analyze_template
         result = analyze_template(str(tmp_path))
 
         # Should identify content types
@@ -431,7 +431,7 @@ class TestErrorHandling:
     def test_invalid_repo_error(self):
         """Test handling of invalid/not-found repo"""
         # [ ] Handles invalid repos gracefully
-        from template_analyzer.analyzer import analyze_template
+        from analyzer import analyze_template
 
         # Should not raise, but return error info
         try:
@@ -447,7 +447,7 @@ class TestErrorHandling:
         # Create directory without 11ty files
         (tmp_path / "some_file.txt").write_text("Not an 11ty project")
 
-        from template_analyzer.validator import validate_eleventy_project
+        from validator import validate_eleventy_project
         is_valid, error = validate_eleventy_project(str(tmp_path))
 
         assert is_valid is False
@@ -464,7 +464,7 @@ class TestErrorHandling:
         content_dir = tmp_path / "content"
         content_dir.mkdir()
 
-        from template_analyzer.analyzer import analyze_template
+        from analyzer import analyze_template
         result = analyze_template(str(tmp_path))
 
         # Should handle gracefully - either return empty or error
@@ -481,7 +481,7 @@ class TestCloneRepository:
     def test_clone_github_repo(self):
         """Test cloning a GitHub repository"""
         # [ ] Clone GitHub repo to /tmp (shallow clone)
-        from template_analyzer.clone import clone_repository
+        from clone import clone_repository
 
         # Would test with a real repo URL
         pass
@@ -489,7 +489,7 @@ class TestCloneRepository:
     @pytest.mark.skip(reason="Requires network access or mocking")
     def test_shallow_clone(self):
         """Test that clone is shallow (not full history)"""
-        from template_analyzer.clone import clone_repository
+        from clone import clone_repository
 
         # Shallow clone should complete faster
         pass
