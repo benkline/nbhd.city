@@ -83,7 +83,8 @@ The development roadmap is organized into 15 sequential phases:
 **Type:** Frontend
 **Estimate:** M
 **Depends On:** SSG-020 (API endpoint)
-**Status:** PENDING
+**Status:** COMPLETE
+**Notes:** Component fully implemented (TemplateURLInput.jsx, 298 lines) with progress tracking and real-time polling
 
 ---
 
