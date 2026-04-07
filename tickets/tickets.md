@@ -318,8 +318,9 @@ The development roadmap is organized into 15 sequential phases:
 
 **Type:** Frontend
 **Estimate:** M
-**Depends On:** SSG-022, SSG-023
-**Status:** PENDING
+**Depends On:** SSG-022
+**Status:** COMPLETE
+**Notes:** EnhancedContentEditor and FrontmatterForm fully integrated with schema service. 21 integration tests all passing.
 
 ---
 
