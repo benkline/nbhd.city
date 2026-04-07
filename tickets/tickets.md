@@ -381,7 +381,8 @@ The development roadmap is organized into 15 sequential phases:
 **Type:** Backend (Integration)
 **Estimate:** S
 **Depends On:** SSG-021, SSG-022
-**Status:** PENDING
+**Status:** COMPLETE
+**Notes:** Content APIs fully integrated with schema support. 8/9 tests passing (1 skipped). All schema fields preserved in storage.
 
 ---
 
@@ -1301,7 +1302,8 @@ The development roadmap is organized into 15 sequential phases:
 **Type:** Frontend (React Components)
 **Estimate:** M
 **Depends On:** SSG-044 (Build Job API)
-**Status:** PENDING
+**Status:** COMPLETE
+**Notes:** All components fully implemented (BuildTriggerButton, BuildStatusPoller, BuildHistory) with real-time polling and error handling
 
 ---
 
