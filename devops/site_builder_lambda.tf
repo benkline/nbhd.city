@@ -202,8 +202,8 @@ resource "aws_lambda_function" "site_builder" {
   handler             = "handler.handler"
   source_code_hash    = data.archive_file.lambda_site_builder_package.output_base64sha256
   runtime             = var.lambda_runtime
-  timeout             = 300  # 5 minutes for building and uploading sites
-  memory_size         = 1024 # 1 GB for npm install + 11ty build
+  timeout             = 900  # 15 minutes for large 11ty builds
+  memory_size         = 2048 # 2 GB for npm install + 11ty build
   architectures       = ["x86_64"]
 
   # Ephemeral storage for npm modules and build output (4 GB = 4096 MB)
