@@ -101,6 +101,24 @@ export const siteContentService = {
   },
 
   /**
+   * Get site-specific content types (SSG-033)
+   * @param {string} siteId - Site ID
+   * @returns {Promise<object>} Content types stored for this site
+   */
+  async getSiteContentTypes(siteId) {
+    try {
+      const response = await api.get(`/api/sites/${siteId}/content-types`);
+      return response.data?.data || response.data || {};
+    } catch (error) {
+      // If endpoint doesn't exist or site not found, return empty
+      if (error.response?.status === 404 || error.response?.status === 400) {
+        return {};
+      }
+      throw error;
+    }
+  },
+
+  /**
    * Get template content types and inferred schema
    * @param {string} templateId - Template ID
    * @returns {Promise<object>} Content types schema
