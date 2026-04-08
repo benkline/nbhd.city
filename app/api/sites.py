@@ -421,6 +421,20 @@ async def update_site(
                 detail="You do not have permission to update this site"
             )
 
+        # Validate title if provided (not empty string)
+        if site_data.title is not None and site_data.title == "":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Site title cannot be empty"
+            )
+
+        # Validate visibility if provided
+        if site_data.visibility is not None and site_data.visibility not in ["public", "private"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Visibility must be 'public' or 'private'"
+            )
+
         # Config validation against schema
         if site_data.config is not None:
             schema = _get_template_schema(site.get("template", ""))
@@ -439,16 +453,26 @@ async def update_site(
         if site_data.title is not None:
             update_expr += ", title = :title"
             expr_values[":title"] = site_data.title
+        if site_data.tagline is not None:
+            update_expr += ", tagline = :tagline"
+            expr_values[":tagline"] = site_data.tagline
+        if site_data.visibility is not None:
+            update_expr += ", visibility = :visibility"
+            expr_values[":visibility"] = site_data.visibility
         if site_data.config is not None:
             update_expr += ", #config = :config"
             expr_values[":config"] = site_data.config
 
-        await table.update_item(
-            Key={"PK": f"SITE#{site_id}", "SK": "METADATA"},
-            UpdateExpression=update_expr,
-            ExpressionAttributeValues=expr_values,
-            ExpressionAttributeNames={"#config": "config"}
-        )
+        update_kwargs = {
+            "Key": {"PK": f"SITE#{site_id}", "SK": "METADATA"},
+            "UpdateExpression": update_expr,
+            "ExpressionAttributeValues": expr_values,
+        }
+        # Only add ExpressionAttributeNames if we're updating config (which uses #config)
+        if site_data.config is not None:
+            update_kwargs["ExpressionAttributeNames"] = {"#config": "config"}
+
+        await table.update_item(**update_kwargs)
 
         # Fetch updated site
         updated_site = await get_site_db(table, site_id)
