@@ -173,6 +173,8 @@ class SiteUpdate(BaseModel):
     """Schema for updating a site."""
 
     title: Optional[str] = None
+    tagline: Optional[str] = None
+    visibility: Optional[str] = None  # "public" or "private"
     config: Optional[Dict] = None
 
     class Config:
