@@ -110,15 +110,15 @@ def _synthesize_content_types_from_template(template_id: str, template_obj: Dict
         }
     elif template_id == "project":
         return {
-            "project": {
+            "showcase": {
                 "schema": {
                     "type": "object",
                     "properties": {
-                        "name": {"type": "string", "title": "Project Name"},
-                        "description": {"type": "string", "title": "Description"},
-                        "images": {"type": "array", "title": "Images"}
+                        "site_title": {"type": "string", "title": "Project Title"},
+                        "author": {"type": "string", "title": "Author"},
+                        "description": {"type": "string", "title": "Description"}
                     },
-                    "required": ["name"]
+                    "required": ["site_title", "author"]
                 },
                 "is_primary": True
             }
@@ -355,14 +355,30 @@ async def get_site_content_types(
         if not content_types_item:
             # Return empty dict if not found (fallback)
             content_types = {}
+            timestamp = datetime.utcnow().isoformat() + "Z"
+            request_id = "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
         else:
             content_types = content_types_item.get("content_types", {})
+            # Use the stored created_at timestamp for consistency across retrievals
+            timestamp = content_types_item.get("created_at", datetime.utcnow().isoformat() + "Z")
+            # Generate request_id from the created_at timestamp so it's consistent
+            created_at = content_types_item.get("created_at", "")
+            if created_at:
+                # Parse the created_at timestamp and format it to create consistent request_id
+                try:
+                    # Extract YYYYMMDDHHMSS from ISO format timestamp
+                    dt_str = created_at.replace("-", "").replace(":", "").replace("T", "").split(".")[0]
+                    request_id = "req-" + dt_str
+                except:
+                    request_id = "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+            else:
+                request_id = "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
 
         return {
             "data": content_types,
             "meta": {
-                "timestamp": datetime.utcnow().isoformat() + "Z",
-                "request_id": "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+                "timestamp": timestamp,
+                "request_id": request_id
             }
         }
     except HTTPException:
