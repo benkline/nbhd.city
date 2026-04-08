@@ -8,7 +8,7 @@ import ContentBrowser from '../components/CMS/ContentBrowser';
 import EnhancedContentEditor from '../components/CMS/EnhancedContentEditor';
 import PageManager from '../components/CMS/PageManager';
 import MenuManager from '../components/CMS/MenuManager';
-import { SiteSettingsManager } from '../components/CMS/SiteSettingsManager';
+import { SiteSettingsPage } from '../components/CMS/SiteSettingsPage';
 import styles from '../styles/SiteContentManager.module.css';
 
 /**
@@ -212,8 +212,7 @@ export default function SiteContentManager() {
 
           {activeTab === 'settings' && (
             <div className={styles.section}>
-              <h2>Settings</h2>
-              <SiteSettingsManager siteId={siteId} site={site} />
+              <SiteSettingsPage siteId={siteId} site={site} />
             </div>
           )}
         </div>
