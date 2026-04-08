@@ -74,6 +74,68 @@ def _validate_config_against_schema(config: Dict, schema: Dict) -> tuple[bool, O
     return True, None
 
 
+def _synthesize_content_types_from_template(template_id: str, template_obj: Dict) -> Dict:
+    """
+    Synthesize content types from a template.
+
+    For built-in templates, creates a default content type based on the template ID.
+    For custom templates, uses content_types from template analysis if available.
+
+    Args:
+        template_id: Template ID (e.g., "blog", "project")
+        template_obj: Template object from templates.py
+
+    Returns:
+        dict: Content types mapping name to schema/metadata
+    """
+    # For custom templates with analysis results
+    if template_obj.get("content_types"):
+        return template_obj.get("content_types", {})
+
+    # For built-in templates, synthesize based on template type
+    if template_id == "blog":
+        return {
+            "post": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "title": {"type": "string", "title": "Post Title"},
+                        "content": {"type": "string", "title": "Post Content"},
+                        "tags": {"type": "array", "title": "Tags"}
+                    },
+                    "required": ["title", "content"]
+                },
+                "is_primary": True
+            }
+        }
+    elif template_id == "project":
+        return {
+            "showcase": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "site_title": {"type": "string", "title": "Project Title"},
+                        "author": {"type": "string", "title": "Author"},
+                        "description": {"type": "string", "title": "Description"}
+                    },
+                    "required": ["site_title", "author"]
+                },
+                "is_primary": True
+            }
+        }
+
+    # Default fallback
+    return {
+        "default": {
+            "schema": {
+                "type": "object",
+                "properties": {}
+            },
+            "is_primary": True
+        }
+    }
+
+
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_site(
     site_data: SiteCreate,
@@ -92,7 +154,7 @@ async def create_site(
     """
     from templates import get_template_by_id
     from dynamodb_client import get_table
-    from dynamodb_repository import create_site as create_site_db, get_neighborhood
+    from dynamodb_repository import create_site as create_site_db, get_neighborhood, store_site_content_types
 
     # Validate template exists
     template_obj = get_template_by_id(site_data.template)
@@ -140,6 +202,10 @@ async def create_site(
                 "nbhd_id": site_data.nbhd_id,
                 "status": "draft"
             })
+
+            # Store content types extracted from template
+            content_types = _synthesize_content_types_from_template(site_data.template, template_obj)
+            await store_site_content_types(table, site["site_id"], content_types)
 
             now = datetime.utcnow().isoformat() + "Z"
             return {
@@ -251,6 +317,76 @@ async def get_site(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get site: {str(e)}"
+        )
+
+
+@router.get("/{site_id}/content-types")
+async def get_site_content_types(
+    site_id: str,
+    user_id: str = Depends(get_current_user)
+) -> dict:
+    """
+    Retrieve content types for a site.
+
+    Returns the content types that were extracted and stored during site creation.
+    """
+    from dynamodb_client import get_dynamodb_table
+    from dynamodb_repository import get_site as get_site_db, get_site_content_types as get_content_types_db
+
+    try:
+        table = await get_dynamodb_table()
+        site = await get_site_db(table, site_id)
+
+        if not site:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Site '{site_id}' not found"
+            )
+
+        # Verify ownership
+        if site.get("user_id") != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this site"
+            )
+
+        # Get content types
+        content_types_item = await get_content_types_db(table, site_id)
+        if not content_types_item:
+            # Return empty dict if not found (fallback)
+            content_types = {}
+            timestamp = datetime.utcnow().isoformat() + "Z"
+            request_id = "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        else:
+            content_types = content_types_item.get("content_types", {})
+            # Use the stored created_at timestamp for consistency across retrievals
+            timestamp = content_types_item.get("created_at", datetime.utcnow().isoformat() + "Z")
+            # Generate request_id from the created_at timestamp so it's consistent
+            created_at = content_types_item.get("created_at", "")
+            if created_at:
+                # Parse the created_at timestamp and format it to create consistent request_id
+                try:
+                    # Extract YYYYMMDDHHMSS from ISO format timestamp
+                    dt_str = created_at.replace("-", "").replace(":", "").replace("T", "").split(".")[0]
+                    request_id = "req-" + dt_str
+                except:
+                    request_id = "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+            else:
+                request_id = "req-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+
+        return {
+            "data": content_types,
+            "meta": {
+                "timestamp": timestamp,
+                "request_id": request_id
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get content types: {str(e)}"
         )
 
 

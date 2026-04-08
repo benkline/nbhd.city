@@ -1045,6 +1045,56 @@ async def list_sites_by_nbhd(table, nbhd_id: str, site_type: Optional[str] = Non
     return response.get("Items", [])
 
 
+# Content Type Operations (SSG-033)
+
+async def store_site_content_types(table, site_id: str, content_types: dict) -> dict:
+    """
+    Store content types for a site extracted from its template.
+
+    Schema:
+        PK: SITE#{site_id}
+        SK: CONTENT_TYPES
+        Stores: content_types dict with schema and primary type info
+
+    Args:
+        table: DynamoDB table resource
+        site_id: Site ID
+        content_types: Dictionary mapping content type names to their schemas
+
+    Returns:
+        dict: Stored content types item
+    """
+    now = now_iso()
+
+    item = {
+        "PK": f"SITE#{site_id}",
+        "SK": "CONTENT_TYPES",
+        "content_types": content_types,
+        "created_at": now,
+        "updated_at": now,
+    }
+
+    await table.put_item(Item=item)
+    return item
+
+
+async def get_site_content_types(table, site_id: str) -> Optional[dict]:
+    """
+    Retrieve content types stored for a site.
+
+    Args:
+        table: DynamoDB table resource
+        site_id: Site ID
+
+    Returns:
+        dict or None: Content types item if found
+    """
+    response = await table.get_item(
+        Key={"PK": f"SITE#{site_id}", "SK": "CONTENT_TYPES"}
+    )
+    return response.get("Item")
+
+
 # Template Analysis Operations (SSG-020)
 
 async def create_template_analysis(

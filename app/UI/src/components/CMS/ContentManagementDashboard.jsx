@@ -10,6 +10,7 @@ import styles from './ContentDashboard.module.css';
 export const ContentManagementDashboard = ({
   siteId = '',
   siteType = 'personal',
+  contentTypes = {},
   onNavigate = null,
   onPoll = null,
   loading = false,
@@ -211,22 +212,53 @@ export const ContentManagementDashboard = ({
       <section className={styles.quickActionsContainer}>
         <h2 className={styles.sectionTitle}>Quick Actions</h2>
         <div className={styles.quickActions}>
-          <button
-            className={styles.actionButton}
-            onClick={() => handleQuickAction('new-post')}
-            aria-label="Create a new post"
-          >
-            <span className={styles.buttonIcon}>📝</span>
-            <span>New Post</span>
-          </button>
-          <button
-            className={styles.actionButton}
-            onClick={() => handleQuickAction('new-page')}
-            aria-label="Create a new page"
-          >
-            <span className={styles.buttonIcon}>📄</span>
-            <span>New Page</span>
-          </button>
+          {/* Dynamic content type buttons (SSG-033) */}
+          {Object.entries(contentTypes).map(([typeName, typeInfo]) => {
+            const isPrimary = typeInfo.is_primary;
+            const icons = {
+              'post': '📝',
+              'showcase': '🎨',
+              'page': '📄',
+              'default': '✍️'
+            };
+            const icon = icons[typeName] || icons['default'];
+            const displayName = typeName.charAt(0).toUpperCase() + typeName.slice(1);
+
+            return isPrimary ? (
+              <button
+                key={`new-${typeName}`}
+                className={styles.actionButton}
+                onClick={() => handleQuickAction(`new-${typeName}`)}
+                aria-label={`Create a new ${typeName}`}
+              >
+                <span className={styles.buttonIcon}>{icon}</span>
+                <span>New {displayName}</span>
+              </button>
+            ) : null;
+          })}
+
+          {/* Fallback buttons if no content types */}
+          {Object.keys(contentTypes).length === 0 && (
+            <>
+              <button
+                className={styles.actionButton}
+                onClick={() => handleQuickAction('new-post')}
+                aria-label="Create a new post"
+              >
+                <span className={styles.buttonIcon}>📝</span>
+                <span>New Post</span>
+              </button>
+              <button
+                className={styles.actionButton}
+                onClick={() => handleQuickAction('new-page')}
+                aria-label="Create a new page"
+              >
+                <span className={styles.buttonIcon}>📄</span>
+                <span>New Page</span>
+              </button>
+            </>
+          )}
+
           <button
             className={styles.actionButton}
             onClick={() => handleQuickAction('manage-menu')}

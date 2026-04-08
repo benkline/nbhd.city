@@ -48,10 +48,24 @@ export default function SiteContentManager() {
         const siteData = siteResponse.data;
         setSite(siteData);
 
-        // Get template content types and schema
+        // Get site-specific content types (SSG-033) or fall back to template
         if (siteData.template) {
-          const contentTypesResponse = await siteContentService.getTemplateContentTypes(siteData.template);
-          setContentTypes(contentTypesResponse);
+          try {
+            // Try to get site-specific content types first
+            const siteContentTypesResponse = await siteContentService.getSiteContentTypes(siteId);
+            if (siteContentTypesResponse && Object.keys(siteContentTypesResponse).length > 0) {
+              setContentTypes(siteContentTypesResponse);
+            } else {
+              // Fall back to template content types
+              const contentTypesResponse = await siteContentService.getTemplateContentTypes(siteData.template);
+              setContentTypes(contentTypesResponse);
+            }
+          } catch (err) {
+            // Fall back to template content types on error
+            console.warn('Failed to load site content types, using template:', err);
+            const contentTypesResponse = await siteContentService.getTemplateContentTypes(siteData.template);
+            setContentTypes(contentTypesResponse);
+          }
 
           const schemaResponse = await siteContentService.getTemplateSchema(siteData.template);
           setTemplateSchema(schemaResponse);
@@ -150,6 +164,7 @@ export default function SiteContentManager() {
             <ContentManagementDashboard
               siteId={siteId}
               siteType={site.site_type}
+              contentTypes={contentTypes || {}}
               onNavigate={(section) => setActiveTab(section)}
             />
           )}

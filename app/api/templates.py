@@ -77,27 +77,20 @@ TEMPLATES = [
         "schema": {
             "type": "object",
             "properties": {
-                "project_name": {
+                "site_title": {
                     "type": "string",
-                    "title": "Project Name"
+                    "title": "Project Title"
+                },
+                "author": {
+                    "type": "string",
+                    "title": "Author Name"
                 },
                 "description": {
                     "type": "string",
                     "title": "Project Description"
-                },
-                "team_members": {
-                    "type": "array",
-                    "title": "Team Members",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {"type": "string"},
-                            "role": {"type": "string"}
-                        }
-                    }
                 }
             },
-            "required": ["project_name"]
+            "required": ["site_title", "author"]
         }
     },
     {
